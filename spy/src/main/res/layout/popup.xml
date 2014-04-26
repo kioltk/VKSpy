@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ImageView
+        android:background="@drawable/corners"
+        android:id="@+id/photo"
+        android:layout_width="80dp"
+        android:layout_height="80dp" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:gravity="center_vertical"
+        android:background="@drawable/popup_message"
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@id/photo"
+        android:layout_width="180dp"
+        android:layout_height="80dp">
+        <TextView
+            android:text="Василий Петрович"
+            android:textSize="16dp"
+            android:textColor="#5e5e5e"
+            android:textStyle="bold"
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/message"
+            android:text="Зашёл в онлайн"
+            android:textStyle="italic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#a5a5a5" />
+        </LinearLayout>
+</RelativeLayout>
