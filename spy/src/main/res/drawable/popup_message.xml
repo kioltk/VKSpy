@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:right="-2px" android:left="-2px" android:top="-2px">
+
+
+    <item android:right="-1px" android:left="-1px" android:top="-1px">
         <shape>
             <solid android:color="#e8e8e8"/>
-            <stroke android:color="#a5a5a5" android:width="3px"/>
+            <stroke android:color="#a5a5a5" android:width="2px"/>
+            <corners android:radius="2px"/>
         </shape>
     </item>
 

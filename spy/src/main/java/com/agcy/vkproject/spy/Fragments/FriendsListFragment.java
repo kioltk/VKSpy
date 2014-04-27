@@ -31,7 +31,7 @@ public class FriendsListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        ListView rootView = (ListView) inflater.inflate(R.layout.fragment_friends, container, false);
+        ListView rootView = (ListView) inflater.inflate(R.layout.fragment_friends,null);
 
         rootView.setAdapter(new UserListAdapter(friends,context));
         rootView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

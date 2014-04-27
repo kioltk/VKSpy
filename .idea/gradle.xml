@@ -7,9 +7,9 @@
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
-            <option value="D:\Projects\VK project\VKSpy" />
-            <option value="D:\Projects\VK project\VKSpy\spy" />
-            <option value="D:\Projects\VK project\VKSpy\vksdk_library" />
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/spy" />
+            <option value="$PROJECT_DIR$/vksdk_library" />
           </set>
         </option>
       </GradleProjectSettings>

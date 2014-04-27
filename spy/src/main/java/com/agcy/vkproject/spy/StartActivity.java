@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
+import com.agcy.vkproject.spy.Core.Memory;
+import com.agcy.vkproject.spy.Core.Notificator;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.vk.sdk.VKAccessToken;
@@ -63,6 +65,9 @@ public class StartActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
+        Memory.initialize(getApplicationContext());
+        Notificator.initialize(getApplicationContext());
+
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext()).build();
         ImageLoader.getInstance().init(config);
 
@@ -70,6 +75,7 @@ public class StartActivity extends Activity {
         VKSdk.initialize(sdkListener, "4328079");
         if (VKSdk.wakeUpSession()) {
             startMainActivity();
+            finish();
             return;
         }
         //

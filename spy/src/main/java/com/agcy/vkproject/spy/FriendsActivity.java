@@ -2,6 +2,7 @@ package com.agcy.vkproject.spy;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 
 import com.agcy.vkproject.spy.Core.Memory;
@@ -33,12 +34,16 @@ public class FriendsActivity extends ActionBarActivity {
             });
         }
     }
-    public void showUser(VKApiUser user){
-        UserFragment userFragment = new UserFragment(user);
-        getSupportFragmentManager()
-                .beginTransaction()
-                .add(R.id.container, userFragment)
-                .commit();
+    public void showUser(VKApiUser user) {
+
+        UserFragment userFragment = new UserFragment(user,getBaseContext());
+
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager()
+                .beginTransaction();
+        fragmentTransaction.replace(R.id.container, userFragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+
     }
 
 
