@@ -48,9 +48,8 @@ public class OnlineAdapter extends BaseAdapter {
 
         Online item = (Online) getItem(position);
 
-        ((TextView)rootView.findViewById(R.id.till)).setText(""+item.till);
-        //TODO: if first convert to "online"
-        ((TextView)rootView.findViewById(R.id.since)).setText(""+item.since);
+        ((TextView)rootView.findViewById(R.id.since)).setText(""+item.getSinceShort());
+        ((TextView)rootView.findViewById(R.id.till)).setText(""+item.getTillShort());
 
         return rootView;
     }

@@ -1,4 +1,4 @@
-package com.agcy.vkproject.spy.Core;
+package com.agcy.vkproject.spy.Longpoll;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -59,6 +59,7 @@ public abstract class LongPollConnection extends AsyncTask<Void, Void, String> {
             }
         onError(exception);
     }
+
 
     public abstract void onSuccess(JSONArray updates, String ts);
     public abstract void onError(Exception exp);

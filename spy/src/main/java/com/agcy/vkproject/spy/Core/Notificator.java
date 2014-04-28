@@ -11,7 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.agcy.vkproject.spy.LongPollService;
+import com.agcy.vkproject.spy.Longpoll.LongPollService;
 import com.agcy.vkproject.spy.R;
 import com.nostra13.universalimageloader.core.ImageLoader;
 

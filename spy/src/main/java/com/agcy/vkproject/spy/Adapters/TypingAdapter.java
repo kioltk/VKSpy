@@ -45,9 +45,8 @@ public class TypingAdapter extends BaseAdapter {
         View rootView = inflater.inflate(R.layout.list_item_typing, null);
 
         Typing item = (Typing) getItem(position);
-        //todo: time converters
-        ((TextView)rootView.findViewById(R.id.time)).setText(""+item.time);
-
+        ((TextView)rootView.findViewById(R.id.time)).setText(""+item.getTime());
+        //todo: date grouping!
         return rootView;
     }
 }

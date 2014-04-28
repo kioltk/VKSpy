@@ -5,21 +5,21 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.agcy.vkproject.spy.Core.Memory;
+import com.agcy.vkproject.spy.Longpoll.LongPollService;
+import com.agcy.vkproject.spy.Receivers.NetworkStateReceiver;
 import com.vk.sdk.VKUIHelper;
 import com.vk.sdk.api.VKApi;
 import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
 import com.vk.sdk.api.model.VKUsersArray;
-
-import org.json.JSONObject;
 
 public class MainActivity extends Activity {
 
@@ -29,9 +29,6 @@ public class MainActivity extends Activity {
         super.onResume();
         VKUIHelper.onResume(this);
     }
-
-
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -48,48 +45,44 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         VKUIHelper.onCreate(this);
-        {
-            VKParameters friendsParameters = new VKParameters();
-            friendsParameters.put("order", "hints");
-            friendsParameters.put("fields", "sex,photo_100,online,last_seen");
 
-            VKRequest friendsRequest = VKApi.friends().get(friendsParameters);
-            friendsRequest.executeWithListener(new VKRequest.VKRequestListener() {
-                @Override
-                public void onComplete(VKResponse response) {
-                    showFriends((VKUsersArray) response.parsedModel);
-                }
-            });
+            if(isNetworkConnected()){
+                downloadData();
+            }else
+            {
 
-            VKRequest request = new VKRequest("messages.getLongPollServer");
-            request.executeAfterRequest(friendsRequest,new VKRequest.VKRequestListener() {
-                @Override
-                public void onComplete(VKResponse response) {
-                    try {
+                ((TextView)findViewById(R.id.status)).setText("Нет интрнта");
+                new NetworkStateReceiver.NetworkStateChangeListener() {
+                    @Override
+                    public void onConnected() {
 
-                        JSONObject responseJson = response.json.getJSONObject("response");
-                        String ts = responseJson.getString("ts");
-                        String server = responseJson.getString("server");
-                        String key = responseJson.getString("key");
-
-                        SharedPreferences.Editor preferences = getApplicationContext().getSharedPreferences("longpoll", MODE_MULTI_PROCESS).edit();
-                        preferences.putString("server", server);
-                        preferences.putString("ts", ts);
-                        preferences.putString("key", key);
-                        preferences.commit();
-                        if(!isLongPollServiceRunning()) {
-                            Intent longPollService = new Intent(getBaseContext(), LongPollService.class);
-                            startService(longPollService);
-                        }
-                    } catch (Exception exp) {
-
-                        Log.e("AGCY SPY LONGPOLL", exp.getMessage());
-
+                        ((TextView)findViewById(R.id.status)).setText("о! есть интрнт\nзгрзка");
+                        downloadData();
                     }
-                }
-            });
+                };
+            }
+    }
 
-        }
+
+    private void downloadData(){
+
+        VKParameters friendsParameters = new VKParameters();
+        friendsParameters.put("order", "hints");
+        friendsParameters.put("fields", "sex,photo_100,online,last_seen");
+
+        VKRequest friendsRequest = VKApi.friends().get(friendsParameters);
+        friendsRequest.executeWithListener(new VKRequest.VKRequestListener() {
+            @Override
+            public void onComplete(VKResponse response) {
+                showFriends((VKUsersArray) response.parsedModel);
+            }
+        });
+        startLongpoll();
+    }
+    private void startLongpoll(){
+
+        Intent longPollService = new Intent(getBaseContext(), LongPollService.class);
+        startService(longPollService);
     }
     private boolean isLongPollServiceRunning() {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
@@ -100,6 +93,15 @@ public class MainActivity extends Activity {
         }
         return false;
     }
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo ni = cm.getActiveNetworkInfo();
+        if (ni == null) {
+            return false;
+        } else
+            return true;
+    }
+
 
     public void showFriends(VKUsersArray friends) {
         Memory.saveFriends(friends);
@@ -124,13 +126,22 @@ public class MainActivity extends Activity {
     }
 
     public void longpollToggle(View view) {
+
+
         SharedPreferences preferences = getSharedPreferences("longpoll", MODE_MULTI_PROCESS);
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean("status",!preferences.getBoolean("status",true));
-        //editor.commit();
-        //todo: disable longpoll
-        ((TextView)view).setText((preferences.getBoolean("status", true) ? "disable" : "enable") + " longPoll");
-        Toast.makeText(getBaseContext(),"not implemented =(",Toast.LENGTH_SHORT).show();
+        Boolean status = !preferences.getBoolean("status", true);
+        editor.putBoolean("status",status);
+
+        Intent longPollService = new Intent(getBaseContext(), LongPollService.class);
+        Bundle bundle = new Bundle();
+        bundle.putInt(LongPollService.ACTION, (status? LongPollService.ACTION_START: LongPollService.ACTION_STOP));
+        longPollService.putExtras(bundle);
+        startService(longPollService);
+
+        editor.commit();
+
+        ((TextView)view).setText((status ? "disable" : "enable") + " longPoll");
 
     }
 }

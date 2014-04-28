@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.agcy.vkproject.spy.LongPollService;
+import com.agcy.vkproject.spy.Longpoll.LongPollService;
 import com.agcy.vkproject.spy.Models.Online;
 import com.agcy.vkproject.spy.Models.Typing;
 import com.vk.sdk.api.model.VKApiUserFull;

@@ -11,7 +11,11 @@ import android.widget.ListView;
 
 import com.agcy.vkproject.spy.Adapters.OnlineWithOwnerAdapter;
 import com.agcy.vkproject.spy.Adapters.TypingWithOwnerAdapter;
+import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
+import com.agcy.vkproject.spy.Models.Online;
+
+import java.util.ArrayList;
 
 
 public class AllActivity extends ActionBarActivity {
@@ -42,15 +46,17 @@ public class AllActivity extends ActionBarActivity {
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_all, container, false);
 
+            final ArrayList<Online> onlines = Helper.orderOnlines(Memory.getOnlines(),false);
+
             final ListView list = (ListView) rootView.findViewById(R.id.list);
-            list.setAdapter(new OnlineWithOwnerAdapter(Memory.getOnlines(), getBaseContext()));
+            list.setAdapter(new OnlineWithOwnerAdapter(onlines, getBaseContext()));
 
             //todo: order by offline time
             Button showOnlines = (Button) rootView.findViewById(R.id.showOnlines);
             showOnlines.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    list.setAdapter(new OnlineWithOwnerAdapter(Memory.getOnlines(), getBaseContext()));
+                    list.setAdapter(new OnlineWithOwnerAdapter(onlines, getBaseContext()));
                 }
             });
             Button showTypings = (Button) rootView.findViewById(R.id.showTypings);
