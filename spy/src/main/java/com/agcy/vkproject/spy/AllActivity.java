@@ -9,8 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
 
-import com.agcy.vkproject.spy.Adapters.OnlineWithOwnerAdapter;
-import com.agcy.vkproject.spy.Adapters.TypingWithOwnerAdapter;
+import com.agcy.vkproject.spy.Adapters.UpdatesWithOwnerAdapter;
 import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
 import com.agcy.vkproject.spy.Models.Online;
@@ -49,21 +48,20 @@ public class AllActivity extends ActionBarActivity {
             final ArrayList<Online> onlines = Helper.orderOnlines(Memory.getOnlines(),false);
 
             final ListView list = (ListView) rootView.findViewById(R.id.list);
-            list.setAdapter(new OnlineWithOwnerAdapter(onlines, getBaseContext()));
+            list.setAdapter(new UpdatesWithOwnerAdapter(onlines, getBaseContext()));
 
-            //todo: order by offline time
             Button showOnlines = (Button) rootView.findViewById(R.id.showOnlines);
             showOnlines.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    list.setAdapter(new OnlineWithOwnerAdapter(onlines, getBaseContext()));
+                    list.setAdapter(new UpdatesWithOwnerAdapter(onlines, getBaseContext()));
                 }
             });
             Button showTypings = (Button) rootView.findViewById(R.id.showTypings);
             showTypings.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    list.setAdapter(new TypingWithOwnerAdapter(Memory.getTyping(), getBaseContext()));
+                    list.setAdapter(new UpdatesWithOwnerAdapter(Memory.getTyping(), getBaseContext()));
                 }
             });
             return rootView;

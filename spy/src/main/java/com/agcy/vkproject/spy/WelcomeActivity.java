@@ -1,22 +1,25 @@
 package com.agcy.vkproject.spy;
 
-import java.util.Locale;
-
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.view.Gravity;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.OvershootInterpolator;
+import android.view.animation.TranslateAnimation;
+import android.widget.Button;
+
+import java.util.Locale;
 
 
 public class WelcomeActivity extends ActionBarActivity {
@@ -43,6 +46,12 @@ public class WelcomeActivity extends ActionBarActivity {
 
 
 
+        SharedPreferences preferences = getSharedPreferences("start", MODE_MULTI_PROCESS);
+        if(!preferences.getBoolean("firstStart",true)) {
+            startActivity(new Intent(getBaseContext(),StartActivity.class));
+            finish();
+        }
+
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -54,24 +63,7 @@ public class WelcomeActivity extends ActionBarActivity {
     }
 
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.welcome, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     
 
@@ -89,7 +81,7 @@ public class WelcomeActivity extends ActionBarActivity {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1);
+            return new PlaceholderFragment();
         }
 
         @Override
@@ -116,7 +108,7 @@ public class WelcomeActivity extends ActionBarActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public class PlaceholderFragment extends Fragment {
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -127,22 +119,108 @@ public class WelcomeActivity extends ActionBarActivity {
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
 
         public PlaceholderFragment() {
         }
-
+        View rootView;
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_welcome, container, false);
+            rootView = inflater.inflate(R.layout.fragment_welcome, container, false);
+            showSanta();
             return rootView;
+        }
+
+        private void hideSanta() {
+            Animation translate = new TranslateAnimation(0,0,0,400);
+            translate.setInterpolator(new AccelerateInterpolator(1.6f));
+            AlphaAnimation alphaAnimation = new AlphaAnimation(1,0);
+            alphaAnimation.setInterpolator(new AccelerateInterpolator());
+
+            AnimationSet set = new AnimationSet(false);
+            set.addAnimation(alphaAnimation);
+            set.addAnimation(translate);
+            set.setDuration(1000);
+            set.setStartOffset(100);
+
+            final View santa =  rootView.findViewById(R.id.image);
+
+            set.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    santa.setVisibility(View.GONE);
+                    showStart();
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
+            santa.startAnimation(set);
+        }
+
+
+        private void showSanta() {
+            Animation translate = new TranslateAnimation(0,0,-400,0);
+            translate.setInterpolator(new OvershootInterpolator(1.6f));
+            AlphaAnimation alphaAnimation = new AlphaAnimation(0,1);
+            alphaAnimation.setInterpolator(new AccelerateInterpolator());
+
+            AnimationSet set = new AnimationSet(false);
+            set.addAnimation(alphaAnimation);
+            set.addAnimation(translate);
+            set.setDuration(1000);
+            set.setStartOffset(300);
+            final View santa =  rootView.findViewById(R.id.image);
+
+            set.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    santa.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    hideSanta();
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
+            santa.startAnimation(set);
+        }
+        private void showStart() {
+
+            AlphaAnimation show = new AlphaAnimation(0,1);
+            show.setInterpolator(new AccelerateInterpolator());
+            show.setDuration(1000);
+
+            View text = rootView.findViewById(R.id.text);
+            Button start = (Button) rootView.findViewById(R.id.start);
+            start.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startActivity(new Intent(WelcomeActivity.this, StartActivity.class));
+
+                    SharedPreferences preferences = getSharedPreferences("start", MODE_MULTI_PROCESS);
+                    preferences.edit().putBoolean("firstStart",false).commit();
+
+                    finish();
+                }
+            });
+            text.setVisibility(View.VISIBLE);
+            start.setVisibility(View.VISIBLE);
+            start.startAnimation(show);
+            text.startAnimation(show);
         }
     }
 

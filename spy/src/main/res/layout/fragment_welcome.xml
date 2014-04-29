@@ -6,8 +6,32 @@
     tools:context="com.agcy.vkproject.spy.WelcomeActivity$PlaceholderFragment">
 
     <ImageView
+        android:visibility="gone"
+        android:layout_centerInParent="true"
+        android:id="@+id/image"
         android:src="@drawable/happy_santa"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
-
+    <TextView
+        android:visibility="gone"
+        android:layout_centerInParent="true"
+        android:id="@+id/text"
+        android:gravity="center"
+        android:text="Ммм..\nКакое класное представление"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <Button
+        android:id="@+id/start"
+        android:visibility="gone"
+        android:background="@drawable/button_red"
+        android:textColor="#fff"
+        android:textStyle="italic|bold"
+        android:text="Старт"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 </RelativeLayout>

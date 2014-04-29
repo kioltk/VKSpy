@@ -20,6 +20,7 @@ public abstract class LongPollConnection extends AsyncTask<Void, Void, String> {
     private final String ts;
     String url = "http://%s?act=a_check&key=%s&ts=%s&wait=25&mode=64";
     private Exception exception;
+    private boolean finished = false;
 
     public LongPollConnection(String server, String key, String ts){
         this.server = server;
@@ -47,6 +48,7 @@ public abstract class LongPollConnection extends AsyncTask<Void, Void, String> {
 
     @Override
     protected void onPostExecute(String jsonResponse) {
+        finished= true;
         if(jsonResponse!=null)
             try {
                 JSONObject object = new JSONObject(jsonResponse);
@@ -63,4 +65,8 @@ public abstract class LongPollConnection extends AsyncTask<Void, Void, String> {
 
     public abstract void onSuccess(JSONArray updates, String ts);
     public abstract void onError(Exception exp);
+
+    public boolean isFinished() {
+        return finished;
+    }
 }

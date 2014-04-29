@@ -7,11 +7,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class NetworkStateReceiver extends BroadcastReceiver {
 
-    private static final ArrayList<NetworkStateChangeListener> listeners = new ArrayList<NetworkStateChangeListener>();
+    private static final HashMap<Integer,NetworkStateChangeListener> listeners = new HashMap<Integer,NetworkStateChangeListener>();
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("AGCY SPY","Network connectivity change");
@@ -20,21 +20,35 @@ public class NetworkStateReceiver extends BroadcastReceiver {
             if(ni!=null && ni.getState()== NetworkInfo.State.CONNECTED) {
                 Log.i("AGCY SPY","Network "+ni.getTypeName()+" connected");
 
-                for(NetworkStateChangeListener listener : listeners){
+                for(NetworkStateChangeListener listener : listeners.values()){
                     listener.onConnected();
-                }
 
+                }
+                //listeners.clear();
             }
         }
         if(intent.getExtras().getBoolean(ConnectivityManager.EXTRA_NO_CONNECTIVITY,Boolean.FALSE)) {
+
+            for(NetworkStateChangeListener listener : listeners.values()){
+                listener.onLost();
+
+            }
             Log.d("AGCY SPY", "Connection lost");
 
         }
     }
     public static abstract class NetworkStateChangeListener {
-        public NetworkStateChangeListener(){
-            listeners.add(this);
+        private final int id;
+
+        public NetworkStateChangeListener(int id){
+            this.id = id;
+            if (!listeners.containsKey(id));
+                listeners.put(id,this);
         }
         public abstract void onConnected();
+        public abstract void onLost();
+        public void remove(){
+            listeners.remove(id);
+        }
     }
 }

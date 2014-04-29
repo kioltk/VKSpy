@@ -7,11 +7,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
-import com.agcy.vkproject.spy.Core.Notificator;
 import com.agcy.vkproject.spy.Receivers.NetworkStateReceiver;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
@@ -22,10 +20,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 public class LongPollService extends Service {
 
+    public static final int LONGPOLL_REFRESHER_ID=27;
+    public static final int LONGPOLL_CONNECTION_ID = 28;
     public static final String ACTION = "ACTION";
     public static final int ACTION_START_SAFE = 2;
     public static final int ACTION_START = 1;
@@ -36,7 +37,7 @@ public class LongPollService extends Service {
     private String server;
 
     private LongPollConnection connection;
-    private NetworkStateReceiver.NetworkStateChangeListener networkStateChangeListener;
+    private static NetworkStateReceiver.NetworkStateChangeListener networkStateChangeListener;
 
 
     @Override
@@ -47,6 +48,20 @@ public class LongPollService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
+        if(networkStateChangeListener==null) {
+            new NetworkStateReceiver.NetworkStateChangeListener(LONGPOLL_CONNECTION_ID) {
+                @Override
+                public void onConnected() {
+                    startLongpoll();
+                }
+
+                @Override
+                public void onLost() {
+                    connection.cancel(true);
+                }
+
+            };
+        }
         if(intent==null){
             //onRestart
 
@@ -73,16 +88,17 @@ public class LongPollService extends Service {
                         break;
                     case ACTION_STOP:
                         if (connection != null) {
-                            connection.cancel(true);
+                            connection.cancel(false);
                             connection = null;
                             saveSettings();
 
                             Log.i("AGCY SPY LONGPOLLSERVICE","stop " );
+                            return Service.START_NOT_STICKY;
                         }
                         break;
                 }
             }else{
-                if(connection==null)
+                if(connection==null || connection.isFinished())
                     refreshSettings();
 
                 Log.i("AGCY SPY LONGPOLLSERVICE","simple call" );
@@ -97,15 +113,14 @@ public class LongPollService extends Service {
     }
 
     private void startSafe() {
-        Memory.initialize(getApplicationContext());
-        Notificator.initialize(getApplicationContext());
 
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext()).build();
-        ImageLoader.getInstance().init(config);
+        Helper.initialize(getApplicationContext());
 
         com.agcy.vkproject.spy.Core.VKSdk.initializeBackground(getApplicationContext());
 
-        refreshSettings();
+        //refreshSettings();
+        restoreSettings();
+        startLongpoll();
         Log.i("AGCY SPY LONGPOLLSERVICE", "restarted after crash " + " key: " + key);
     }
 
@@ -149,13 +164,25 @@ public class LongPollService extends Service {
             public void onError(VKError error) {
 
 
+                if (error.httpError instanceof SocketException || error.httpError instanceof UnknownHostException) {
+                    new NetworkStateReceiver.NetworkStateChangeListener(LONGPOLL_REFRESHER_ID) {
+                        @Override
+                        public void onConnected() {
+                            refreshSettings();
+                        }
+
+                        @Override
+                        public void onLost() {
+
+                        }
+                    };
+                }
                 Log.w("AGCY SPY LONGPOLLSERVICE","refreshing error" + error);
             }
 
             @Override
             public void onComplete(VKResponse response) {
 
-                Log.w("AGCY SPY LONGPOLLSERVICE","refreshing complete");
                 try {
 
                     JSONObject responseJson = response.json.getJSONObject("response");
@@ -163,14 +190,14 @@ public class LongPollService extends Service {
                     server = responseJson.getString("server");
                     key = responseJson.getString("key");
 
+                    Log.w("AGCY SPY LONGPOLLSERVICE","refreshing complete");
+
                     saveSettings();
 
                     startLongpoll();
 
                 } catch (Exception exp) {
-                    //todo: onInternet? => listener
-                    //todo: login? => relogin
-                    Log.e("AGCY SPY LONGPOLL", exp.getMessage());
+                    Log.e("AGCY SPY LONGPOLL", "refreshing error" + exp.getMessage());
 
                 }
             }
@@ -188,6 +215,16 @@ public class LongPollService extends Service {
     }
 
     private void startLongpoll() {
+
+        if(connection!=null){
+
+            Log.w("AGCY SPY LONPOLL", "startLongpoll called, but there is another longpoll");
+            if(!connection.isFinished()){
+                connection.cancel(true);
+
+                Log.wtf("AGCY SPY LONPOLL", "KILL IT!!1");
+            }
+        }
 
         connection = new LongPollConnection(server, key, ts) {
             @Override
@@ -208,8 +245,7 @@ public class LongPollService extends Service {
                         Log.e("AGCY SPY LONGPOLL", "update parsing error: " + exp.toString());
                     }
                 }
-                Memory.saveUpdates(updates);
-                Notificator.announce(updates);
+                Helper.newUpdates(updates);
                 startLongpoll();
             }
 
@@ -219,15 +255,6 @@ public class LongPollService extends Service {
                 Log.e("AGCY SPY LONGPOLL", exp.toString() + "" + exp.getMessage());
                 if (exp instanceof JSONException) {
                     refreshSettings();
-                }
-                if (exp instanceof SocketException) {
-                    networkStateChangeListener = new NetworkStateReceiver.NetworkStateChangeListener() {
-                        @Override
-                        public void onConnected() {
-                            startLongpoll();
-                        }
-
-                    };
                 }
                 //todo: undefined? try several times than cancel. startLongpoll(); maybe notify?
             }
@@ -255,6 +282,7 @@ public class LongPollService extends Service {
             case Update.TYPE_OFFLINE:
             case Update.TYPE_USER_TYPING:
             case Update.TYPE_CHAT_TYPING:
+            case Update.TYPE_MESSAGE:
                 return true;
             default:
                 return false;
@@ -263,6 +291,7 @@ public class LongPollService extends Service {
 
 
     public class Update {
+        public static final int TYPE_MESSAGE = 4;
 
         public static final int TYPE_ONLINE = 8;
         public static final int TYPE_OFFLINE = 9;
@@ -273,11 +302,18 @@ public class LongPollService extends Service {
         private final int flags;
         private final int userId;
         private VKApiUserFull user;
-        
+
         public Update(String[] updateArray){
+
             this.updateType = Integer.valueOf(updateArray[0]);
-            this.userId = Integer.valueOf(updateArray[1]) * (updateType<10? -1: 1);
-            this.flags = Integer.valueOf(updateArray[2]);
+            if(updateType==TYPE_MESSAGE) {
+
+                this.userId = Integer.valueOf(updateArray[3]);
+                this.flags = Integer.valueOf(updateArray[2]);
+            }else {
+                this.userId = Integer.valueOf(updateArray[1]) * (updateType < 10 ? -1 : 1);
+                this.flags = Integer.valueOf(updateArray[2]);
+            }
             user = Memory.getUserById(userId);
         }
 
@@ -287,14 +323,16 @@ public class LongPollService extends Service {
         }
         public String getMessage(){
             switch (updateType) {
+                case Update.TYPE_MESSAGE:
+                    return "Новое сообщение";
                 case Update.TYPE_ONLINE:
                     return (user.sex ==2?"Зашёл в сеть":"Зашла в сеть" ) ;
                 case Update.TYPE_OFFLINE:
                     return (user.sex ==2?"Вышел из сети":"Вышла из сети" ) ;
                 case Update.TYPE_USER_TYPING:
-                    return "Пишет..";
+                    return (user.sex ==2?"Писал 3 минуты назад":"Писала 3 минуты назад" ) ;
                 case Update.TYPE_CHAT_TYPING:
-                    return "Пишет в беседе";
+                    return (user.sex ==2?"Писал в беседе 3 минуты назад":"Писала в беседе 3 минуты назад" ) ;
             }
             return "Уведомление";
         }
@@ -304,6 +342,24 @@ public class LongPollService extends Service {
 
         public VKApiUserFull getUser() {
             return user;
+        }
+
+        public Object getExtra() {
+            switch (updateType) {
+                case Update.TYPE_ONLINE:
+                    return 0 ;
+                case Update.TYPE_OFFLINE:
+                    return  (flags==0? 0:60*15) ;//таймаунт в секундах
+                case Update.TYPE_USER_TYPING:
+                    return "Пишет..";
+                case Update.TYPE_CHAT_TYPING:
+                    return "Пишет в беседе";
+            }
+            return null;
+        }
+
+        public boolean isStatusUpdate() {
+            return updateType == TYPE_OFFLINE || updateType == TYPE_ONLINE;
         }
     }
 }

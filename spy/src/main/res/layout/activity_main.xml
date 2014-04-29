@@ -1,43 +1,90 @@
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
-    android:gravity="center"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="${packageName}.${activityClass}">
-    <TextView
-        android:id="@+id/status"
-        android:text="згрзка"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <LinearLayout
-        android:orientation="vertical"
+    <RelativeLayout
+        android:layout_above="@+id/displayButtons"
         android:gravity="center"
-        android:visibility="gone"
+        android:id="@+id/content"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+        android:text="Загрузка"
+        android:id="@+id/status"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    </RelativeLayout>
+
+    <LinearLayout
+
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_above="@+id/togglers"
         android:id="@+id/displayButtons"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <Button
             android:text="Список друзей"
             android:onClick="showFriends"
-            android:layout_width="wrap_content"
+            android:layout_weight="3"
+            android:layout_width="0dp"
             android:layout_height="wrap_content" />
         <Button
             android:text="Показать всё"
             android:onClick="showAll"
-            android:layout_width="wrap_content"
+            android:layout_weight="3"
+            android:layout_width="0dp"
             android:layout_height="wrap_content" />
     </LinearLayout>
+    <LinearLayout
+        android:id="@+id/togglers"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <Button
-        android:text="disablePopup"
-        android:onClick="popupToggle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <Button
-        android:text="disableLongpoll\n(All tracks will be disabled)"
-        android:onClick="longpollToggle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-</LinearLayout>
+        <Button
+            android:textStyle="bold|italic"
+            android:textColor="#ffffff"
+            android:text="Уведомления включены"
+            android:id="@+id/popupToggler"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/button_green"
+            android:onClick="popupToggle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <Button
+
+            android:textStyle="bold|italic"
+            android:textColor="#ffffff"
+            android:id="@+id/longpollToggler"
+            android:text="Шпоин включен"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/button_green"
+            android:onClick="longpollToggle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <Button
+            android:onClick="logout"
+            android:background="#00000000"
+            android:text="Выход"
+            android:textColor="#445"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</RelativeLayout>

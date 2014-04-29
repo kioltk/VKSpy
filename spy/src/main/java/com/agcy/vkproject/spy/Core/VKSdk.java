@@ -24,6 +24,11 @@ public class VKSdk {
             VKScope.MESSAGES
     };
     private static Context context;
+
+    public static void DESTROY() {
+        com.vk.sdk.VKSdk.logout();
+        context = null;
+    }
     public static void initialize(Context context){
         VKSdk.context = context;
         com.vk.sdk.VKSdk.initialize(sdkListener, "4328079");

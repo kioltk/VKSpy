@@ -9,10 +9,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.agcy.vkproject.spy.Adapters.OnlineAdapter;
-import com.agcy.vkproject.spy.Adapters.TypingAdapter;
+import com.agcy.vkproject.spy.Adapters.UpdatesAdapter;
 import com.agcy.vkproject.spy.Core.Memory;
 import com.agcy.vkproject.spy.R;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -24,6 +22,7 @@ import com.vk.sdk.api.model.VKApiUser;
 public class UserFragment extends android.support.v4.app.Fragment {
     private final VKApiUser user;
     private final Context context;
+    private boolean tracked;
 
     public UserFragment(VKApiUser user, Context context) {
         this.user = user;
@@ -36,7 +35,7 @@ public class UserFragment extends android.support.v4.app.Fragment {
 
         ImageView photo = (ImageView) rootView.findViewById(R.id.photo);
         TextView name = (TextView) rootView.findViewById(R.id.name);
-        ImageView status = (ImageView) rootView.findViewById(R.id.status);
+        ImageView status = (ImageView) rootView.findViewById(R.id.status_image);
         name.setText(user.first_name+" "+user.last_name);
         if(user.online) {
             status.setVisibility(View.VISIBLE);
@@ -44,23 +43,32 @@ public class UserFragment extends android.support.v4.app.Fragment {
         }
         ImageLoader.getInstance().displayImage(user.photo_100,photo);
 
-        //todo: track him!
 
         final ListView list = (ListView) rootView.findViewById(R.id.list);
-        list.setAdapter(new OnlineAdapter(Memory.getOnlines(user.id), context));
+        list.setAdapter(new UpdatesAdapter(Memory.getOnlines(user.id), context));
 
         Button showOnlines = (Button) rootView.findViewById(R.id.showOnlines);
         showOnlines.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                list.setAdapter(new OnlineAdapter(Memory.getOnlines(user.id), context));
+                list.setAdapter(new UpdatesAdapter(Memory.getOnlines(user.id), context));
             }
         });
-        Button track = (Button) rootView.findViewById(R.id.track);
+        final Button track = (Button) rootView.findViewById(R.id.track);
+        tracked = Memory.isTracked(user.id);
+        track.setText(("Уведомления"));
+        if(tracked) {
+            track.setBackgroundDrawable(getResources().getDrawable(R.drawable.button_green));
+        }else
+            track.setBackgroundDrawable(getResources().getDrawable(R.drawable.button_red));
         track.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, "not implemented =(", Toast.LENGTH_SHORT).show();
+                tracked = Memory.setTracked(user.id);
+                if(tracked) {
+                    track.setBackgroundDrawable(getResources().getDrawable(R.drawable.button_green));
+                }else
+                    track.setBackgroundDrawable(getResources().getDrawable(R.drawable.button_red));
             }
         });
 
@@ -68,7 +76,7 @@ public class UserFragment extends android.support.v4.app.Fragment {
         showTypings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                list.setAdapter(new TypingAdapter(Memory.getTyping(user.id), context));
+                list.setAdapter(new UpdatesAdapter(Memory.getTyping(user.id), context));
             }
         });
         return rootView;

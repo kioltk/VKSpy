@@ -10,6 +10,15 @@
     >
 
     <include layout="@layout/list_item_user"/>
+
+    <Button
+        android:id="@+id/track"
+        android:text="track"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="@drawable/button_red"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -23,12 +32,6 @@
         <Button
             android:id="@+id/showTypings"
             android:text="тайпинги"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content" />
-        <Button
-            android:id="@+id/track"
-            android:text="track"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content" />

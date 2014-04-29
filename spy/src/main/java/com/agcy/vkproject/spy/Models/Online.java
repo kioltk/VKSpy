@@ -2,16 +2,13 @@ package com.agcy.vkproject.spy.Models;
 
 import com.agcy.vkproject.spy.Core.Helper;
 
-/**
- * Created by kiolt_000 on 26-Apr-14.
- */
-public class Online {
-    public final int userId;
+public class Online extends Update {
     private final int since;
     private final int till;
 
-    public Online(int userId, int since, int till) {
-        this.userId = userId;
+    public Online(int userid, int since, int till) {
+        super(userid);
+
         this.since = since;
         this.till = till;
     }
@@ -19,11 +16,9 @@ public class Online {
         if(since==0){
             return "undefined";
         }
-        if(since==-1){
-            return "online";
-        }
        return Helper.getTimeShort(since);
     }
+    @Override
     public Integer getUnix() {
         if(till>0)
             return till;
@@ -32,9 +27,23 @@ public class Online {
 
     public String getTillShort() {
 
-        if(since==0){
+        if(till==0){
             return "undefined";
         }
+
+        if(till==-1){
+            return "online";
+        }
         return Helper.getTimeShort(till);
+    }
+
+
+    @Override
+    public String getTime() {
+        return getTillShort();
+    }
+
+    public String getDate(){
+        return Helper.getDate(getUnix());
     }
 }

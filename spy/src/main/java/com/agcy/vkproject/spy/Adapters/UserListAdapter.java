@@ -48,7 +48,7 @@ public class UserListAdapter extends BaseAdapter {
 
         ImageView photo = (ImageView) rootView.findViewById(R.id.photo);
         TextView name = (TextView) rootView.findViewById(R.id.name);
-        ImageView status = (ImageView) rootView.findViewById(R.id.status);
+        ImageView status = (ImageView) rootView.findViewById(R.id.status_image);
         VKApiUser user = (VKApiUser) getItem(position);
         name.setText(user.first_name+" "+user.last_name);
         if(user.online) {
