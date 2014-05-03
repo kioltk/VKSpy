@@ -1,6 +1,7 @@
 package com.agcy.vkproject.spy.Longpoll;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -65,6 +66,7 @@ public class LongPollService extends Service {
         if(intent==null){
             //onRestart
 
+            Log.i("AGCY SPY LONGPOLLSERVICE","Intent equals null" );
             startSafe();
 
         }
@@ -76,32 +78,32 @@ public class LongPollService extends Service {
                 int action = bundle.getInt(ACTION, 0);
                 switch (action) {
                     case ACTION_START:
+                        Log.i("AGCY SPY LONGPOLLSERVICE","force start " );
                         restoreSettings();
                         startLongpoll();
 
-                        Log.i("AGCY SPY LONGPOLLSERVICE","force start " );
                         break;
                     case ACTION_START_SAFE:
-                        startSafe();
 
                         Log.i("AGCY SPY LONGPOLLSERVICE","safe start " );
+                        startSafe();
                         break;
                     case ACTION_STOP:
                         if (connection != null) {
+
+                            Log.i("AGCY SPY LONGPOLLSERVICE","stop " );
                             connection.cancel(false);
                             connection = null;
                             saveSettings();
-
-                            Log.i("AGCY SPY LONGPOLLSERVICE","stop " );
                             return Service.START_NOT_STICKY;
                         }
                         break;
                 }
             }else{
+                Log.i("AGCY SPY LONGPOLLSERVICE","simple call" );
                 if(connection==null || connection.isFinished())
                     refreshSettings();
 
-                Log.i("AGCY SPY LONGPOLLSERVICE","simple call" );
             }
 
             // any other start
@@ -121,7 +123,7 @@ public class LongPollService extends Service {
         //refreshSettings();
         restoreSettings();
         startLongpoll();
-        Log.i("AGCY SPY LONGPOLLSERVICE", "restarted after crash " + " key: " + key);
+        Log.i("AGCY SPY LONGPOLLSERVICE", "Started safe" + " key: " + key);
     }
 
     @Override
@@ -229,6 +231,7 @@ public class LongPollService extends Service {
         connection = new LongPollConnection(server, key, ts) {
             @Override
             public void onSuccess(JSONArray updatesJson, String ts) {
+
                 LongPollService.this.ts = ts;
                 saveSettings();
                 ArrayList<Update> updates = new ArrayList<Update>();
@@ -247,6 +250,7 @@ public class LongPollService extends Service {
                 }
                 Helper.newUpdates(updates);
                 startLongpoll();
+                saveLongpollExecuted();
             }
 
             @Override
@@ -256,7 +260,6 @@ public class LongPollService extends Service {
                 if (exp instanceof JSONException) {
                     refreshSettings();
                 }
-                //todo: undefined? try several times than cancel. startLongpoll(); maybe notify?
             }
 
 
@@ -274,6 +277,13 @@ public class LongPollService extends Service {
         SharedPreferences preferences = getApplicationContext().getSharedPreferences("longpoll", MODE_MULTI_PROCESS);
         return preferences.getBoolean("status",true);
     }
+    private void saveLongpollExecuted(){
+        SharedPreferences preferences = getBaseContext().getSharedPreferences("longpoll", Context.MODE_MULTI_PROCESS);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt("lastUpdate", (int) Helper.unixNow());
+        editor.commit();
+
+    }
     public static Boolean shouldHandle(String[] updateArray) {
 
         int updateType = Integer.valueOf(updateArray[0]);
@@ -282,7 +292,12 @@ public class LongPollService extends Service {
             case Update.TYPE_OFFLINE:
             case Update.TYPE_USER_TYPING:
             case Update.TYPE_CHAT_TYPING:
+                return true;
             case Update.TYPE_MESSAGE:
+                int flags = Integer.valueOf(updateArray[2]);
+                if ((flags & Update.FLAG_MESSAGE_CHAT) == Update.FLAG_MESSAGE_CHAT) {
+                    return false;
+                }
                 return true;
             default:
                 return false;
@@ -292,36 +307,42 @@ public class LongPollService extends Service {
 
     public class Update {
         public static final int TYPE_MESSAGE = 4;
+        public static final int TYPE_MESSAGE_CHAT = 400;
 
         public static final int TYPE_ONLINE = 8;
         public static final int TYPE_OFFLINE = 9;
         public static final int TYPE_USER_TYPING = 61;
-        public static final int TYPE_CHAT_TYPING = 62;
+        public static final int TYPE_CHAT_TYPING = 620;// rebuild architecture to get chats also
+
+        public static final int FLAG_MESSAGE_CHAT = 8192;
 
         private final int updateType;
         private final int flags;
         private final int userId;
-        private VKApiUserFull user;
 
         public Update(String[] updateArray){
 
-            this.updateType = Integer.valueOf(updateArray[0]);
-            if(updateType==TYPE_MESSAGE) {
+            int tempUpdateType = Integer.valueOf(updateArray[0]);
+            if(tempUpdateType==TYPE_MESSAGE) {
 
                 this.userId = Integer.valueOf(updateArray[3]);
                 this.flags = Integer.valueOf(updateArray[2]);
+                if((flags & FLAG_MESSAGE_CHAT) == FLAG_MESSAGE_CHAT){
+                    tempUpdateType = TYPE_MESSAGE_CHAT;
+                }
             }else {
-                this.userId = Integer.valueOf(updateArray[1]) * (updateType < 10 ? -1 : 1);
+                this.userId = Integer.valueOf(updateArray[1]) * (tempUpdateType < 10 ? -1 : 1);
                 this.flags = Integer.valueOf(updateArray[2]);
             }
-            user = Memory.getUserById(userId);
+            updateType = tempUpdateType;
         }
 
         public int getType(){return updateType;}
         public String getHeader(){
-            return user.first_name+" "+user.last_name;
+            return getUser().first_name+" "+getUser().last_name;
         }
         public String getMessage(){
+            VKApiUserFull user = getUser();
             switch (updateType) {
                 case Update.TYPE_MESSAGE:
                     return "Новое сообщение";
@@ -337,11 +358,11 @@ public class LongPollService extends Service {
             return "Уведомление";
         }
         public String getImageUrl(){
-            return user.photo_100;
+            return getUser().getBiggestPhoto();
         }
 
         public VKApiUserFull getUser() {
-            return user;
+            return Memory.getUserById(userId);
         }
 
         public Object getExtra() {

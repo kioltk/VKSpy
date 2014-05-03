@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
+        android:name=".SpyApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
@@ -16,12 +17,10 @@
         <activity
             android:name="com.agcy.vkproject.spy.StartActivity"
             android:label="@string/app_name" >
-
         </activity>
         <activity
             android:name="com.agcy.vkproject.spy.MainActivity"
             android:label="@string/main" >
-
         </activity>
         <activity
             android:name="com.agcy.vkproject.spy.FriendsActivity"
@@ -29,13 +28,13 @@
         </activity>
 
         <service
-            android:name=".Longpoll.LongPollService"
+            android:name="com.agcy.vkproject.spy.Longpoll.LongPollService"
             android:enabled="true"
             android:exported="true" >
         </service>
 
         <receiver
-            android:name=".Receivers.NetworkStateReceiver"
+            android:name="com.agcy.vkproject.spy.Receivers.NetworkStateReceiver"
             android:enabled="true"
             android:exported="true" >
             <intent-filter>
@@ -49,7 +48,7 @@
         </activity>
 
         <receiver
-            android:name=".Receivers.BootCompleteReceiver"
+            android:name="com.agcy.vkproject.spy.Receivers.BootCompleteReceiver"
             android:enabled="true"
             android:exported="true" >
             <intent-filter>
@@ -60,12 +59,19 @@
         <activity
             android:name="com.agcy.vkproject.spy.WelcomeActivity"
             android:label="VK Spy" >
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="com.agcy.vkproject.spy.UserActivity"
+            android:label="@string/user" >
+        </activity>
+        <activity
+            android:name="com.agcy.vkproject.spy.SettingsActivity"
+            android:label="@string/title_activity_settings" >
         </activity>
     </application>
 

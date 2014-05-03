@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.agcy.vkproject.spy.R;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.vk.sdk.api.model.VKApiUser;
+import com.vk.sdk.api.model.VKApiUserFull;
 import com.vk.sdk.api.model.VKUsersArray;
 
 /**
@@ -49,13 +49,13 @@ public class UserListAdapter extends BaseAdapter {
         ImageView photo = (ImageView) rootView.findViewById(R.id.photo);
         TextView name = (TextView) rootView.findViewById(R.id.name);
         ImageView status = (ImageView) rootView.findViewById(R.id.status_image);
-        VKApiUser user = (VKApiUser) getItem(position);
+        VKApiUserFull user = (VKApiUserFull) getItem(position);
         name.setText(user.first_name+" "+user.last_name);
         if(user.online) {
             status.setVisibility(View.VISIBLE);
             //if (user.online_mobile) status.setText("В сети с мобильного");
         }
-        ImageLoader.getInstance().displayImage(user.photo_100,photo);
+        ImageLoader.getInstance().displayImage(user.getBiggestPhoto(),photo);
         return rootView;
     }
 }

@@ -37,6 +37,7 @@ public class FriendsListFragment extends Fragment {
         rootView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
                 onSelectedListener.onSelect((VKApiUser) parent.getItemAtPosition(position));
             }
         });

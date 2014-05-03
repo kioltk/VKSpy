@@ -16,10 +16,10 @@ import java.util.ArrayList;
 public class UpdatesAdapter extends BaseAdapter {
 
     protected final Context context;
-    protected final ArrayList<Item> items;
+    protected final ItemHelper.ObservableArray items;
 
     public UpdatesAdapter(ArrayList<? extends Update> updates, Context context){
-        this.items = ItemHelper.convertUpdates(updates);
+        this.items = new ItemHelper.ObservableArray(updates);
         this.context = context;
 
     }
@@ -31,6 +31,11 @@ public class UpdatesAdapter extends BaseAdapter {
 
     @Override
     public Item getItem(int position) {
+
+        if(items.size()-15<position){
+            if(items.convertMore(15))
+                notifyDataSetChanged();
+        }
         return items.get(position);
     }
 
@@ -39,11 +44,12 @@ public class UpdatesAdapter extends BaseAdapter {
         return 0;
     }
 
+
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
 
         return getItem(position).getView(context);
-
     }
 }

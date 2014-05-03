@@ -37,6 +37,7 @@ public class Notificator {
                 events.add(new Event(update.getHeader(), update.getMessage(), update.getImageUrl()));
         }
         showPopup(events);
+
     }
     public static Boolean isUpdateTracked(LongPollService.Update update){
         switch (update.getType()){

@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
@@ -34,7 +35,6 @@ import java.net.UnknownHostException;
 
 public class MainActivity extends Activity {
 
-    public static final int START_LOADER_ID = 150;
     @Override
     protected void onResume() {
         super.onResume();
@@ -57,7 +57,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         SharedPreferences popupPreferences = getSharedPreferences("popup", MODE_MULTI_PROCESS);
-        boolean popupStatus = popupPreferences.getBoolean("status", true);
+        boolean popupStatus = popupPreferences.getBoolean("status", false);
         Button popupToggler = (Button) findViewById(R.id.popupToggler);
         Resources res = getBaseContext().getResources();
         if(popupStatus){
@@ -70,7 +70,7 @@ public class MainActivity extends Activity {
         }
 
         SharedPreferences longpollPreferences = getSharedPreferences("longpoll", MODE_MULTI_PROCESS);
-        boolean longpolStatus = longpollPreferences.getBoolean("status", true);
+        boolean longpolStatus = longpollPreferences.getBoolean("status", false);
         Button longpollToggler = (Button) findViewById(R.id.longpollToggler);
         if(longpolStatus){
             longpollToggler.setText("Шпион включен");
@@ -84,7 +84,7 @@ public class MainActivity extends Activity {
 
         VKUIHelper.onCreate(this);
 
-                downloadData();
+        downloadData();
     }
 
 
@@ -92,62 +92,72 @@ public class MainActivity extends Activity {
 
         VKParameters friendsParameters = new VKParameters();
         friendsParameters.put("order", "hints");
-        friendsParameters.put("fields", "sex,photo_100,online,last_seen");
+        friendsParameters.put("fields", "sex,photo_200,photo_200_orig,photo_50,photo_100,online,last_seen");
 
-        VKRequest friendsRequest = VKApi.friends().get(friendsParameters);
-        friendsRequest.executeWithListener(
-                new VKRequest.VKRequestListener() {
-                    public NetworkStateReceiver.NetworkStateChangeListener connectionListener;
+        final VKRequest friendsRequest = VKApi.friends().get(friendsParameters);
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
 
-                    @Override
-                    public void onComplete(final VKResponse response) {
+                Memory.loadFriends();
 
-                        new AsyncTask<Void, Void, Void>() {
+                friendsRequest.executeWithListener(
+                        new VKRequest.VKRequestListener() {
+                            public NetworkStateReceiver.NetworkStateChangeListener connectionListener;
+
                             @Override
-                            protected Void doInBackground(Void... params) {
-                                Memory.saveFriends((VKUsersArray)response.parsedModel);
+                            public void onComplete(final VKResponse response) {
 
-                                return null;
+                                new AsyncTask<Void, Void, Void>() {
+                                    @Override
+                                    protected Void doInBackground(Void... params) {
+                                        Memory.saveUsers((VKUsersArray) response.parsedModel);
+
+                                        return null;
+                                    }
+
+                                    @Override
+                                    protected void onPostExecute(Void aVoid) {
+                                        ((TextView)findViewById(R.id.status)).setText("Шпионить плохо -_-");
+                                    }
+                                }.execute();
+                                if(connectionListener!=null)
+                                    connectionListener.remove();
                             }
 
                             @Override
-                            protected void onPostExecute(Void aVoid) {
-                                findViewById(R.id.status).setVisibility(View.GONE);
-                            }
-                        }.execute();
-                        if(connectionListener!=null)
-                            connectionListener.remove();
-                    }
+                            public void onError(VKError error) {
+                                super.onError(error);
+                                //unknownhost
 
-                    @Override
-                    public void onError(VKError error) {
-                        super.onError(error);
-                        //unknownhost
+                                if (error.httpError instanceof SocketException || error.httpError instanceof UnknownHostException) {
 
-                        if (error.httpError instanceof SocketException || error.httpError instanceof UnknownHostException) {
-
-                            ((TextView)findViewById(R.id.status)).setText("Проверьте подключение");
-                            connectionListener = new NetworkStateReceiver.NetworkStateChangeListener(START_LOADER_ID) {
-                                @Override
-                                public void onConnected() {
-
-                                    ((TextView)findViewById(R.id.status)).setText("Подключение восстановленно");
-                                    downloadData();
-
-                                }
-
-                                @Override
-                                public void onLost() {
                                     ((TextView)findViewById(R.id.status)).setText("Проверьте подключение");
-                                }
+                                    connectionListener = new NetworkStateReceiver.NetworkStateChangeListener(Helper.START_LOADER_ID) {
+                                        @Override
+                                        public void onConnected() {
 
-                            };
+                                            ((TextView)findViewById(R.id.status)).setText("Подключение восстановленно");
+                                            downloadData();
+
+                                        }
+
+                                        @Override
+                                        public void onLost() {
+                                            ((TextView)findViewById(R.id.status)).setText("Проверьте подключение");
+                                        }
+
+                                    };
+                                }
+                                Log.e("AGCY SPY", error.httpError.toString());
+                            }
                         }
-                        Log.e("AGCY SPY", error.httpError.toString());
-                    }
-                }
-        );
-        startLongpoll();
+                );
+                startLongpoll();
+                return null;
+            }
+        }.execute();
+
     }
     private void startLongpoll(){
 
@@ -245,5 +255,11 @@ public class MainActivity extends Activity {
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    public void settings(View view) {
+
+        startActivity(new Intent(getBaseContext(),SettingsActivity.class));
+        Toast.makeText(getBaseContext(),"Ещё не сделано..", Toast.LENGTH_SHORT).show();
     }
 }

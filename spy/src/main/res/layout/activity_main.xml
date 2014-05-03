@@ -1,4 +1,5 @@
 <RelativeLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
@@ -12,6 +13,7 @@
         android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+        
         <TextView
         android:text="Загрузка"
         android:id="@+id/status"
@@ -22,25 +24,36 @@
     </RelativeLayout>
 
     <LinearLayout
-
+        android:layout_margin="20dp"
         android:orientation="horizontal"
         android:gravity="center"
         android:layout_above="@+id/togglers"
         android:id="@+id/displayButtons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <Button
+
+
+        <com.agcy.vkproject.spy.Views.MainMenuItemView
             android:text="Список друзей"
             android:onClick="showFriends"
             android:layout_weight="3"
             android:layout_width="0dp"
-            android:layout_height="wrap_content" />
-        <Button
+            android:layout_height="wrap_content"
+            app:image="@drawable/ic_launcher"/>
+        <com.agcy.vkproject.spy.Views.MainMenuItemView
             android:text="Показать всё"
             android:onClick="showAll"
             android:layout_weight="3"
             android:layout_width="0dp"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            app:image="@drawable/ic_launcher"/>
+        <com.agcy.vkproject.spy.Views.MainMenuItemView
+            android:onClick="settings"
+            android:layout_weight="3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Настройки"
+            app:image="@drawable/ic_launcher"/>
     </LinearLayout>
     <LinearLayout
         android:id="@+id/togglers"
@@ -50,28 +63,21 @@
         android:layout_height="wrap_content">
 
         <Button
-            android:textStyle="bold|italic"
-            android:textColor="#ffffff"
             android:text="Уведомления включены"
             android:id="@+id/popupToggler"
             android:layout_marginTop="10dp"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
-            android:background="@drawable/button_green"
             android:onClick="popupToggle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <Button
-
-            android:textStyle="bold|italic"
-            android:textColor="#ffffff"
             android:id="@+id/longpollToggler"
             android:text="Шпоин включен"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_marginTop="10dp"
-            android:background="@drawable/button_green"
             android:onClick="longpollToggle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
@@ -86,5 +92,6 @@
             android:layout_marginTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
     </LinearLayout>
 </RelativeLayout>

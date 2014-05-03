@@ -23,6 +23,7 @@ package com.vk.sdk.api.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -172,6 +173,20 @@ public class VKPhotoSizes extends VKList<VKApiPhotoSize> implements Parcelable {
      */
     public String getImageForDimension(int width, int height) {
         return width >= height ? getImageForWidth(width) : getImageForHeight(height);
+    }
+
+    public String getBiggest(){
+        String biggest = null;
+        int biggestSize = 0;
+        if(!isEmpty()) {
+            for(VKApiPhotoSize photo : this) {
+                if(photo.height>biggestSize) {
+                    biggest = photo.src;
+                    biggestSize = photo.height;
+                }
+            }
+        }
+        return biggest;
     }
 
     private String getImageForWidth(int width) {

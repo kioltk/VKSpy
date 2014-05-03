@@ -23,9 +23,6 @@
     <Button
         android:id="@+id/start"
         android:visibility="gone"
-        android:background="@drawable/button_red"
-        android:textColor="#fff"
-        android:textStyle="italic|bold"
         android:text="Старт"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"

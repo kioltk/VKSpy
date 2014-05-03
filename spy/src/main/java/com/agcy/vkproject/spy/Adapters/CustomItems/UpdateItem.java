@@ -10,7 +10,7 @@ import android.widget.TextView;
 import com.agcy.vkproject.spy.Models.Update;
 import com.agcy.vkproject.spy.R;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.vk.sdk.api.model.VKApiUser;
+import com.vk.sdk.api.model.VKApiUserFull;
 
 /**
  * Created by kiolt_000 on 28-Apr-14.
@@ -31,13 +31,13 @@ public abstract class UpdateItem extends Item {
         ImageView photo = (ImageView) ownerView.findViewById(R.id.photo);
         TextView name = (TextView) ownerView.findViewById(R.id.name);
         ImageView status = (ImageView) ownerView.findViewById(R.id.status_image);
-        VKApiUser user = update.getOwner();
+        VKApiUserFull user = update.getOwner();
         name.setText(user.first_name+" "+user.last_name);
         if(user.online) {
             status.setVisibility(View.VISIBLE);
             //if (user.online_mobile) status.setText("В сети с мобильного");
         }
-        ImageLoader.getInstance().displayImage(user.photo_100,photo);
+        ImageLoader.getInstance().displayImage(user.getBiggestPhoto(),photo);
         View contentView = getView(context);
 
         LinearLayout linearLayout = new LinearLayout(context);

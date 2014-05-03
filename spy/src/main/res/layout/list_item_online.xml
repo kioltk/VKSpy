@@ -19,6 +19,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent" />
         <View
+            android:id="@+id/divider"
             android:layout_weight="4"
             android:background="#444"
             android:layout_width="0dp"

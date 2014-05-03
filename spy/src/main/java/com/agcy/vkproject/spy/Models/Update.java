@@ -1,7 +1,7 @@
 package com.agcy.vkproject.spy.Models;
 
 import com.agcy.vkproject.spy.Core.Memory;
-import com.vk.sdk.api.model.VKApiUser;
+import com.vk.sdk.api.model.VKApiUserFull;
 
 /**
  * Created by kiolt_000 on 28-Apr-14.
@@ -13,7 +13,7 @@ public abstract class Update {
         this.userid = userid;
     }
 
-    public VKApiUser getOwner(){
+    public VKApiUserFull getOwner(){
         return Memory.getUserById(userid);
     }
     public abstract String getTime();

@@ -2,69 +2,81 @@ package com.agcy.vkproject.spy;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ListView;
 
+import com.agcy.vkproject.spy.Adapters.ListFragment;
 import com.agcy.vkproject.spy.Adapters.UpdatesWithOwnerAdapter;
 import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
-import com.agcy.vkproject.spy.Models.Online;
+import com.viewpagerindicator.TitlePageIndicator;
 
-import java.util.ArrayList;
+import java.util.Locale;
 
 
 public class AllActivity extends ActionBarActivity {
+
+    private SectionsPagerAdapter mSectionsPagerAdapter;
+    private ViewPager mViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_all);
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
-                    .commit();
-        }
+
+        TitlePageIndicator tabPager = (TitlePageIndicator) findViewById(R.id.pager_indicator);
+        // Create the adapter that will return a fragment for each of the three
+        // primary sections of the activity.
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+        // Set up the ViewPager with the sections adapter.
+        mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+
+        tabPager.setViewPager(mViewPager);
+
+        // When swiping between different sections, select the corresponding
+        // tab. We can also use ActionBar.Tab#select() to do this if we have
+        // a reference to the Tab.
     }
 
 
+    public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public class PlaceholderFragment extends Fragment {
-
-        public PlaceholderFragment() {
+        public SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
         }
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_all, container, false);
+        public Fragment getItem(int position) {
+            // getItem is called to instantiate the fragment for the given page.
+            // Return a PlaceholderFragment (defined as a static inner class below).
+            return new ListFragment((position==0?
+                    new UpdatesWithOwnerAdapter(Helper.convertUndefined(Memory.getOnlines()), getBaseContext()):
+                    new UpdatesWithOwnerAdapter(Memory.getTyping(), getBaseContext())
+            ));
+        }
 
-            final ArrayList<Online> onlines = Helper.orderOnlines(Memory.getOnlines(),false);
 
-            final ListView list = (ListView) rootView.findViewById(R.id.list);
-            list.setAdapter(new UpdatesWithOwnerAdapter(onlines, getBaseContext()));
 
-            Button showOnlines = (Button) rootView.findViewById(R.id.showOnlines);
-            showOnlines.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    list.setAdapter(new UpdatesWithOwnerAdapter(onlines, getBaseContext()));
-                }
-            });
-            Button showTypings = (Button) rootView.findViewById(R.id.showTypings);
-            showTypings.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    list.setAdapter(new UpdatesWithOwnerAdapter(Memory.getTyping(), getBaseContext()));
-                }
-            });
-            return rootView;
+        @Override
+        public int getCount() {
+            // Show 3 total pages.
+            return 2;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            Locale l = Locale.getDefault();
+            switch (position) {
+                case 0:
+                    return getString(R.string.onlines).toUpperCase(l);
+                case 1:
+                    return getString(R.string.typings).toUpperCase(l);
+            }
+            return null;
         }
     }
 }

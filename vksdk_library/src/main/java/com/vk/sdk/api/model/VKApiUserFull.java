@@ -862,4 +862,16 @@ public class VKApiUserFull extends VKApiUser implements android.os.Parcelable {
             return new VKApiUserFull[size];
         }
     };
+    public String getBiggestPhoto(){
+        String biggest = photo.getBiggest();
+        if(biggest == null){
+            if(photo_200!=null)
+                return photo_200;
+            if(photo_100!=null)
+                return photo_100;
+            return "http://vk.com/images/camera_a.gif";
+
+        }
+        return biggest;
+    }
 }

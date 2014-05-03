@@ -60,6 +60,8 @@ public class StartActivity extends Activity {
 
 
     public void login(View view) {
+
+        com.agcy.vkproject.spy.Core.VKSdk.authorize();
     }
 
     private void startMainActivity() {
