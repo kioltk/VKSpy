@@ -19,6 +19,10 @@ import android.view.animation.OvershootInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 
+import com.agcy.vkproject.spy.Core.Helper;
+import com.vk.sdk.VKSdk;
+import com.vk.sdk.VKUIHelper;
+
 import java.util.Locale;
 
 
@@ -43,26 +47,40 @@ public class WelcomeActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
-
-
+        VKUIHelper.onCreate(this);
+        com.agcy.vkproject.spy.Core.VKSdk.initialize(this);
 
         SharedPreferences preferences = getSharedPreferences("start", MODE_MULTI_PROCESS);
         if(!preferences.getBoolean("firstStart",true)) {
-            startActivity(new Intent(getBaseContext(),StartActivity.class));
+            if (VKSdk.wakeUpSession()) {
+
+                startActivity(new Intent(WelcomeActivity.this, MainActivity.class));
+                finish();
+                return;
+
+            }
+            com.agcy.vkproject.spy.Core.VKSdk.authorize();
+            Helper.initialize(this);
+
             finish();
+
         }
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
-        // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
     }
 
+    private void login(){
 
+        startActivity(new Intent(WelcomeActivity.this, StartActivity.class));
+
+        finish();
+    }
 
 
     
@@ -201,12 +219,10 @@ public class WelcomeActivity extends ActionBarActivity {
             start.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    startActivity(new Intent(WelcomeActivity.this, StartActivity.class));
-
                     SharedPreferences preferences = getSharedPreferences("start", MODE_MULTI_PROCESS);
                     preferences.edit().putBoolean("firstStart",false).commit();
 
-                    finish();
+                    login();
                 }
             });
             text.setVisibility(View.VISIBLE);

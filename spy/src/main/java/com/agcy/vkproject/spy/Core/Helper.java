@@ -3,14 +3,18 @@ package com.agcy.vkproject.spy.Core;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.util.TypedValue;
 
 import com.agcy.vkproject.spy.Longpoll.LongPollService;
 import com.agcy.vkproject.spy.Models.Online;
+import com.agcy.vkproject.spy.Models.Status;
+import com.agcy.vkproject.spy.Models.Update;
 import com.agcy.vkproject.spy.Receivers.NetworkStateReceiver;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -27,6 +31,7 @@ import com.vk.sdk.api.model.VKList;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -220,7 +225,26 @@ public class Helper {
         return String.format(" %tT",
                 date);
     }
-
+    public static String getSmartDate(int time) {
+        if(getDate((int) unixNow()).equals(getDate(time)))
+            return "Today";
+        if(getDate((int) unixNow()-24 * 3600).equals(getDate(time)))
+            return "Yesterday";
+        return getDate(time);
+    }
+    public static String getSmartTime(Integer unix) {
+        if (getDate((int) unixNow()) != getDate(unix)) {
+            long time = unixNow() - unix;
+            if (time < 3600 * 12) {
+                if (time < 3600)
+                    return time / 60 + " min";
+                if (time > 3600 && time < 7200)
+                    return 1 + " hr";
+                return time / 3600 + " hrs";
+            }
+        }
+        return getTimeShort(unix);
+    }
     public static String getTimeShort(int unix) {
 
         Date date = new Date(unix * 1000L);
@@ -231,6 +255,42 @@ public class Helper {
     public static boolean isOnline(int userid){
         return Memory.getUserById(userid).online;
     }
+
+    public static float convertToDp(int i) {
+        Resources r = context.getResources();
+        float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, i, r.getDisplayMetrics());
+        return px;
+    }
+
+    public static String getStreak(int till, int since) {
+        if(till <= 0 || since <= 0)
+            return "undefined";
+        String convertedStreak = "";
+        int streak = till - since;
+        if(streak/(24*3600)> 0) {
+            convertedStreak += streak / 24 * 3600 + " d ";
+            streak = streak % (24 * 3600);
+        }
+        if(streak/(3600)> 0) {
+            int hrOrHrs = streak / 3600;
+            if (hrOrHrs == 1)
+                convertedStreak += 1 + " hr ";
+            else
+                convertedStreak += hrOrHrs + " hrs ";
+            streak = streak % (3600);
+        }
+        if(streak/ 60>0){
+            convertedStreak += streak / 60 + " m ";
+            streak = streak% 60;
+        }
+        if(streak > 0){
+            convertedStreak += streak + " s ";
+        }
+        return convertedStreak;
+    }
+
+
+
     static class TypingTimer extends Thread {
         public LongPollService.Update update;
         private boolean again = false;
@@ -319,9 +379,27 @@ public class Helper {
         }});
     }
     //endregion
+    public static ArrayList<? extends Update> convertToStatus(ArrayList<Online> onlines) {
 
-    public static ArrayList<Online> convertUndefined(ArrayList<Online> onlines) {
-        //Collections.sort(onlines, new CustomComparator());
+        ArrayList<Status> convertedOnlines = new ArrayList<Status>();
+
+        for(Online online : onlines){
+            int userid = online.getOwner().id;
+            int till = online.getTill();
+            int since = online.getSince();
+            if(till > 0)
+                convertedOnlines.add(new Status(userid, till, false));
+            if(since > 0)
+                convertedOnlines.add(new Status(userid, since, true));
+
+        }
+
+        Collections.sort(convertedOnlines, new CustomComparator());
+        Collections.reverse(convertedOnlines);
+        return convertedOnlines;
+    }
+    public static ArrayList<Online> convertLastUndefinedToOnline(ArrayList<Online> onlines) {
+        //
         //if(!asc)
         //Collections.reverse(onlines);
         ArrayList<Integer> ids = new ArrayList<Integer>();
@@ -338,12 +416,32 @@ public class Helper {
         return onlines;
     }
 
-    public static class CustomComparator implements Comparator<Online> {
+    public static class CustomComparator implements Comparator<Update> {
         @Override
-        public int compare(Online o1, Online o2) {
+        public int compare(Update o1, Update o2) {
             return o1.getUnix().compareTo(o2.getUnix());
         }
     }
 
+
+    private static ArrayList<OnInitializationEndListener> initializationEndListeners = new ArrayList<OnInitializationEndListener>();
+    public static void addOnInitializationEndListener(OnInitializationEndListener listener){
+        initializationEndListeners.add(listener);
+    }
+
+    public static void initializationEnded() {
+        initialized = true;
+        for(OnInitializationEndListener listener : initializationEndListeners){
+            listener.onEnd();
+        }
+    }
+    private static boolean initialized = false;
+
+    public static boolean isInitialized() {
+        return initialized;
+    }
+    public static abstract class OnInitializationEndListener{
+        public abstract void onEnd();
+    }
 
 }

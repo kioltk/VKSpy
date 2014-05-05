@@ -1,39 +1,46 @@
 package com.agcy.vkproject.spy;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
+import com.agcy.vkproject.spy.Fragments.MainFragment;
+import com.agcy.vkproject.spy.Fragments.OnlinesFragment;
+import com.agcy.vkproject.spy.Fragments.TypingsFragment;
+import com.agcy.vkproject.spy.Fragments.UsersListFragment;
 import com.agcy.vkproject.spy.Longpoll.LongPollService;
 import com.agcy.vkproject.spy.Receivers.NetworkStateReceiver;
+import com.viewpagerindicator.ContentPagerAdapter;
+import com.viewpagerindicator.TabPageIndicator;
 import com.vk.sdk.VKUIHelper;
 import com.vk.sdk.api.VKApi;
 import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
+import com.vk.sdk.api.model.VKApiUser;
 import com.vk.sdk.api.model.VKUsersArray;
 
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-public class MainActivity extends Activity {
+public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onResume() {
@@ -56,35 +63,21 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        SharedPreferences popupPreferences = getSharedPreferences("popup", MODE_MULTI_PROCESS);
-        boolean popupStatus = popupPreferences.getBoolean("status", false);
-        Button popupToggler = (Button) findViewById(R.id.popupToggler);
-        Resources res = getBaseContext().getResources();
-        if(popupStatus){
-            popupToggler.setText("Уведомления включены");
-            popupToggler.setBackgroundDrawable(res.getDrawable(R.drawable.button_green));
-        }else{
-
-            popupToggler.setText("Уведомления выключены");
-            popupToggler.setBackgroundDrawable(res.getDrawable(R.drawable.button_red));
-        }
-
-        SharedPreferences longpollPreferences = getSharedPreferences("longpoll", MODE_MULTI_PROCESS);
-        boolean longpolStatus = longpollPreferences.getBoolean("status", false);
-        Button longpollToggler = (Button) findViewById(R.id.longpollToggler);
-        if(longpolStatus){
-            longpollToggler.setText("Шпион включен");
-            longpollToggler.setBackgroundDrawable(res.getDrawable(R.drawable.button_green));
-        }else{
-
-            longpollToggler.setText("Шпион выключен");
-            longpollToggler.setBackgroundDrawable(res.getDrawable(R.drawable.button_red));
-        }
-
-
         VKUIHelper.onCreate(this);
+        Helper.initialize(this);
+        TabPageIndicator indicator = (TabPageIndicator) findViewById(R.id.mainIndicator);
+
+        ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
+        MainPagerAdapter mSectionsPagerAdapter  = new MainPagerAdapter(getSupportFragmentManager());
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+
+        indicator.setViewPager(mViewPager);
+
+
 
         downloadData();
+
+
     }
 
 
@@ -118,7 +111,7 @@ public class MainActivity extends Activity {
 
                                     @Override
                                     protected void onPostExecute(Void aVoid) {
-                                        ((TextView)findViewById(R.id.status)).setText("Шпионить плохо -_-");
+                                        //((TextView)findViewById(R.id.status)).setText("Шпионить плохо -_-");
                                     }
                                 }.execute();
                                 if(connectionListener!=null)
@@ -132,19 +125,19 @@ public class MainActivity extends Activity {
 
                                 if (error.httpError instanceof SocketException || error.httpError instanceof UnknownHostException) {
 
-                                    ((TextView)findViewById(R.id.status)).setText("Проверьте подключение");
+                                    //((TextView)findViewById(R.id.status)).setText("Проверьте подключение");
                                     connectionListener = new NetworkStateReceiver.NetworkStateChangeListener(Helper.START_LOADER_ID) {
                                         @Override
                                         public void onConnected() {
 
-                                            ((TextView)findViewById(R.id.status)).setText("Подключение восстановленно");
+                                            //((TextView)findViewById(R.id.status)).setText("Подключение восстановленно");
                                             downloadData();
 
                                         }
 
                                         @Override
                                         public void onLost() {
-                                            ((TextView)findViewById(R.id.status)).setText("Проверьте подключение");
+                                            //((TextView)findViewById(R.id.status)).setText("Проверьте подключение");
                                         }
 
                                     };
@@ -155,6 +148,11 @@ public class MainActivity extends Activity {
                 );
                 startLongpoll();
                 return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                Helper.initializationEnded();
             }
         }.execute();
 
@@ -187,53 +185,9 @@ public class MainActivity extends Activity {
         startActivity(new Intent(this, FriendsActivity.class));
     }
 
-    public void showAll(View view) {
-        startActivity(new Intent(this, AllActivity.class));
-    }
-    public void popupToggle(View view) {
 
-        SharedPreferences preferences = getSharedPreferences("popup", MODE_MULTI_PROCESS);
-        SharedPreferences.Editor editor = preferences.edit();
-        boolean status = !preferences.getBoolean("status", false);
-        editor.putBoolean("status",status);
-        editor.commit();
-        Button popupToggler = (Button) view;
-        Resources res = getBaseContext().getResources();
-        if(status){
-            popupToggler.setText("Уведомления включены");
-            popupToggler.setBackgroundDrawable(res.getDrawable(R.drawable.button_green));
-        }else{
 
-            popupToggler.setText("Уведомления выключены");
-            popupToggler.setBackgroundDrawable(res.getDrawable(R.drawable.button_red));
-        }
-    }
 
-    public void longpollToggle(View view) {
-
-        SharedPreferences preferences = getSharedPreferences("longpoll", MODE_MULTI_PROCESS);
-        SharedPreferences.Editor editor = preferences.edit();
-        boolean status = !preferences.getBoolean("status", false);
-        editor.putBoolean("status",status);
-        editor.commit();
-        Button longpollToggler = (Button) view;
-        Resources res = getBaseContext().getResources();
-        if(status){
-            longpollToggler.setText("Шпион включен");
-            longpollToggler.setBackgroundDrawable(res.getDrawable(R.drawable.button_green));
-        }else{
-
-            longpollToggler.setText("Шпион выключен");
-            longpollToggler.setBackgroundDrawable(res.getDrawable(R.drawable.button_red));
-        }
-
-        Intent longPollService = new Intent(getBaseContext(), LongPollService.class);
-        Bundle bundle  = new Bundle();
-        bundle.putInt(LongPollService.ACTION,(status? LongPollService.ACTION_START:LongPollService.ACTION_STOP));
-        longPollService.putExtras(bundle);
-        startService(longPollService);
-
-    }
 
     public void logout(View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -261,5 +215,50 @@ public class MainActivity extends Activity {
 
         startActivity(new Intent(getBaseContext(),SettingsActivity.class));
         Toast.makeText(getBaseContext(),"Ещё не сделано..", Toast.LENGTH_SHORT).show();
+    }
+
+    private class MainPagerAdapter extends FragmentPagerAdapter implements ContentPagerAdapter<Integer> {
+        public MainPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Integer getContent(int index) {
+            return R.drawable.ic_launcher;
+
+        }
+
+        @Override
+        public int getCount() {
+            return 4;
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+
+            switch (position) {
+                case 0:
+                    return new MainFragment(getBaseContext());
+                case 1:
+                    return new TypingsFragment(getBaseContext());
+                case 2:
+                    return new OnlinesFragment(getBaseContext());
+                default:
+                    return new UsersListFragment(getBaseContext(), new UsersListFragment.OnSelectedListener() {
+                        @Override
+                        public void onSelect(VKApiUser user) {
+
+                            Intent intent = new Intent(getBaseContext(), UserActivity.class);
+                            Bundle bundle = new Bundle();
+                            bundle.putInt("id", user.id);
+                            intent.putExtras(bundle);
+                            startActivity(intent);
+                        }
+                    });
+
+            }
+
+
+        }
     }
 }

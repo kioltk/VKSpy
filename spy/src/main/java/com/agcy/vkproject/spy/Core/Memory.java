@@ -105,6 +105,10 @@ public class Memory {
         return user;
     }
 
+    public static ArrayList<VKApiUserFull> getUsers() {
+        ArrayList<VKApiUserFull> arrayUsers = new ArrayList<VKApiUserFull>(users);
+        return arrayUsers;
+    }
     public static Track getTrackById(int userid) {
         if (tracks.isEmpty())
             loadTracks();
@@ -135,8 +139,16 @@ public class Memory {
     //region Getters
     public static Cursor getCursor(String databaseName, String[] fields, String selector, String orderby) {
         open();
-        Cursor cursor = database.query(databaseName, fields, selector, null, null, null, orderby);
-
+        Cursor cursor;
+        try {
+            cursor = database.query(databaseName, fields, selector, null, null, null, orderby);
+        }
+        catch(Exception exp) {
+            Log.e("AGCY SPY SQL", "Cursor error " + exp.toString());
+            close();
+            open();
+            return getCursor(databaseName,fields,selector,orderby);
+        }
         return cursor;
         // don't forget to close !!1
     }
@@ -213,9 +225,6 @@ public class Memory {
 
         ArrayList<Typing> typings = new ArrayList<Typing>();
 
-        Online online;
-        int since = 0;
-        int till = 0;
         if (cursor.moveToFirst())
             do {
                 int userid = cursor.getInt(useridColumnIndex);
@@ -304,6 +313,7 @@ public class Memory {
             }else{
                 saveStatus(user,online, (int) time);
             }
+            close();
         }
         // did we lost connection half hour ago?
 
@@ -451,6 +461,7 @@ public class Memory {
         }
         Log.i("AGCY SPY SQL", "Operation ended. Count of operation: " + dbOperations);
     }
+
 
 
     //endregion

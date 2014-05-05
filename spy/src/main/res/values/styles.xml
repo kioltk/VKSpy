@@ -3,6 +3,51 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light">
         <!-- Customize your theme here. -->
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:actionBarStyle">@style/MyActionBar</item>
+        <item name="android:homeAsUpIndicator">@drawable/ic_launcher</item>
+
+        <item name="actionBarStyle">@style/MyActionBar</item>
+        <item name="homeAsUpIndicator">@drawable/ic_launcher</item>
+    </style>
+    <style name="AppTheme.NoTitle" parent="AppTheme">
+        <item name="android:windowNoTitle">true</item>
+
     </style>
 
+    <style name="Theme.PageIndicatorDefaults" parent="android:Theme">
+            <item name="TabPageIndicatorStyle">@style/Widget.TabPageIndicator</item>
+        </style>
+
+    <style name="Widget">
+        </style>
+
+    <style name="Widget.TabPageIndicator" parent="Widget">
+            <item name="android:gravity">center</item>
+            <item name="android:background">@drawable/tab_indicator_item_normal</item>
+            <item name="android:paddingLeft">22dip</item>
+            <item name="android:paddingRight">22dip</item>
+            <item name="android:paddingTop">12dp</item>
+            <item name="android:paddingBottom">12dp</item>
+            <item name="android:textSize">12sp</item>
+            <item name="android:maxLines">1</item>
+
+            <item name="android:divider">@drawable/tab_indicator_divider</item>
+            <item name="android:fadingEdge">horizontal</item>
+            <item name="android:fadingEdgeLength">8dp</item>
+
+        </style>
+
+    <style name="MyActionBar"
+        parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+        <item name="android:background">@drawable/tab_indicator_item_normal</item>
+        <item name="android:titleTextStyle">@style/MyActionBar.TextStyle</item>
+
+        <item name="background">@drawable/tab_indicator_item_normal</item>
+        <item name="titleTextStyle">@style/MyActionBar.TextStyle</item>
+    </style>
+    <style name="MyActionBar.TextStyle" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
+
+        <item name="android:textColor">@color/blue</item>
+    </style>
 </resources>

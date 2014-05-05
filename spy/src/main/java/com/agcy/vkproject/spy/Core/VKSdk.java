@@ -31,10 +31,6 @@ public class VKSdk {
     }
     public static void initialize(Context context){
         VKSdk.context = context;
-        com.vk.sdk.VKSdk.initialize(sdkListener, "4328079");
-    }
-    public static void initializeBackground(Context context){
-        VKSdk.context = context;
         com.vk.sdk.VKSdk.initialize(sdkBackgroundListener, "4328079",
                 VKAccessToken.tokenFromSharedPreferences(context, VK_SDK_ACCESS_TOKEN_PREF_KEY));
     }
@@ -61,43 +57,17 @@ public class VKSdk {
 
         @Override
         public void onReceiveNewToken(VKAccessToken newToken) {
-        }
-
-        @Override
-        public void onAcceptUserToken(VKAccessToken token) {
-        }
-    };
-    private static final VKSdkListener sdkListener = new VKSdkListener() {
-        @Override
-        public void onCaptchaError(VKError captchaError) {
-            new VKCaptchaDialog(captchaError).show();
-        }
-
-        @Override
-        public void onTokenExpired(VKAccessToken expiredToken) {
-            com.vk.sdk.VKSdk.authorize(sMyScope);
-        }
-
-        @Override
-        public void onAccessDenied(VKError authorizationError) {
-            new AlertDialog.Builder(context)
-                    .setMessage(authorizationError.errorMessage)
-                    .show();
-        }
-
-        @Override
-        public void onReceiveNewToken(VKAccessToken newToken) {
             startMainActivity();
         }
 
         @Override
         public void onAcceptUserToken(VKAccessToken token) {
-
-            startMainActivity();
         }
     };
     private static void startMainActivity() {
-        context.startActivity(new Intent(context, MainActivity.class));
+        Intent startMain = new Intent(context, MainActivity.class);
+        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(startMain);
     }
 
 }

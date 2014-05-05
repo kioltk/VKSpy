@@ -1,5 +1,6 @@
 package com.agcy.vkproject.spy.Models;
 
+import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
 import com.vk.sdk.api.model.VKApiUserFull;
 
@@ -24,4 +25,8 @@ public abstract class Update {
     public abstract String getDate();
 
     public abstract Integer getUnix();
+
+    public String getSmartTime(){
+        return Helper.getSmartTime(getUnix());
+    }
 }

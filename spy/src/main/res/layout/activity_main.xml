@@ -1,97 +1,19 @@
-<RelativeLayout
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="${packageName}.${activityClass}">
-    <RelativeLayout
-        android:layout_above="@+id/displayButtons"
-        android:gravity="center"
-        android:id="@+id/content"
-        android:layout_alignParentTop="true"
+
+    <com.viewpagerindicator.TabPageIndicator
+        android:id="@+id/mainIndicator"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        
-        <TextView
-        android:text="Загрузка"
-        android:id="@+id/status"
-        android:layout_marginTop="20dp"
-        android:gravity="center"
+        android:layout_height="wrap_content"/>
+
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/pager"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-    </RelativeLayout>
-
-    <LinearLayout
-        android:layout_margin="20dp"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_above="@+id/togglers"
-        android:id="@+id/displayButtons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-
-        <com.agcy.vkproject.spy.Views.MainMenuItemView
-            android:text="Список друзей"
-            android:onClick="showFriends"
-            android:layout_weight="3"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:image="@drawable/ic_launcher"/>
-        <com.agcy.vkproject.spy.Views.MainMenuItemView
-            android:text="Показать всё"
-            android:onClick="showAll"
-            android:layout_weight="3"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:image="@drawable/ic_launcher"/>
-        <com.agcy.vkproject.spy.Views.MainMenuItemView
-            android:onClick="settings"
-            android:layout_weight="3"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Настройки"
-            app:image="@drawable/ic_launcher"/>
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/togglers"
-        android:layout_alignParentBottom="true"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <Button
-            android:text="Уведомления включены"
-            android:id="@+id/popupToggler"
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:onClick="popupToggle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <Button
-            android:id="@+id/longpollToggler"
-            android:text="Шпоин включен"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginTop="10dp"
-            android:onClick="longpollToggle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <Button
-            android:onClick="logout"
-            android:background="#00000000"
-            android:text="Выход"
-            android:textColor="#445"
-            android:layout_marginBottom="20dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginTop="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-    </LinearLayout>
-</RelativeLayout>
+        android:layout_height="match_parent"/>
+</LinearLayout>

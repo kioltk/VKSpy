@@ -1,61 +1,56 @@
 package com.agcy.vkproject.spy.Adapters;
 
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.agcy.vkproject.spy.R;
-import com.nostra13.universalimageloader.core.ImageLoader;
+import com.agcy.vkproject.spy.Adapters.CustomItems.Item;
 import com.vk.sdk.api.model.VKApiUserFull;
-import com.vk.sdk.api.model.VKUsersArray;
+
+import java.util.ArrayList;
 
 /**
  * Created by kiolt_000 on 26-Apr-14.
  */
 public class UserListAdapter extends BaseAdapter {
 
-    private final VKUsersArray friends;
     private final Context context;
-
-    public UserListAdapter(VKUsersArray friends,Context context) {
-        this.friends = friends;
+    private final ItemHelper.ObservableUsersArray items;
+    public UserListAdapter(ArrayList<VKApiUserFull> users,Context context) {
         this.context = context;
+        items = new ItemHelper.ObservableUsersArray(users);
+    }
+
+    @Override
+    public boolean isEnabled(int position) {
+        return getItem(position).isEnabled();
     }
 
     @Override
     public int getCount() {
-        return friends.size();
+        return items.size();
     }
 
     @Override
-    public Object getItem(int position) {
-        return friends.get(position);
+    public Item getItem(int position) {
+
+        if(items.size()-15<position){
+            if(items.convertMore(15))
+                notifyDataSetChanged();
+        }
+        return items.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return friends.get(0).id;
+        return 0;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View rootView = inflater.inflate(R.layout.list_item_user, null);
-
-        ImageView photo = (ImageView) rootView.findViewById(R.id.photo);
-        TextView name = (TextView) rootView.findViewById(R.id.name);
-        ImageView status = (ImageView) rootView.findViewById(R.id.status_image);
-        VKApiUserFull user = (VKApiUserFull) getItem(position);
-        name.setText(user.first_name+" "+user.last_name);
-        if(user.online) {
-            status.setVisibility(View.VISIBLE);
-            //if (user.online_mobile) status.setText("В сети с мобильного");
-        }
-        ImageLoader.getInstance().displayImage(user.getBiggestPhoto(),photo);
+        Item item = getItem(position);
+        View rootView = item.getView(context);
         return rootView;
     }
 }

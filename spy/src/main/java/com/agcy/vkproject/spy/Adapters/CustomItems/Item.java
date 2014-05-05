@@ -15,4 +15,7 @@ public abstract class Item {
 
     public abstract Object getContent();
 
+    public boolean isEnabled() {
+        return true;
+    }
 }

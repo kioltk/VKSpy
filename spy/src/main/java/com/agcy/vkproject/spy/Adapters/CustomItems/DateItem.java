@@ -22,14 +22,25 @@ public class DateItem extends Item {
     public View getView(Context context) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        View rootView = inflater.inflate(R.layout.list_item_time, null);
+        View rootView = inflater.inflate(R.layout.list_item_date, null);
 
-        ((TextView)rootView.findViewById(R.id.time)).setText(""+ Helper.getDate(time));
+        ((TextView)rootView.findViewById(R.id.time)).setText( getDate());
         return rootView;
     }
-
+    public String getDate(){
+        return Helper.getSmartDate(time);
+    }
     @Override
-    public String getContent() {
-        return Helper.getDate(time);
+    public Integer getContent() {
+        return time;
+    }
+
+    public View getCenterView(Context context){
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        View rootView = inflater.inflate(R.layout.list_item_date_center, null);
+
+        ((TextView)rootView.findViewById(R.id.time)).setText( getDate());
+        return rootView;
     }
 }

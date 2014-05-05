@@ -13,12 +13,14 @@ public class SpyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        /*
         Thread.currentThread().setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
                 Log.e("AGCY SPY APPLICATION"," HAHA CRASH!");
             }
         });
+        */
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)

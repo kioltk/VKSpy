@@ -4,12 +4,13 @@
         <attr name="android:text"/>
         <attr name="image" format="integer" />
     </declare-styleable>
-        <declare-styleable name="RoundedImageView">
-            <attr name="corner_radius" format="dimension" />
-            <attr name="border_width" format="dimension" />
-            <attr name="border_color" format="color" />
-            <attr name="mutate_background" format="boolean" />
-            <attr name="oval" format="boolean" />
-            <attr name="android:scaleType" />
-        </declare-styleable>
+
+    <declare-styleable name="RoundedImageView">
+        <attr name="corner_radius" format="dimension" />
+        <attr name="border_width" format="dimension" />
+        <attr name="border_color" format="color" />
+        <attr name="mutate_background" format="boolean" />
+        <attr name="is_oval" format="boolean" />
+        <attr name="android:scaleType" />
+    </declare-styleable>
 </resources>

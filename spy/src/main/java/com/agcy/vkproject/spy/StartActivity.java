@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.agcy.vkproject.spy.Core.Helper;
-import com.vk.sdk.VKSdk;
 import com.vk.sdk.VKUIHelper;
 
 public class StartActivity extends Activity {
@@ -24,11 +23,7 @@ public class StartActivity extends Activity {
 
         VKUIHelper.onCreate(this);
         com.agcy.vkproject.spy.Core.VKSdk.initialize(this);
-        if (VKSdk.wakeUpSession()) {
-            startMainActivity();
-            finish();
-            return;
-        }
+
 
 
         com.agcy.vkproject.spy.Core.VKSdk.authorize();
@@ -60,7 +55,6 @@ public class StartActivity extends Activity {
 
 
     public void login(View view) {
-
         com.agcy.vkproject.spy.Core.VKSdk.authorize();
     }
 

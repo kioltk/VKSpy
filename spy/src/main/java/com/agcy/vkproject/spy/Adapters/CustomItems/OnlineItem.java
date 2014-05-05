@@ -3,9 +3,6 @@ package com.agcy.vkproject.spy.Adapters.CustomItems;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.ScaleAnimation;
 import android.widget.TextView;
 
 import com.agcy.vkproject.spy.Models.Online;
@@ -23,36 +20,51 @@ public class OnlineItem extends UpdateItem {
     @Override
     public View getView(Context context) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View rootView = inflater.inflate(R.layout.list_item_online, null);
-
-        View divider = rootView.findViewById(R.id.divider);
+        View rootView = null;
 
 
+        Online item = getContent();
 
-        final TextView since = ((TextView) rootView.findViewById(R.id.since));
-                since.setText("" + getContent().getSinceShort());
-        final TextView till = ((TextView) rootView.findViewById(R.id.till));
-                till.setText("" + getContent().getTillShort());
+        rootView = inflater.inflate(R.layout.list_item_online, null);
 
-        final AlphaAnimation sinceAlphaAnimation = new AlphaAnimation(0,1);
-        sinceAlphaAnimation.setInterpolator(new AccelerateInterpolator());
-        sinceAlphaAnimation.setDuration(700);
+        TextView tillView = ((TextView) rootView.findViewById(R.id.till));
+        TextView sinceView = ((TextView) rootView.findViewById(R.id.since));
+        TextView streakView = ((TextView) rootView.findViewById(R.id.streak));
+        if(item.isStreak()){
 
-
-        final AlphaAnimation tillAlphaAnimation = new AlphaAnimation(0,1);
-        tillAlphaAnimation.setInterpolator(new AccelerateInterpolator());
-        tillAlphaAnimation.setDuration(700);
-        tillAlphaAnimation.setStartOffset(700);
-
-        ScaleAnimation scaleAnimation = new ScaleAnimation(0,1,1,1);
-        scaleAnimation.setDuration(1000);
+            sinceView.setText(item.getSinceTime());
+            tillView.setText(item.getTillTime());
+            streakView.setText(item.getStreak());
 
 
-        divider.startAnimation(scaleAnimation);
+            sinceView.setVisibility(View.VISIBLE);
+            tillView.setVisibility(View.VISIBLE);
+            streakView.setVisibility(View.VISIBLE);
+        }else{
 
-        since.startAnimation(sinceAlphaAnimation);
-        till.startAnimation(tillAlphaAnimation);
+            TextView timeView = null;
+            if(item.getTill()>0) {
+                timeView = tillView;
+            }else{
+                timeView = sinceView;
+            }
+
+            timeView.setVisibility(View.VISIBLE);
+            timeView.setText(item.getTime());
+            if(item.isOnline()){
+                streakView.setVisibility(View.VISIBLE);
+            }
+
+        }
+
+
+
         return rootView;
+    }
+
+    @Override
+    public View getViewWithOwner(Context context) {
+        return null;
     }
 
     @Override

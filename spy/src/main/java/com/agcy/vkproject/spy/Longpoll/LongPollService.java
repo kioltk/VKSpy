@@ -118,7 +118,7 @@ public class LongPollService extends Service {
 
         Helper.initialize(getApplicationContext());
 
-        com.agcy.vkproject.spy.Core.VKSdk.initializeBackground(getApplicationContext());
+        com.agcy.vkproject.spy.Core.VKSdk.initialize(getApplicationContext());
 
         //refreshSettings();
         restoreSettings();
@@ -160,51 +160,58 @@ public class LongPollService extends Service {
 
 
         Log.w("AGCY SPY LONGPOLLSERVICE","refreshing..");
-        VKRequest request = new VKRequest("messages.getLongPollServer");
-        request.executeWithListener(new VKRequest.VKRequestListener() {
-            @Override
-            public void onError(VKError error) {
+        try{
+            VKRequest request = new VKRequest("messages.getLongPollServer");
+            request.executeWithListener(new VKRequest.VKRequestListener() {
+                @Override
+                public void onError(VKError error) {
 
 
-                if (error.httpError instanceof SocketException || error.httpError instanceof UnknownHostException) {
-                    new NetworkStateReceiver.NetworkStateChangeListener(LONGPOLL_REFRESHER_ID) {
-                        @Override
-                        public void onConnected() {
-                            refreshSettings();
-                        }
+                    if (error.httpError instanceof SocketException || error.httpError instanceof UnknownHostException) {
+                        new NetworkStateReceiver.NetworkStateChangeListener(LONGPOLL_REFRESHER_ID) {
+                            @Override
+                            public void onConnected() {
+                                refreshSettings();
+                            }
 
-                        @Override
-                        public void onLost() {
+                            @Override
+                            public void onLost() {
 
-                        }
-                    };
+                            }
+                        };
+                    }
+                    Log.w("AGCY SPY LONGPOLLSERVICE", "refreshing error" + error);
                 }
-                Log.w("AGCY SPY LONGPOLLSERVICE","refreshing error" + error);
-            }
 
-            @Override
-            public void onComplete(VKResponse response) {
+                @Override
+                public void onComplete(VKResponse response) {
 
-                try {
+                    try {
 
-                    JSONObject responseJson = response.json.getJSONObject("response");
-                    ts = responseJson.getString("ts");
-                    server = responseJson.getString("server");
-                    key = responseJson.getString("key");
+                        JSONObject responseJson = response.json.getJSONObject("response");
+                        ts = responseJson.getString("ts");
+                        server = responseJson.getString("server");
+                        key = responseJson.getString("key");
 
-                    Log.w("AGCY SPY LONGPOLLSERVICE","refreshing complete");
+                        Log.w("AGCY SPY LONGPOLLSERVICE", "refreshing complete");
 
-                    saveSettings();
+                        saveSettings();
 
-                    startLongpoll();
+                        startLongpoll();
 
-                } catch (Exception exp) {
-                    Log.e("AGCY SPY LONGPOLL", "refreshing error" + exp.getMessage());
+                    } catch (Exception exp) {
+                        Log.e("AGCY SPY LONGPOLL", "refreshing error" + exp.getMessage());
 
+                    }
                 }
-            }
-        });
+            });
+        }catch (Exception exp){
 
+            Log.e("AGCY SPY LONGPOLLSERVICE","refreshing error reinit ");
+            Helper.initialize(getApplicationContext());
+            refreshSettings();
+            return;
+        }
         Log.w("AGCY SPY LONGPOLLSERVICE","refreshing executed ");
     }
     private void restoreSettings(){

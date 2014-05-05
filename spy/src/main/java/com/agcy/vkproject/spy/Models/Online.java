@@ -25,6 +25,7 @@ public class Online extends Update {
         return since;
     }
 
+
     public String getTillShort() {
 
         if(till==0){
@@ -40,7 +41,7 @@ public class Online extends Update {
 
     @Override
     public String getTime() {
-        return getTillShort();
+        return Helper.getTime(getUnix());
     }
 
     public String getDate(){
@@ -53,5 +54,31 @@ public class Online extends Update {
 
     public void setTill(int till) {
         this.till = till;
+    }
+
+    public boolean isOnline() {
+        if(till==-1)
+            return getOwner().online;
+        return false;
+    }
+
+    public int getSince() {
+        return since;
+    }
+
+    public boolean isStreak() {
+        return till > 0 && since > 0;
+    }
+
+    public String getSinceTime() {
+        return Helper.getTime(getSince());
+    }
+
+    public String getTillTime() {
+        return Helper.getTime(getTill());
+    }
+
+    public String getStreak() {
+        return Helper.getStreak(till, since);
     }
 }
