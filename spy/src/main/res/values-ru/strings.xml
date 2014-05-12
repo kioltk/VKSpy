@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">VK Spy</string>
+    <string name="main">Главная</string>
+    <string name="login">Вход</string>
+    <string name="friends">Друзья</string>
+    <string name="settings">Настройки</string>
+    <string name="welcome">Привет</string>
+    <string name="user">Пользователь</string>
+    <string name="onlines">Онлайны</string>
+    <string name="typings">Тайпинги</string>
+    <string name="logout">Выход</string>
+    <string name="desc"><![CDATA[<b>VK Spy</b> незаметно отслеживает активность Ваших друзей и других пользователей ВКонтакте.]]></string>
+    <string name="logout_message">Так мы ни за кем не последим :(</string>
+    <string name="logout_title">Действительно выйти?</string>
+    <string name="logout_accept">Выход!</string>
+    <string name="logout_cancel">Отмена</string>
+    <string name="nothinghere">Событий пока нет</string>
+    <string name="signin">Войти</string>
+    <string name="start_text"> </string>
+
+</resources>

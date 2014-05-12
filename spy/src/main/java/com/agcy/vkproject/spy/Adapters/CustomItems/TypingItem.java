@@ -25,7 +25,7 @@ public class TypingItem extends UpdateItem {
 
         View rootView = inflater.inflate(R.layout.list_item_typing, null);
 
-        ((TextView)rootView.findViewById(R.id.time)).setText(""+ getContent().getTime());
+        ((TextView)rootView.findViewById(R.id.time)).setText(""+ getContent().getSmartTime());
         return rootView;
     }
 

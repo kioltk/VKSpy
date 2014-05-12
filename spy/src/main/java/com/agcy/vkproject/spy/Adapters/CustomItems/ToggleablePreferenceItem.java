@@ -40,6 +40,7 @@ public abstract class ToggleablePreferenceItem extends PreferenceItem {
         switcher.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                ToggleablePreferenceItem.this.isChecked = isChecked;
                 onToggle(isChecked);
             }
         });
@@ -47,7 +48,8 @@ public abstract class ToggleablePreferenceItem extends PreferenceItem {
         rootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ToggleablePreferenceItem.this.onClick();
+                isChecked = !isChecked;
+                ToggleablePreferenceItem.this.onToggle(isChecked);
             }
         });
 

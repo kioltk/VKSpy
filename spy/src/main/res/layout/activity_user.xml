@@ -15,17 +15,18 @@
             <com.roundedimage.RoundedImageView
                 app:is_oval="true"
                 android:id="@+id/photo"
-                android:src="@drawable/ic_launcher"
+                android:src="@drawable/user_placeholder"
                 android:layout_margin="15dp"
-                android:layout_width="100dp"
-                android:layout_height="100dp" />
+                android:layout_width="125dp"
+                android:layout_height="125dp" />
             <TextView
-                android:visibility="gone"
                 android:id="@+id/status_text"
                 android:layout_marginBottom="20dp"
+                android:textSize="16sp"
+                android:textColor="#808080"
                 android:gravity="center"
-                android:text="online"
-                android:layout_width="match_parent"
+                android:text="@string/offline"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </LinearLayout>
 

@@ -42,6 +42,7 @@ public class SpyApplication extends Application {
     public void onTerminate() {
         super.onTerminate();
         Log.i("AGCY SPY APPLICATION","Terminate");
+
     }
 
 }

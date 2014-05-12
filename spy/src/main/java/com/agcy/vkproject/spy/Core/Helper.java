@@ -28,6 +28,7 @@ import com.vk.sdk.api.VKResponse;
 import com.vk.sdk.api.model.VKApiUserFull;
 import com.vk.sdk.api.model.VKList;
 
+import java.io.File;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -92,8 +93,37 @@ public class Helper {
         Memory.DESTROY();
         Notificator.DESTROY();
         VKSdk.DESTROY();
+        clearApplicationData();
+
         context = null;
 
+    }
+    public static void clearApplicationData() {
+        File cache = context.getCacheDir();
+        File appDir = new File(cache.getParent());
+        if (appDir.exists()) {
+            String[] children = appDir.list();
+            for (String s : children) {
+                if (!s.equals("lib")) {
+                    deleteDir(new File(appDir, s));
+                    Log.i("TAG", "**************** File /data/data/APP_PACKAGE/" + s + " DELETED *******************");
+                }
+            }
+        }
+    }
+
+    public static boolean deleteDir(File dir) {
+        if (dir != null && dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++) {
+                boolean success = deleteDir(new File(dir, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+
+        return dir.delete();
     }
 
 
@@ -131,7 +161,11 @@ public class Helper {
 
     public static void saveOnlines(ArrayList<LongPollService.Update> updates) {
         for (LongPollService.Update update : updates) {
-            Memory.setStatus(update.getUser(), (update.getType() == LongPollService.Update.TYPE_ONLINE), ((Integer) update.getExtra()) > 0);
+            Memory.setStatus(
+                    update.getUser(),
+                    (update.getType() == LongPollService.Update.TYPE_ONLINE),
+                    ((Integer) update.getExtra()) > 0
+            );
         }
     }
 
@@ -226,6 +260,10 @@ public class Helper {
                 date);
     }
     public static String getSmartDate(int time) {
+
+        if(time==0)
+            return "Now";
+
         if(getDate((int) unixNow()).equals(getDate(time)))
             return "Today";
         if(getDate((int) unixNow()-24 * 3600).equals(getDate(time)))
@@ -289,6 +327,10 @@ public class Helper {
         return convertedStreak;
     }
 
+    public static String getLastSeen(int userid) {
+        return "offline";
+        //todo: lastseen
+    }
 
 
     static class TypingTimer extends Thread {
@@ -424,24 +466,38 @@ public class Helper {
     }
 
 
-    private static ArrayList<OnInitializationEndListener> initializationEndListeners = new ArrayList<OnInitializationEndListener>();
-    public static void addOnInitializationEndListener(OnInitializationEndListener listener){
+    private static ArrayList<InitializationListener> initializationEndListeners = new ArrayList<InitializationListener>();
+    public static void addInitializationListener(InitializationListener listener){
         initializationEndListeners.add(listener);
     }
 
-    public static void initializationEnded() {
-        initialized = true;
-        for(OnInitializationEndListener listener : initializationEndListeners){
-            listener.onEnd();
+    private static boolean loadingEnded = false;
+    private static boolean downloadingEnded = false;
+
+    public static void loadingEnded(){
+
+        loadingEnded = true;
+        for(InitializationListener listener : initializationEndListeners){
+            listener.onLoadingEnded();
         }
     }
-    private static boolean initialized = false;
 
-    public static boolean isInitialized() {
-        return initialized;
+    public static void downloadingEnded() {
+        downloadingEnded = true;
+        for(InitializationListener listener : initializationEndListeners){
+            listener.onDownloadingEnded();
+        }
+
     }
-    public static abstract class OnInitializationEndListener{
-        public abstract void onEnd();
+    public static boolean isLoaded(){
+        return loadingEnded;
+    }
+    public static boolean isInitialized() {
+        return downloadingEnded;
+    }
+    public static abstract class InitializationListener {
+        public abstract void onLoadingEnded();
+        public abstract void onDownloadingEnded();
     }
 
 }

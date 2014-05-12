@@ -1,8 +1,15 @@
 package com.agcy.vkproject.spy.Core;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.support.v4.app.NotificationCompat;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,8 +19,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.agcy.vkproject.spy.Longpoll.LongPollService;
+import com.agcy.vkproject.spy.MainActivity;
 import com.agcy.vkproject.spy.R;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.assist.ImageLoadingListener;
 
 import java.util.ArrayList;
 
@@ -31,15 +41,33 @@ public class Notificator {
     public static void announce(ArrayList<LongPollService.Update> updates) {
         if (updates.size() == 0)
             return;
-        ArrayList<Event> events = new ArrayList<Event>();
+        ArrayList<Event> popupEvents = new ArrayList<Event>();
+        ArrayList<Event> notifyEvents = new ArrayList<Event>();
         for (LongPollService.Update update : updates) {
-            if(isUpdateTracked(update))
-                events.add(new Event(update.getHeader(), update.getMessage(), update.getImageUrl()));
+            if(updateShouldPopup(update))
+                popupEvents.add(new Event(update));
+            if(updateShouldNotify(update)){
+                notifyEvents.add(new Event(update));
+            }
         }
-        showPopup(events);
-
+        showPopup(popupEvents);
+        showNotification(notifyEvents);
     }
-    public static Boolean isUpdateTracked(LongPollService.Update update){
+
+
+
+    public static Boolean updateShouldPopup(LongPollService.Update update){
+        switch (update.getType()){
+            case LongPollService.Update.TYPE_OFFLINE:
+            case LongPollService.Update.TYPE_ONLINE:
+                return Memory.isTracked(update.getUser());
+            case LongPollService.Update.TYPE_CHAT_TYPING:
+            case LongPollService.Update.TYPE_USER_TYPING:
+            default:
+                return true;
+        }
+    }
+    public static Boolean updateShouldNotify(LongPollService.Update update){
         switch (update.getType()){
             case LongPollService.Update.TYPE_OFFLINE:
             case LongPollService.Update.TYPE_ONLINE:
@@ -75,21 +103,81 @@ public class Notificator {
         toast.setDuration(Toast.LENGTH_SHORT);
         toast.show();
     }
+    private static void showNotification(ArrayList<Event> notifyEvents) {
 
+        for(Event event: notifyEvents) {
+
+            final NotificationCompat.Builder mBuilder =
+                    new NotificationCompat.Builder(context)
+                            .setSmallIcon(R.drawable.ic_stat_spy)
+                            .setContentTitle(event.headerText)
+                            .setContentText(event.messageText)
+                            .setDefaults( Notification.DEFAULT_LIGHTS | Notification.DEFAULT_VIBRATE)
+                            .setContentInfo("VK Spy");
+            SharedPreferences prefs = context.getSharedPreferences("notification", Context.MODE_MULTI_PROCESS);
+
+            String ringtoneUri = prefs.getString("notifications_ringtone", "");
+            Uri parsedRingtonUri = Uri.parse(ringtoneUri);
+            mBuilder.setSound(parsedRingtonUri);
+
+
+            Intent resultIntent = new Intent(context, MainActivity.class);
+            PendingIntent resultPendingIntent =
+                    PendingIntent.getActivity(
+                            context,
+                            0,
+                            resultIntent,
+                            PendingIntent.FLAG_UPDATE_CURRENT
+                    );
+            mBuilder.setContentIntent(resultPendingIntent);
+            final NotificationManager mNotificationManager =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            // mId allows you to update the notification later on.
+            final int mId = event.id;
+
+            ImageLoader.getInstance().loadImage(event.imageUrl,new ImageLoadingListener() {
+                @Override
+                public void onLoadingStarted(String s, View view) {
+
+                }
+
+                @Override
+                public void onLoadingFailed(String s, View view, FailReason failReason) {
+
+                }
+
+                @Override
+                public void onLoadingComplete(String s, View view, Bitmap bitmap) {
+
+                    mBuilder.setLargeIcon(bitmap);
+                    mNotificationManager.notify(mId, mBuilder.build());
+
+                }
+
+                @Override
+                public void onLoadingCancelled(String s, View view) {
+
+                }
+            });
+
+        }
+    }
     public static void DESTROY() {
         context = null;
     }
 
     public static class Event {
 
+        private  int id;
         public String headerText;
         public String messageText;
         public String imageUrl;
 
-        public Event(String headerText, String messageText, String imageUrl) {
+        public Event(String headerText, String messageText, String imageUrl,int id) {
             this.headerText = headerText;
             this.messageText = messageText;
             this.imageUrl = imageUrl;
+            this.id = id;
         }
 
         public Event(LongPollService.Update update) {
@@ -97,6 +185,7 @@ public class Notificator {
             this.headerText = update.getHeader();
             this.messageText = update.getMessage();
             this.imageUrl = update.getImageUrl();
+            this.id = update.getUser().id;
         }
 
 

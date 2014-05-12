@@ -9,13 +9,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <ImageView
-            android:src="@drawable/happy_santa"
+            android:src="@drawable/santa"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="80dp" />
         <View
-            android:background="@drawable/happy_santa_ground"
+            android:background="@drawable/ground"
             android:layout_width="match_parent"
-            android:layout_height="2dp"/>
+            android:layout_height="5dp"/>
         <LinearLayout
             android:paddingBottom="14dp"
             android:paddingTop="14dp"
@@ -27,13 +27,16 @@
             android:layout_height="wrap_content">
             <TextView
                 android:gravity="center"
-                android:textSize="18sp"
+                android:textSize="17sp"
+                android:text="@string/desc"
+                android:lineSpacingExtra="2dp"
                 android:id="@+id/happySantaText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
             <TextView
                 android:gravity="center"
-                android:textSize="16sp"
+                android:textSize="17sp"
+                android:layout_marginTop="2dp"
                 android:id="@+id/happySantaLink"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />

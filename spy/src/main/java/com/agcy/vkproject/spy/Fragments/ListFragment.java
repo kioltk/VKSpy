@@ -3,7 +3,6 @@ package com.agcy.vkproject.spy.Fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,58 +21,67 @@ public abstract class ListFragment extends Fragment {
      * The fragment argument representing the section number for this
      * fragment.
      */
-    protected final Context context;
-    protected final Helper.OnInitializationEndListener onInitilizationEndListener  = new Helper.OnInitializationEndListener() {
+    protected Context context;
+    protected final Helper.InitializationListener initializationListener = new Helper.InitializationListener() {
         @Override
-        public void onEnd() {
+        public void onLoadingEnded() {
+            startLoading();
+        }
+
+        @Override
+        public void onDownloadingEnded() {
             startLoading();
         }
     };
     protected BaseAdapter adapter;
     protected Thread task;
-    protected boolean loading = false;
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-    public ListFragment(Context context) {
-        this.context = context;
-        if(Helper.isInitialized()){
+        if(Helper.isLoaded()){
             startLoading();
         }else{
-            Helper.addOnInitializationEndListener(onInitilizationEndListener);
+            Helper.addInitializationListener(initializationListener);
         }
+        context = getActivity();
+        setRetainInstance(true);
     }
+
     View rootView;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         rootView =  inflater.inflate(R.layout.fragment_list, container, false);
-        if(!loading)
-            fillListView();
+        fillListView();
         return rootView;
     }
     public void startLoading(){
         if(task==null){
-            loading = true;
-            final Handler handler = new Handler(new Handler.Callback() {
-                @Override
-                public boolean handleMessage(Message msg) {
 
-                    loading = false;
-                    fillListView();
-                    return true;
-                }
-            });
+            final Handler handler = new Handler();
+
             task = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     adapter = adapter();
-                    handler.sendMessage(new Message());
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            onLoad();
+                        }
+                    });
                 }
             });
             task.start();
         }
     }
+    protected void onLoad(){
 
+        fillListView();
+        task = null;
+    }
     protected void fillListView(){
 
 
@@ -82,6 +90,7 @@ public abstract class ListFragment extends Fragment {
             if (adapter.isEmpty()) {
                 (rootView.findViewById(R.id.status)).setVisibility(View.VISIBLE);
             } else {
+                (rootView.findViewById(R.id.status)).setVisibility(View.GONE);
                 ((ListView) rootView.findViewById(R.id.list)).setAdapter(adapter);
             }
         }

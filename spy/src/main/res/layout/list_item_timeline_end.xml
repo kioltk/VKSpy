@@ -9,8 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="54dp">
         <View
-            android:background="@color/blue"
-            android:layout_width="1dp"
+            android:background="@color/blue_timeline"
+            android:layout_width="2dp"
             android:layout_height="21dp"/>
         <View
             android:id="@+id/circle"

@@ -12,14 +12,14 @@
     <TextView
         android:textStyle="bold"
         android:padding="2dp"
-        android:textColor="@color/blue"
+        android:textColor="@color/blue_header"
         android:id="@+id/text"
         android:text="IMPORTANT"
         android:textAllCaps="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <View
-        android:background="@color/blue"
+        android:background="@color/blue_header"
         android:layout_width="match_parent"
         android:layout_height="2dp"/>
 </LinearLayout>

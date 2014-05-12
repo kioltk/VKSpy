@@ -27,28 +27,23 @@ import java.util.ArrayList;
  */
 public class MainFragment extends android.support.v4.app.Fragment {
 
-    private final Context context;
-
-    public MainFragment(Context context){
-        this.context = context;
-    }
-
+    private Context context;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
+        context = getActivity();
         View rootView = inflater.inflate(R.layout.fragment_main,null);
 
         SharedPreferences popupPreferences = context.getSharedPreferences("popup", Context.MODE_MULTI_PROCESS);
-        boolean popupStatus = popupPreferences.getBoolean("status", false);
+        boolean popupStatus = popupPreferences.getBoolean("status", true);
 
         SharedPreferences longpollPreferences = context.getSharedPreferences("longpoll", Context.MODE_MULTI_PROCESS);
-        boolean longpollStatus = longpollPreferences.getBoolean("status", false);
+        boolean longpollStatus = longpollPreferences.getBoolean("status", true);
 
 
         TextView happySantaText = (TextView) rootView.findViewById(R.id.happySantaText);
-        happySantaText.setText(Html.fromHtml("<b>VK Spy</b> invisibly monitors your friends and VK users activity."));
+        happySantaText.setText(Html.fromHtml(context.getString(R.string.desc)));
         TextView happySantaLink = (TextView) rootView.findViewById(R.id.happySantaLink);
-        happySantaLink.setText(Html.fromHtml("<a href=\"http://vk.com/happysanta\">http://vk.com/<b>happysanta</b>"));
+        happySantaLink.setText(Html.fromHtml("<a style=\"color:#007edf\" href=\"http://vk.com/happysanta\">http://vk.com/<b>happysanta</b>"));
         happySantaLink.setMovementMethod(LinkMovementMethod.getInstance());
 
 

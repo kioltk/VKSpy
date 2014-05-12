@@ -10,9 +10,11 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.agcy.vkproject.spy.Adapters.CustomItems.UserItem;
+import com.agcy.vkproject.spy.Adapters.UpdatesAdapter;
 import com.agcy.vkproject.spy.Adapters.UserListAdapter;
 import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
+import com.agcy.vkproject.spy.Models.Update;
 import com.agcy.vkproject.spy.R;
 import com.vk.sdk.api.model.VKApiUser;
 import com.vk.sdk.api.model.VKApiUserFull;
@@ -27,19 +29,40 @@ public class UsersListFragment extends Fragment {
     private ArrayList<VKApiUserFull> users;
     private final Context context;
     private OnSelectedListener selectedListener;
-    private Helper.OnInitializationEndListener onInitializationEndListener = new Helper.OnInitializationEndListener() {
+    private Helper.InitializationListener initializationListener = new Helper.InitializationListener() {
         @Override
-        public void onEnd() {
+        public void onLoadingEnded() {
+
+            users = Memory.getUsers();
+            create();
+        }
+
+        @Override
+        public void onDownloadingEnded() {
             users = Memory.getUsers();
             create();
         }
     };
+    private UserListAdapter adapter;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+        Memory.addOnlineListener(new UpdatesAdapter.NewItemListener() {
+            @Override
+            public void newItem(Update Item) {
+                if(adapter!=null)
+                    adapter.notifyDataSetChanged();
+            }
+        });
+    }
 
     public UsersListFragment(Context context, OnSelectedListener userSelectedListener){
         this.context = context;
         if(Memory.users.isEmpty()) {
             users = new ArrayList<VKApiUserFull>();
-            Helper.addOnInitializationEndListener(onInitializationEndListener);
+            Helper.addInitializationListener(initializationListener);
         }
         else{
             users = Memory.getUsers();
@@ -57,8 +80,10 @@ public class UsersListFragment extends Fragment {
 
     private void create() {
         if(!users.isEmpty()) {
+
             ListView listView = (ListView) rootView.findViewById(R.id.list);
-            listView.setAdapter(new UserListAdapter(users, context));
+            adapter = new UserListAdapter(users, context);
+            listView.setAdapter(adapter);
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

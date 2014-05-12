@@ -13,7 +13,6 @@
         android:orientation="vertical">
 
         <TextView
-            android:textStyle="italic"
             android:gravity="center"
             android:textColor="@color/grey_dark"
             android:text="20:20"

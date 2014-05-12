@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:id="@+id/user"
+        android:background="#f0f0f0"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="175dp">
+        <com.roundedimage.RoundedImageView
+            app:is_oval="true"
+            android:id="@+id/photo"
+            android:src="@drawable/user_placeholder"
+            android:layout_margin="15dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp" />
+        <TextView
+            android:id="@+id/name"
+            android:layout_marginBottom="20dp"
+            android:textSize="16sp"
+            android:textColor="#808080"
+
+            android:gravity="center"
+            android:text="happysanta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <TextView
+        android:gravity="center"
+        android:text="More settings coming soon"
+        android:layout_below="@+id/user"
+        android:layout_above="@+id/logout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <ListView
+        android:id="@android:id/list"
+        android:layout_below="@+id/user"
+        android:layout_above="@+id/logout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <Button
+        android:id="@+id/logout"
+        android:onClick="logout"
+        android:layout_alignParentBottom="true"
+        android:textColor="@color/red"
+        android:text="@string/logout"
+        android:background="#00ffffff"
+        android:layout_width="match_parent"
+        android:layout_height="75dp" />
+</RelativeLayout>

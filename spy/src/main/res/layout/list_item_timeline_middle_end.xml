@@ -5,18 +5,21 @@
 
     <View
         android:layout_centerInParent="true"
-        android:background="@color/blue"
-        android:layout_width="1dp"
+        android:background="@color/blue_timeline"
+        android:layout_width="2dp"
+        android:minHeight="9dp"
         android:layout_height="match_parent" />
 
     <LinearLayout
+
         android:orientation="vertical"
         android:layout_centerInParent="true"
-        android:gravity="bottom"
+        android:gravity="bottom|center_horizontal"
         android:layout_width="12dp"
         android:layout_height="match_parent">
 
         <View
+            android:id="@+id/circle"
             android:background="@drawable/circle"
             android:layout_width="12dp"
             android:layout_height="12dp" />

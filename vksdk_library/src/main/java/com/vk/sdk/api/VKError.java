@@ -57,7 +57,7 @@ public class VKError extends VKObject {
     /**
      * May contains such errors:<br/>
      * <b>HTTP status code</b> if HTTP error occured;<br/>
-     * <b>VK_API_ERROR</b> if API error occured;<br/>
+     * <b>VK_API_ERROR</b> if API error occurred;<br/>
      * <b>VK_API_CANCELED</b> if request was canceled;<br/>
      * <b>VK_API_REQUEST_NOT_PREPARED</b> if error occured while preparing request;
      */
@@ -173,7 +173,6 @@ public class VKError extends VKObject {
 				if (errorMessage != null)
 					errorString.append(String.format("%s; ", errorMessage));
 				break;
-
 			default:
 				errorString.append(String.format("code: %d; ", errorCode));
 				if (errorReason != null)
@@ -181,7 +180,6 @@ public class VKError extends VKObject {
 				if (errorMessage != null)
 					errorString.append(String.format("message: %s; ", errorMessage));
 				break;
-
 		}
 		errorString.append(")");
 		return errorString.toString();

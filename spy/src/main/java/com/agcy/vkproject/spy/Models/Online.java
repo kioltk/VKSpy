@@ -3,27 +3,33 @@ package com.agcy.vkproject.spy.Models;
 import com.agcy.vkproject.spy.Core.Helper;
 
 public class Online extends Update {
+
     private int since;
     private int till;
 
+    protected String sinceConvertedTime;
+    protected String tillConvertedTime;
+
+    private final String streakConverted;
     public Online(int userid, int since, int till) {
-        super(userid);
+        super(userid, till > 0 ? till: since);
 
         this.since = since;
         this.till = till;
+
+        sinceConvertedTime =  Helper.getTime(since);
+        tillConvertedTime = Helper.getTime(till);
+        streakConverted = Helper.getStreak(till, since);
+
     }
+    /**
     public String getSinceShort(){
         if(since==0){
             return "undefined";
         }
        return Helper.getTimeShort(since);
     }
-    @Override
-    public Integer getUnix() {
-        if(till>0)
-            return till;
-        return since;
-    }
+
 
 
     public String getTillShort() {
@@ -37,16 +43,8 @@ public class Online extends Update {
         }
         return Helper.getTimeShort(till);
     }
+    */
 
-
-    @Override
-    public String getTime() {
-        return Helper.getTime(getUnix());
-    }
-
-    public String getDate(){
-        return Helper.getDate(getUnix());
-    }
 
     public int getTill() {
         return till;
@@ -71,14 +69,15 @@ public class Online extends Update {
     }
 
     public String getSinceTime() {
-        return Helper.getTime(getSince());
+        return sinceConvertedTime;
     }
 
     public String getTillTime() {
-        return Helper.getTime(getTill());
+        return tillConvertedTime;
     }
 
     public String getStreak() {
-        return Helper.getStreak(till, since);
+        return streakConverted;
     }
+
 }

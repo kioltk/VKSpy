@@ -3,6 +3,7 @@ package com.agcy.vkproject.spy.Core;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Process;
 
 import com.agcy.vkproject.spy.MainActivity;
 import com.vk.sdk.VKAccessToken;
@@ -50,11 +51,20 @@ public class VKSdk {
 
         @Override
         public void onAccessDenied(VKError authorizationError) {
-            new AlertDialog.Builder(context)
-                    .setMessage(authorizationError.errorMessage)
-                    .show();
-        }
 
+            try {
+                new AlertDialog.Builder(context)
+                        .setMessage(authorizationError.errorMessage)
+                        .show();
+                if (authorizationError.errorReason.equals("user_denied")){
+                    Helper.DESTROYALL();
+
+                }
+            }catch (Exception exp){
+
+                android.os.Process.killProcess(Process.myPid());
+            }
+        }
         @Override
         public void onReceiveNewToken(VKAccessToken newToken) {
             startMainActivity();

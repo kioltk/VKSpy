@@ -21,16 +21,17 @@
         <com.roundedimage.RoundedImageView
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/photo"
-            android:src="@drawable/ic_launcher"
+            android:src="@drawable/user_placeholder"
             app:corner_radius="30dip"
             app:border_width="3dip"
-            app:border_color="#ffffffff"
+            app:border_color="@drawable/user_list_selector"
             app:is_oval="true"
             android:layout_width="50dp"
             android:layout_height="50dp"  />
         <TextView
             android:text="HAPPY SANTA!!1"
             android:layout_marginLeft="10dp"
+            android:textSize="16sp"
             android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />

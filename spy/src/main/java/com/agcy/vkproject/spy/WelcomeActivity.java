@@ -11,12 +11,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.OvershootInterpolator;
-import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 
 import com.agcy.vkproject.spy.Core.Helper;
@@ -105,7 +99,7 @@ public class WelcomeActivity extends ActionBarActivity {
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 3;
+            return 1;
         }
 
         @Override
@@ -125,110 +119,29 @@ public class WelcomeActivity extends ActionBarActivity {
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
 
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setRetainInstance(true);
+        }
+
         /**
          * Returns a new instance of this fragment for the given section
          * number.
          */
 
-        public PlaceholderFragment() {
-        }
         View rootView;
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             rootView = inflater.inflate(R.layout.fragment_welcome, container, false);
-            showSanta();
-            return rootView;
-        }
-
-        private void hideSanta() {
-            Animation translate = new TranslateAnimation(0,0,0,400);
-            translate.setInterpolator(new AccelerateInterpolator(1.6f));
-            AlphaAnimation alphaAnimation = new AlphaAnimation(1,0);
-            alphaAnimation.setInterpolator(new AccelerateInterpolator());
-
-            AnimationSet set = new AnimationSet(false);
-            set.addAnimation(alphaAnimation);
-            set.addAnimation(translate);
-            set.setDuration(1000);
-            set.setStartOffset(100);
-
-            final View santa =  rootView.findViewById(R.id.image);
-
-            set.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    santa.setVisibility(View.GONE);
-                    showStart();
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-
-                }
-            });
-
-            santa.startAnimation(set);
-        }
-
-
-        private void showSanta() {
-            Animation translate = new TranslateAnimation(0,0,-400,0);
-            translate.setInterpolator(new OvershootInterpolator(1.6f));
-            AlphaAnimation alphaAnimation = new AlphaAnimation(0,1);
-            alphaAnimation.setInterpolator(new AccelerateInterpolator());
-
-            AnimationSet set = new AnimationSet(false);
-            set.addAnimation(alphaAnimation);
-            set.addAnimation(translate);
-            set.setDuration(1000);
-            set.setStartOffset(300);
-            final View santa =  rootView.findViewById(R.id.image);
-
-            set.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-                    santa.setVisibility(View.VISIBLE);
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    hideSanta();
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-
-                }
-            });
-
-            santa.startAnimation(set);
-        }
-        private void showStart() {
-
-            AlphaAnimation show = new AlphaAnimation(0,1);
-            show.setInterpolator(new AccelerateInterpolator());
-            show.setDuration(1000);
-
-            View text = rootView.findViewById(R.id.text);
-            Button start = (Button) rootView.findViewById(R.id.start);
-            start.setOnClickListener(new View.OnClickListener() {
+            ((Button)rootView.findViewById(R.id.start)).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    SharedPreferences preferences = getSharedPreferences("start", MODE_MULTI_PROCESS);
-                    preferences.edit().putBoolean("firstStart",false).commit();
-
                     login();
                 }
             });
-            text.setVisibility(View.VISIBLE);
-            start.setVisibility(View.VISIBLE);
-            start.startAnimation(show);
-            text.startAnimation(show);
+            return rootView;
         }
     }
 

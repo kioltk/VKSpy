@@ -274,9 +274,9 @@ public class TabPageIndicator extends HorizontalScrollView implements PageIndica
                 ImageView icon = new ImageView(context);
                 icon.setImageDrawable(context.getResources().getDrawable((Integer) content));
 
-                float width = Helper.convertToDp(25);
+                float height = Helper.convertToDp(22);
 
-                icon.setLayoutParams(new ViewGroup.LayoutParams((int) width, WRAP_CONTENT));
+                icon.setLayoutParams(new ViewGroup.LayoutParams(WRAP_CONTENT, (int) height));
                 addView(icon);
 
             }else {

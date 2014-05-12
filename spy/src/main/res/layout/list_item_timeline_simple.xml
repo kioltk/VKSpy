@@ -5,7 +5,7 @@
 
     <View
         android:layout_centerInParent="true"
-        android:background="@color/blue"
-        android:layout_width="1dp"
+        android:background="@color/blue_timeline"
+        android:layout_width="2dp"
         android:layout_height="match_parent" />
 </RelativeLayout>

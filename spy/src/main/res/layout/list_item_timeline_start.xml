@@ -14,8 +14,8 @@
         android:layout_width="12dp"
         android:layout_height="12dp" />
     <View
-        android:background="@color/blue"
-        android:layout_width="1dp"
+        android:background="@color/blue_timeline"
+        android:layout_width="2dp"
         android:layout_height="21dp"/>
 
 

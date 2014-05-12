@@ -8,14 +8,27 @@ import android.view.View;
  */
 public abstract class Item {
 
+    private boolean isNew = false;
 
-
+    private boolean isDeleted = false;
     public abstract View getView(Context context);
 
-
+    public void setDeleted(){
+        isDeleted = true;
+    }
+    public boolean isNew(){
+        return isNew;
+    }
+    public void setNew(Boolean value){
+        isNew = value;
+    }
     public abstract Object getContent();
 
     public boolean isEnabled() {
         return true;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
     }
 }

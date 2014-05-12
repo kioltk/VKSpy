@@ -8,7 +8,7 @@
         android:gravity="center"
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="100dp">
+        android:layout_height="90dp">
         <LinearLayout
 
             android:layout_width="120dp"
@@ -18,22 +18,25 @@
 
             <TextView
                 android:visibility="gone"
-                android:textStyle="italic"
                 android:gravity="center"
+                android:textSize="14sp"
                 android:textColor="@color/red"
                 android:text="20:20"
+                android:drawableRight="@drawable/ic_arrow_red"
                 android:id="@+id/till"
                 android:layout_width="wrap_content"
-                android:layout_height="25dp"/>
+                android:layout_height="29dp"/>
             <TextView
                 android:visibility="gone"
-                android:textStyle="italic"
                 android:textColor="@color/green"
+                android:textSize="14sp"
                 android:gravity="center"
                 android:text="20:19"
                 android:id="@+id/since"
                 android:layout_width="wrap_content"
-                android:layout_height="25dp" />
+                android:layout_height="29dp"
+                android:drawableRight="@drawable/ic_arrow_green"
+                />
         </LinearLayout>
         <View
             android:layout_width="30dp"
@@ -46,7 +49,7 @@
 
             <TextView
                 android:id="@+id/streak"
-                android:textColor="@color/grey_dark"
+                android:textColor="@color/grey_light"
                 android:visibility="gone"
                 android:text="ONLINE"
                 android:layout_width="120dp"

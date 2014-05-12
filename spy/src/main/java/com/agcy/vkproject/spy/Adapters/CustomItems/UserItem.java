@@ -31,7 +31,8 @@ public class UserItem extends Item {
         name.setText(user.first_name+" "+user.last_name);
         if(user.online) {
             status.setVisibility(View.VISIBLE);
-            //if (user.online_mobile) status.setText("В сети с мобильного");
+            if (user.online_mobile)
+                status.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_online_mobile));
         }
         ImageLoader.getInstance().displayImage(user.getBiggestPhoto(),photo);
         return rootView;

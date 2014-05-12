@@ -4,14 +4,20 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light">
         <!-- Customize your theme here. -->
         <item name="android:windowBackground">@android:color/white</item>
-        <item name="android:actionBarStyle">@style/MyActionBar</item>
-        <item name="android:homeAsUpIndicator">@drawable/ic_launcher</item>
 
         <item name="actionBarStyle">@style/MyActionBar</item>
-        <item name="homeAsUpIndicator">@drawable/ic_launcher</item>
+        <item name="homeAsUpIndicator">@drawable/ic_back_button</item>
+        <item name="android:icon">@drawable/ic_ab_icon</item>
+        <item name="android:actionBarStyle">@style/MyActionBar</item>
+        <item name="android:homeAsUpIndicator">@drawable/ic_back_button</item>
+
     </style>
     <style name="AppTheme.NoTitle" parent="AppTheme">
         <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowTitleSize">0dp</item>
+        <item name="windowActionBar">false</item>
+
 
     </style>
 
@@ -40,11 +46,13 @@
 
     <style name="MyActionBar"
         parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">@drawable/tab_indicator_item_normal</item>
-        <item name="android:titleTextStyle">@style/MyActionBar.TextStyle</item>
 
         <item name="background">@drawable/tab_indicator_item_normal</item>
         <item name="titleTextStyle">@style/MyActionBar.TextStyle</item>
+
+        <item name="android:background">@drawable/tab_indicator_item_normal</item>
+        <item name="android:titleTextStyle">@style/MyActionBar.TextStyle</item>
+
     </style>
     <style name="MyActionBar.TextStyle" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
 

@@ -1,22 +1,19 @@
 package com.agcy.vkproject.spy;
 
 import android.app.ActivityManager;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
 
 import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
@@ -35,12 +32,16 @@ import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
 import com.vk.sdk.api.model.VKApiUser;
+import com.vk.sdk.api.model.VKApiUserFull;
+import com.vk.sdk.api.model.VKList;
 import com.vk.sdk.api.model.VKUsersArray;
 
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
 public class MainActivity extends ActionBarActivity {
+
+    private OnlinesFragment onlinesFragment;
 
     @Override
     protected void onResume() {
@@ -67,101 +68,160 @@ public class MainActivity extends ActionBarActivity {
         Helper.initialize(this);
         TabPageIndicator indicator = (TabPageIndicator) findViewById(R.id.mainIndicator);
 
-        ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
-        MainPagerAdapter mSectionsPagerAdapter  = new MainPagerAdapter(getSupportFragmentManager());
+        final ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
+        final MainPagerAdapter mSectionsPagerAdapter = new MainPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         indicator.setViewPager(mViewPager);
 
+        indicator.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+                if (onlinesFragment != null)
+                    onlinesFragment.notifyNowRecreate();
+            }
+        });
 
         downloadData();
 
-
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            boolean typing = bundle.getBoolean("TYPING", false);
+            if(typing)
+                mViewPager.setCurrentItem(1,true);
+        }
     }
 
 
     private void downloadData() {
+        // всё сложно..
+        final Handler handler = new Handler();
 
         VKParameters friendsParameters = new VKParameters();
         friendsParameters.put("order", "hints");
         friendsParameters.put("fields", "sex,photo_200,photo_200_orig,photo_50,photo_100,online,last_seen");
 
         final VKRequest friendsRequest = VKApi.friends().get(friendsParameters);
-        new AsyncTask<Void, Void, Void>() {
+
+        // начинаем поток, который загружает всех с бд. друзей может быть много, поэтому нужен фон
+        // когда загрузились, уведомляем всех, что загрузились. все сразу начинают юзать данные
+        // после чего скачиваем новый список друзей, и заливаем его в бд. По итогу обновляем
+        // списки, уведомляем, что закачка завершена.
+        // если какие-то друзья загрузились из бд, значит мы можем за ними следить => включаем лонпгол
+        // иначе ждём, пока они загрузятся
+
+        new Thread(new Runnable() {
             @Override
-            protected Void doInBackground(Void... params) {
+            public void run() {
+                if(Memory.loadFriends()){
+                    startLongpoll();
+                }
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
 
-                Memory.loadFriends();
+                        Helper.loadingEnded();
+                        friendsRequest.executeWithListener(
 
-                friendsRequest.executeWithListener(
-                        new VKRequest.VKRequestListener() {
-                            public NetworkStateReceiver.NetworkStateChangeListener connectionListener;
+                                new VKRequest.VKRequestListener() {
 
-                            @Override
-                            public void onComplete(final VKResponse response) {
+                                    public NetworkStateReceiver.NetworkStateChangeListener connectionListener;
 
-                                new AsyncTask<Void, Void, Void>() {
                                     @Override
-                                    protected Void doInBackground(Void... params) {
-                                        Memory.saveUsers((VKUsersArray) response.parsedModel);
+                                    public void onComplete(final VKResponse response) {
+                                        // асинхронно сохраняем, чтобы никого не задеть...
+                                        // мы ведь внутри обычного потока
+                                        new Thread(new Runnable() {
+                                            @Override
+                                            public void run() {
 
-                                        return null;
+                                                Memory.saveUsers((VKUsersArray) response.parsedModel);
+                                                handler.post(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        Helper.downloadingEnded();
+                                                        startLongpoll();
+                                                    }
+                                                });
+                                            }
+                                        }).start();
+
+                                        if (connectionListener != null)
+                                            connectionListener.remove();
                                     }
 
                                     @Override
-                                    protected void onPostExecute(Void aVoid) {
-                                        //((TextView)findViewById(R.id.status)).setText("Шпионить плохо -_-");
+                                    public void onError(VKError error) {
+                                        super.onError(error);
+                                        //unknownhost
+
+                                        switch (error.errorCode) {
+                                            case VKError.VK_API_REQUEST_HTTP_FAILED:
+                                                if (error.httpError instanceof SocketException || error.httpError instanceof UnknownHostException) {
+
+                                                    //((TextView)findViewById(R.id.status)).setText("Проверьте подключение");
+                                                    connectionListener = new NetworkStateReceiver.NetworkStateChangeListener(Helper.START_LOADER_ID) {
+
+                                                        @Override
+                                                        public void onConnected() {
+
+                                                            //((TextView)findViewById(R.id.status)).setText("Подключение восстановленно");
+                                                            downloadData();
+
+                                                        }
+
+                                                        @Override
+                                                        public void onLost() {
+                                                            //((TextView)findViewById(R.id.status)).setText("Проверьте подключение");
+                                                        }
+
+                                                    };
+                                                }
+                                                break;
+                                            default:
+                                                Log.e("AGCY SPY", error.toString());
+                                                break;
+                                        }
                                     }
-                                }.execute();
-                                if(connectionListener!=null)
-                                    connectionListener.remove();
-                            }
 
-                            @Override
-                            public void onError(VKError error) {
-                                super.onError(error);
-                                //unknownhost
-
-                                if (error.httpError instanceof SocketException || error.httpError instanceof UnknownHostException) {
-
-                                    //((TextView)findViewById(R.id.status)).setText("Проверьте подключение");
-                                    connectionListener = new NetworkStateReceiver.NetworkStateChangeListener(Helper.START_LOADER_ID) {
-                                        @Override
-                                        public void onConnected() {
-
-                                            //((TextView)findViewById(R.id.status)).setText("Подключение восстановленно");
-                                            downloadData();
-
-                                        }
-
-                                        @Override
-                                        public void onLost() {
-                                            //((TextView)findViewById(R.id.status)).setText("Проверьте подключение");
-                                        }
-
-                                    };
                                 }
-                                Log.e("AGCY SPY", error.httpError.toString());
+                        );
+
+                        VKParameters userParameters = new VKParameters();
+                        userParameters.put("fields", "sex,photo_200,photo_200_orig,photo_50,photo_100");
+                        VKApi.users().get(userParameters).executeWithListener(new VKRequest.VKRequestListener() {
+                            @Override
+                            public void onComplete(VKResponse response) {
+                                VKApiUserFull user = ((VKList<VKApiUserFull>) response.parsedModel).get(0);
+                                SharedPreferences.Editor editor = getSharedPreferences("user",MODE_MULTI_PROCESS).edit();
+                                editor.putString("name",user.first_name+ " " + user.last_name);
+                                editor.putString("photo",user.getBiggestPhoto());
+                                editor.commit();
                             }
-                        }
-                );
-                startLongpoll();
-                return null;
-            }
+                        });
 
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                Helper.initializationEnded();
+                    }
+                });
             }
-        }.execute();
-
+        }).start();
     }
+
     private void startLongpoll(){
 
         Intent longPollService = new Intent(getBaseContext(), LongPollService.class);
         startService(longPollService);
     }
+
     private boolean isLongPollServiceRunning() {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
@@ -180,51 +240,24 @@ public class MainActivity extends ActionBarActivity {
             return true;
     }
 
-
-    public void showFriends(View view) {
-        startActivity(new Intent(this, FriendsActivity.class));
-    }
-
-
-
-
-
-    public void logout(View view) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        builder.setMessage("Так мы ни за кем не последим :(")
-                .setTitle("Действительно выйти?");
-
-        builder.setPositiveButton("Выход!", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                Helper.DESTROYALL();
-                finish();
-            }
-        });
-        builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-
-            }
-        });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
-
-    public void settings(View view) {
-
-        startActivity(new Intent(getBaseContext(),SettingsActivity.class));
-        Toast.makeText(getBaseContext(),"Ещё не сделано..", Toast.LENGTH_SHORT).show();
-    }
-
     private class MainPagerAdapter extends FragmentPagerAdapter implements ContentPagerAdapter<Integer> {
         public MainPagerAdapter(FragmentManager fm) {
             super(fm);
+
         }
 
         @Override
         public Integer getContent(int index) {
-            return R.drawable.ic_launcher;
+            switch (index){
+                case 0:
+                    return R.drawable.tab_vkpsy;
+                case 1:
+                    return R.drawable.tab_typings;
+                case 2:
+                    return R.drawable.tab_onlines;
+                default:
+                    return R.drawable.tab_friends;
+            }
 
         }
 
@@ -238,11 +271,12 @@ public class MainActivity extends ActionBarActivity {
 
             switch (position) {
                 case 0:
-                    return new MainFragment(getBaseContext());
+                    return new MainFragment();
                 case 1:
-                    return new TypingsFragment(getBaseContext());
+                    return new TypingsFragment();
                 case 2:
-                    return new OnlinesFragment(getBaseContext());
+                    onlinesFragment = new OnlinesFragment();
+                    return onlinesFragment;
                 default:
                     return new UsersListFragment(getBaseContext(), new UsersListFragment.OnSelectedListener() {
                         @Override
@@ -260,5 +294,6 @@ public class MainActivity extends ActionBarActivity {
 
 
         }
+
     }
 }

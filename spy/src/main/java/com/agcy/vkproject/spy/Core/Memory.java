@@ -8,7 +8,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.agcy.vkproject.spy.Adapters.UpdatesAdapter;
 import com.agcy.vkproject.spy.Models.Online;
+import com.agcy.vkproject.spy.Models.Status;
 import com.agcy.vkproject.spy.Models.Track;
 import com.agcy.vkproject.spy.Models.Typing;
 import com.vk.sdk.api.model.VKApiUserFull;
@@ -27,6 +29,7 @@ public class Memory {
     private static DatabaseConnector databaseConnector;
     private static SQLiteDatabase database;
 
+
     public static void initialize(Context context) {
 
         Memory.context = context;
@@ -41,8 +44,23 @@ public class Memory {
         context = null;
     }
 
+    private static ArrayList<UpdatesAdapter.NewItemListener> onlineListeners = new ArrayList<UpdatesAdapter.NewItemListener>();
+    private static ArrayList<UpdatesAdapter.NewItemListener> onlineOnceListeners = new ArrayList<UpdatesAdapter.NewItemListener>();
+
+    public static void addOnlineOnceListener(UpdatesAdapter.NewItemListener onlineOnceListener) {
+        if(!onlineOnceListeners.contains(onlineOnceListener))
+            onlineOnceListeners.add(onlineOnceListener);
+    }
+    public static void addOnlineListener(UpdatesAdapter.NewItemListener onlineListener) {
+        if(!onlineListeners.contains(onlineListener))
+            onlineListeners.add(onlineListener);
+    }
+    public static void removeOnlineListener(UpdatesAdapter.NewItemListener onlineListener){
+        onlineListeners.remove(onlineListener);
+    }
+
     //region Interface
-    public static void loadFriends() {
+    public static Boolean loadFriends() {
 
         ArrayList<VKApiUserFull> loadedUsers = new ArrayList<VKApiUserFull>();
         final Cursor cursor = getCursor(DatabaseConnector.USER_DATABASE,
@@ -68,6 +86,7 @@ public class Memory {
             } while (cursor.moveToNext());
         close();
         users.addAll(loadedUsers);
+        return !users.isEmpty();
     }
 
     public static void loadTracks() {
@@ -249,14 +268,26 @@ public class Memory {
         return track.notification;
     }
 
+
     public static void setStatus(VKApiUserFull user, Boolean online, boolean timeout) {
 
         user.online = online;
-        if (online)
-            saveStatus(user, true, (int) Helper.unixNow());
-        else {
-            updateStatus(user, online, Helper.unixNow() - (timeout ? 15 * 60 : 0));
+        long time = Helper.unixNow() - (timeout ? 15 * 60 : 0);
+        if (online) {
+            saveStatus(user, true, (int) time);
+        } else {
+            updateStatus(user, online, time);
         }
+
+        Status status = new Status(user.id, (int) time, online);
+        for(UpdatesAdapter.NewItemListener onlineListener: onlineListeners){
+            onlineListener.newItem(status);
+        }
+        for(UpdatesAdapter.NewItemListener onlineListener: onlineOnceListeners){
+            onlineListener.newItem(status);
+        }
+        onlineOnceListeners.clear();
+
     }
 
     //endregion
@@ -434,6 +465,7 @@ public class Memory {
     public static int dbOperations = 0;
 
     public static void open() {
+        dbOperations++;
         if (database == null) {
             database = databaseConnector.getWritableDatabase();
         } else {
@@ -446,12 +478,10 @@ public class Memory {
             }
 
         }
-        dbOperations++;
         Log.i("AGCY SPY SQL", "New operation. Count of operation: " + dbOperations);
     }
 
     private static void close() {
-        dbOperations--;
         if (dbOperations == 0) {
             if (database != null) {
                 database.close();
@@ -459,8 +489,10 @@ public class Memory {
             }
             databaseConnector.close();
         }
+        dbOperations--;
         Log.i("AGCY SPY SQL", "Operation ended. Count of operation: " + dbOperations);
     }
+
 
 
 

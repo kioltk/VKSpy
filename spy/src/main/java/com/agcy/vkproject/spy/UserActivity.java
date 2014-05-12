@@ -7,7 +7,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.view.View;
+import android.view.MenuItem;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -55,8 +55,11 @@ public class UserActivity extends ActionBarActivity {
         ImageView photo = (ImageView) findViewById(R.id.photo);
         TextView status = (TextView) findViewById(R.id.status_text);
         if (user.online) {
-            status.setVisibility(View.VISIBLE);
-            if (user.online_mobile) status.setText("С мобильного");
+            status.setText(R.string.online);
+            if (user.online_mobile)
+                status.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.online_mobile_grey, 0);
+        }else{
+            status.setText(Helper.getLastSeen(userid));
         }
         ImageLoader.getInstance().displayImage(user.getBiggestPhoto(), photo);
 
@@ -80,9 +83,23 @@ public class UserActivity extends ActionBarActivity {
         ActionBar bar = getSupportActionBar();
         bar.setTitle(user.first_name+" "+ user.last_name);
         bar.setDisplayHomeAsUpEnabled(true);
+
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+            case android.R.id.home:
+                onBackPressed();
+                break;
 
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+        return true;
+    }
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -100,14 +117,14 @@ public class UserActivity extends ActionBarActivity {
             // Return a PlaceholderFragment (defined as a static inner class below).
             switch (position) {
                 case 0:
-                    return new ListFragment(getBaseContext()) {
+                    return new ListFragment() {
                         @Override
                         public BaseAdapter adapter() {
                             return new UpdatesAdapter(Helper.convertLastUndefinedToOnline(Memory.getOnlines(user.id)),context);
                         }
                     };
                 default:
-                    return new ListFragment(getBaseContext()) {
+                    return new ListFragment() {
                         @Override
                         public BaseAdapter adapter() {
                             return new UpdatesAdapter(Memory.getTyping(user.id),context);
