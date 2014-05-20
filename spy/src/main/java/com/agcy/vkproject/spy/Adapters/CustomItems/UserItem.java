@@ -15,14 +15,14 @@ import com.vk.sdk.api.model.VKApiUserFull;
  */
 public class UserItem extends Item {
     private final VKApiUserFull user;
-
+    View rootView;
     public UserItem(VKApiUserFull user){
         this.user = user;
     }
     @Override
     public View getView(Context context) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View rootView = inflater.inflate(R.layout.list_item_user, null);
+        rootView = inflater.inflate(R.layout.list_item_user, null);
 
         ImageView photo = (ImageView) rootView.findViewById(R.id.photo);
         TextView name = (TextView) rootView.findViewById(R.id.name);
@@ -41,5 +41,10 @@ public class UserItem extends Item {
     @Override
     public VKApiUserFull getContent() {
         return user;
+    }
+
+    public void removeDivider() {
+        View divider = rootView.findViewById(R.id.divider);
+        divider.setVisibility(View.GONE);
     }
 }

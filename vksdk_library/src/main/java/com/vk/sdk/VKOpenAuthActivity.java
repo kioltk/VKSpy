@@ -32,7 +32,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -95,6 +94,8 @@ public class VKOpenAuthActivity extends Activity {
             webSettings.setJavaScriptEnabled(true);
             mWebView.loadUrl(urlToLoad);
             mWebView.setVisibility(View.INVISIBLE);
+            mWebView.clearCache(true);
+
 
         } catch (Exception e) {
             setResult(RESULT_CANCELED);
@@ -121,6 +122,7 @@ public class VKOpenAuthActivity extends Activity {
                 if (getIntent().hasExtra(VK_EXTRA_VALIDATION_URL))
                     data.putExtra(VK_EXTRA_VALIDATION_URL, true);
                 setResult(RESULT_OK, data);
+
                 finish();
                 return true;
             }

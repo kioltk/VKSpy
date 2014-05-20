@@ -8,12 +8,22 @@
     <color name="green">#ff09aa38</color>
     <color name="green_dark">#ff77cc33</color>
     <color name="grey_light_extra">#f0f0f0</color>
+
     <color name="grey">#9fa2a6</color>
     <color name="grey_light">#999999</color>
     <color name="grey_dark">#737373</color>
+    <color name="grey_user_item_background">#f2f2f2</color>
+
+    <color name="grey_user_background">#e3eff9</color>
 
     <color name="blue_timeline">@color/blue_light</color>
-    <color name="blue_tab">#3196df</color>
     <color name="blue_circle">#3196df</color>
     <color name="blue_header">#1182d2</color>
+
+
+    <color name="tab_indicator_text_selected">#3196df</color>
+    <color name="tab_indicator_text_normal">#999</color>
+
+    <color name="link_color_pressed">#0060ac</color>
+    <color name="link_color_normal">#0180dc</color>
 </resources>

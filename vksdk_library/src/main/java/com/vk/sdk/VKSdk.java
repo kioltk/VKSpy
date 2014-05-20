@@ -363,6 +363,8 @@ public class VKSdk {
 
         sInstance.mAccessToken = null;
         VKAccessToken.removeTokenAtKey(VKUIHelper.getTopActivity(), VK_SDK_ACCESS_TOKEN_PREF_KEY);
+
+        instance().sdkListener().onLogout();
     }
     public static boolean isLoggedIn() {
         return sInstance.mAccessToken != null && !sInstance.mAccessToken.isExpired();

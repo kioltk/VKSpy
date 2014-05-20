@@ -2,13 +2,17 @@
 
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:paddingLeft="22dp"
+    android:paddingRight="22dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
-        <include layout="@layout/list_item_preference"/>
+    <include layout="@layout/list_item_preference_template" />
         <Switch
             android:textOff="OFF"
             android:textOn="ON"
             android:thumb="@drawable/switcher_thumb"
+            android:track="@drawable/apptheme_switch_bg_holo_light"
             android:id="@+id/toggler"
             android:checked="true"
             android:layout_centerInParent="true"

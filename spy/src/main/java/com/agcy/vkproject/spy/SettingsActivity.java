@@ -1,8 +1,10 @@
 package com.agcy.vkproject.spy;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
@@ -11,11 +13,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.agcy.vkproject.spy.Adapters.CustomItems.PreferenceItem;
 import com.agcy.vkproject.spy.Core.Helper;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.vk.sdk.VKUIHelper;
+
+import org.focuser.sendmelogs.LogCollector;
+
+import java.util.ArrayList;
 
 /**
  * Created by kiolt_000 on 10-May-14.
@@ -38,9 +47,11 @@ public class SettingsActivity extends PreferenceActivity {
             bar.setTitle(title);
             bar.setDisplayHomeAsUpEnabled(true);
         }
-        //ListView listView = (ListView) findViewById(R.id.list);
-        //SettingsAdapter adapter = new SettingsAdapter();
-        //listView.setAdapter(adapter);
+
+
+        ListView listView = (ListView) findViewById(R.id.list);
+        SettingsAdapter adapter = new SettingsAdapter();
+        listView.setAdapter(adapter);
 
         SharedPreferences prefs = getSharedPreferences("user", MODE_MULTI_PROCESS);
         String name = prefs.getString("name", "");
@@ -65,7 +76,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         builder.setPositiveButton(getString(R.string.logout_accept), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                Helper.DESTROYALL();
+                Helper.logout();
                 finish();
             }
         });
@@ -97,18 +108,49 @@ public class SettingsActivity extends PreferenceActivity {
     private class SettingsAdapter extends BaseAdapter {
 
 
+        ArrayList<PreferenceItem> items = new ArrayList<PreferenceItem>(){{
+            add(new PreferenceItem("Report","Send logs") {
+                @Override
+                public void onClick() {
+                    new AsyncTask<Void, Void, Boolean>() {
 
+                        LogCollector mLogCollector = new LogCollector(SettingsActivity.this);
+                        ProgressDialog progressDialog = new ProgressDialog(SettingsActivity.this);
+                        @Override
+                        protected Boolean doInBackground(Void... params) {
+                            return mLogCollector.collect();
+                        }
+                        @Override
+                        protected void onPreExecute() {
+                            progressDialog.setMessage("Collecting..");
+                            progressDialog.setTitle("Sending logs");
+                            progressDialog.setIndeterminate(true);
+                            progressDialog.show();
+                        }
+                        @Override
+                        protected void onPostExecute(Boolean result) {
+                            progressDialog.dismiss();
+                            if (result)
+                                mLogCollector.sendLog("kioltk@gmail.com", "VK Spy - Application log", "Log report");
+                            else
+                                Toast.makeText(getBaseContext(),"Sending error",Toast.LENGTH_SHORT).show();
+                        }
+
+                    }.execute();
+                }
+            });
+        }};
 
 
 
         @Override
         public int getCount() {
-            return 0;
+            return items.size();
         }
 
         @Override
-        public Object getItem(int position) {
-            return null;
+        public PreferenceItem getItem(int position) {
+            return items.get(position);
         }
 
         @Override
@@ -118,7 +160,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            return null;
+            return getItem(position).getView(getBaseContext());
         }
     }
 }

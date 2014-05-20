@@ -3,12 +3,16 @@ package com.agcy.vkproject.spy.Fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
-import android.text.method.LinkMovementMethod;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,9 +47,40 @@ public class MainFragment extends android.support.v4.app.Fragment {
         TextView happySantaText = (TextView) rootView.findViewById(R.id.happySantaText);
         happySantaText.setText(Html.fromHtml(context.getString(R.string.desc)));
         TextView happySantaLink = (TextView) rootView.findViewById(R.id.happySantaLink);
-        happySantaLink.setText(Html.fromHtml("<a style=\"color:#007edf\" href=\"http://vk.com/happysanta\">http://vk.com/<b>happysanta</b>"));
-        happySantaLink.setMovementMethod(LinkMovementMethod.getInstance());
+        happySantaLink.setText(Html.fromHtml("vk.com/<b>happysanta</b>"));
+        happySantaLink.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent browserIntent = new Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("http://vk.com/happysanta")
+                );
+                startActivity(browserIntent);
+            }
+        });
 
+
+        /*Bitmap tile = BitmapFactory.decodeResource(context.getResources(), R.drawable.underline);
+        BitmapDrawable tiledBitmapDrawable = new BitmapDrawable(context.getResources(), tile);
+        tiledBitmapDrawable.setTileModeX(Shader.TileMode.REPEAT);
+        //tiledBitmapDrawable.setTileModeY(Shader.TileMode.REPEAT);
+
+        santaGroundView.setBackgroundDrawable(tiledBitmapDrawable);
+
+        BitmapDrawable bitmap = new BitmapDrawable(BitmapFactory.decodeResource(
+                getResources(), R.drawable.underline2));
+        bitmap.setTileModeX(Shader.TileMode.REPEAT);
+        */
+        LinearLayout layout = (LinearLayout)rootView.findViewById(R.id.line);
+        Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        int width = display.getWidth();  // deprecated
+
+        for(int i = 0; width%(341*i + 1) < width;i++ ){
+            layout.addView(new ImageView(context){{
+                setBackgroundDrawable(context.getResources().getDrawable(R.drawable.underline));
+                setLayoutParams(new ViewGroup.LayoutParams(341, ViewGroup.LayoutParams.MATCH_PARENT));
+            }});
+        }
 
         ListView preferencesView = (ListView) rootView.findViewById(R.id.preference);
         ArrayList<PreferenceItem> preferences = new ArrayList<PreferenceItem>();

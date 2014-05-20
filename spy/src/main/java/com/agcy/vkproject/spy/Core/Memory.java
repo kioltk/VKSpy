@@ -17,7 +17,6 @@ import com.vk.sdk.api.model.VKApiUserFull;
 import com.vk.sdk.api.model.VKUsersArray;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 
 public class Memory {
@@ -28,10 +27,12 @@ public class Memory {
     private static Context context;
     private static DatabaseConnector databaseConnector;
     private static SQLiteDatabase database;
+    public static ArrayList<Integer> downloadingIds = new ArrayList<Integer>();
 
 
     public static void initialize(Context context) {
 
+        Log.i("AGCY SPY SQL","Initialization");
         Memory.context = context;
         databaseConnector = new DatabaseConnector(context);
         open();
@@ -42,6 +43,13 @@ public class Memory {
     public static void DESTROY() {
         context.deleteDatabase(DatabaseConnector.DATABASE);
         context = null;
+    }
+    public static void clearAll(){
+
+        Log.i("AGCY SPY SQL","Clearing databases.");
+        clearUsers();
+        clearTypings();
+        clearOnlines();
     }
 
     private static ArrayList<UpdatesAdapter.NewItemListener> onlineListeners = new ArrayList<UpdatesAdapter.NewItemListener>();
@@ -60,7 +68,7 @@ public class Memory {
     }
 
     //region Interface
-    public static Boolean loadFriends() {
+    public static Boolean loadUsers() {
 
         ArrayList<VKApiUserFull> loadedUsers = new ArrayList<VKApiUserFull>();
         final Cursor cursor = getCursor(DatabaseConnector.USER_DATABASE,
@@ -71,6 +79,7 @@ public class Memory {
         final int photoColumnIndex = cursor.getColumnIndex("photo");
         final int first_nameColumnIndex = cursor.getColumnIndex("first_name");
         final int last_nameColumnIndex = cursor.getColumnIndex("last_name");
+        final int isFriend_nameColumnIndex = cursor.getColumnIndex("isFriend");
         if (cursor.moveToFirst())
             do {
                 VKApiUserFull user = new VKApiUserFull() {{
@@ -79,6 +88,7 @@ public class Memory {
                     this.first_name = cursor.getString(first_nameColumnIndex);
                     this.last_name = cursor.getString(last_nameColumnIndex);
                     this.sex = cursor.getInt(sexColumnIndex);
+                    this.isFriend = cursor.getInt(isFriend_nameColumnIndex)>0;
                 }};
                 if (users.getById(user.id) == null)
                     loadedUsers.add(user);
@@ -112,14 +122,18 @@ public class Memory {
 
     public static VKApiUserFull getUserById(int userid) {
         if (users.isEmpty()) {
-            loadFriends();
+            loadUsers();
         }
         VKApiUserFull user = users.getById(userid);
         if (user == null) {
-            Helper.downloadUser(userid);
-            Log.w("AGCY SPY", "No such userid in database: userid = " + userid);
+            if(!downloadingIds.contains(userid)) {
+                Helper.downloadUser(userid);
+                downloadingIds.add(userid);
+            }
+            Log.w("AGCY SPY", "No such userid in memory: userid = " + userid);
             user = new VKApiUserFull();
             user.id = userid;
+
         }
         return user;
     }
@@ -127,6 +141,16 @@ public class Memory {
     public static ArrayList<VKApiUserFull> getUsers() {
         ArrayList<VKApiUserFull> arrayUsers = new ArrayList<VKApiUserFull>(users);
         return arrayUsers;
+    }
+    public static ArrayList<VKApiUserFull> getFriends(){
+
+        ArrayList<VKApiUserFull> friends = new ArrayList<VKApiUserFull>();
+        for(VKApiUserFull user: users){
+            if(user.isFriend)
+                friends.add(user);
+        }
+
+        return friends;
     }
     public static Track getTrackById(int userid) {
         if (tracks.isEmpty())
@@ -173,10 +197,14 @@ public class Memory {
     }
 
     public static ArrayList<Online> getOnlines() {
+
+        Log.i("AGCY SPY SQL", "Loading onlines");
         return getOnlines(null, "id desc");
     }
 
     public static ArrayList<Online> getOnlines(final int userid) {
+
+        Log.i("AGCY SPY SQL", "Loading onlines by userid:"+ userid);
         return getOnlines("userid = " + userid, "id desc");
     }
 
@@ -207,6 +235,7 @@ public class Memory {
 
     public static Track getTrack(int userid) {
 
+        Log.i("AGCY SPY SQL", "Loading track");
         Cursor cursor = getCursor(DatabaseConnector.TRACK_DATABASE,
                 DatabaseConnector.TRACK_DATABASE_FIELDS,
                 "userid = " + userid,
@@ -226,10 +255,12 @@ public class Memory {
     }
 
     public static ArrayList<Typing> getTyping() {
+        Log.i("AGCY SPY SQL", "Loading typings");
         return getTyping(null, null);
     }
 
     public static ArrayList<Typing> getTyping(int userid) {
+        Log.i("AGCY SPY SQL", "Loading typings by userid:" + userid);
         return getTyping("userid = " + userid, null);
     }
 
@@ -272,11 +303,12 @@ public class Memory {
     public static void setStatus(VKApiUserFull user, Boolean online, boolean timeout) {
 
         user.online = online;
-        long time = Helper.unixNow() - (timeout ? 15 * 60 : 0);
+        long time = Helper.getUnixNow() - (timeout ? 15 * 60 : 0);
         if (online) {
             saveStatus(user, true, (int) time);
         } else {
             updateStatus(user, online, time);
+            user.last_seen = Helper.getUnixNow();
         }
 
         Status status = new Status(user.id, (int) time, online);
@@ -302,6 +334,7 @@ public class Memory {
     public static void updateTrack(Track track) {
 
 
+        Log.i("AGCY SPY SQL","Updating track.");
         ContentValues values = new ContentValues();
         values.put("notification", track.notification);
 
@@ -311,10 +344,12 @@ public class Memory {
     }
     public static void updateStatus(VKApiUserFull user, Boolean online, long time){
 
+
+        Log.i("AGCY SPY SQL","Updating status.");
         SharedPreferences preferences = context.getSharedPreferences("longpoll", Context.MODE_MULTI_PROCESS);
 
         int lastUpdate = preferences.getInt("lastUpdate",0);
-        if(Helper.unixNow() - lastUpdate > 30*60){
+        if(Helper.getUnixNow() - lastUpdate > 30*60){
             saveStatus(user,online, (int) time);
         }else{
             Cursor cursor = getCursor(DatabaseConnector.ONLINE_DATABASE,
@@ -369,27 +404,38 @@ public class Memory {
     }
 
     public static void saveUser(VKApiUserFull user) {
+
+        Log.i("AGCY SPY SQL","Saving user.");
         ContentValues values = new ContentValues();
         values.put("userid", user.id);
         values.put("sex", user.sex);
         values.put("photo", user.getBiggestPhoto());
         values.put("first_name", user.first_name);
         values.put("last_name", user.last_name);
+        values.put("isFriend", user.isFriend);
         save(DatabaseConnector.USER_DATABASE, values);
+        users.add(user);
     }
 
-    public static void saveUsers(VKUsersArray users) {
-        ArrayList<ContentValues> valuesList = new ArrayList<ContentValues>();
-        VKUsersArray storedUsers = Memory.users;
-        Memory.users = users;
-        for (VKApiUserFull storedUser : storedUsers) {
-            VKApiUserFull existedUser = Memory.users.getById(storedUser.id);
-            if (existedUser == null) {
-                Memory.users.add(storedUser);
+    public static void saveFriends(VKUsersArray friends){
+        for(VKApiUserFull friend : friends){
+            friend.isFriend = true;
+        }
+        saveUsers(friends);
+    }
+
+    public static void saveUsers(VKUsersArray newUsers) {
+        VKUsersArray alreadyStoredUsers = new VKUsersArray(Memory.users);
+        for (VKApiUserFull alreadyStoredUser : alreadyStoredUsers) {
+            VKApiUserFull storedOld = newUsers.getById(alreadyStoredUser.id);
+            if (storedOld == null) {
+                newUsers.add(alreadyStoredUser);
             }
         }
+        Memory.users = newUsers;
 
-
+        Log.i("AGCY SPY SQL","Saving new users. Count: "+newUsers.size());
+        ArrayList<ContentValues> valuesList = new ArrayList<ContentValues>();
         for (int i = 0; i < Memory.users.size(); i++) {
             VKApiUserFull user = Memory.users.get(i);
             ContentValues values = new ContentValues();
@@ -398,6 +444,7 @@ public class Memory {
             values.put("photo", user.getBiggestPhoto());
             values.put("first_name", user.first_name);
             values.put("last_name", user.last_name);
+            values.put("isFriend",user.isFriend);
             values.put("hint", i);
             valuesList.add(values);
         }
@@ -410,6 +457,7 @@ public class Memory {
     public static void saveStatus(VKApiUserFull user, boolean status, int time) {
 
 
+        Log.i("AGCY SPY SQL","Saving online.");
         ContentValues values = new ContentValues();
         values.put("userid", user.id);
         values.put(status? "since":"till", time);
@@ -419,6 +467,7 @@ public class Memory {
     public static void saveTrack(Track track) {
 
 
+        Log.i("AGCY SPY SQL","Saving track.");
         ContentValues values = new ContentValues();
         values.put("userid", track.userid);
         values.put("notification", track.notification);
@@ -427,9 +476,10 @@ public class Memory {
 
     public static void saveTyping(VKApiUserFull user) {
 
+        Log.i("AGCY SPY SQL","Saving typing.");
         ContentValues values = new ContentValues();
         values.put("userid", user.id);
-        values.put("time", Helper.unixNow() - 3 * 60);
+        values.put("time", Helper.getUnixNow() - 3 * 60);
 
         save(DatabaseConnector.TYPING_DATABASE, values);
     }
@@ -458,9 +508,7 @@ public class Memory {
         close();
     }
 
-    public static Date fromUnix(long unixtime) {
-        return new Date(unixtime);
-    }
+    //endregion
 
     public static int dbOperations = 0;
 
@@ -496,7 +544,6 @@ public class Memory {
 
 
 
-    //endregion
 
     private static class DatabaseConnector extends SQLiteOpenHelper {
 
@@ -526,7 +573,8 @@ public class Memory {
                 "sex",
                 "photo",
                 "first_name",
-                "last_name"
+                "last_name",
+                "isFriend"
         };
         private static final String TRACK_DATABASE_CREATE =
                 "create table " +
@@ -544,7 +592,8 @@ public class Memory {
                         "photo text not null," +
                         "first_name text not null," +
                         "last_name text not null," +
-                        "hint int DEFAULT 99999" +
+                        "hint int DEFAULT 99999," +
+                        "isFriend int default 0"+
                         " ) ";
         private static final String ONLINE_DATABASE_CREATE =
                 "create table " +
@@ -565,7 +614,7 @@ public class Memory {
                         " ) ";
 
         public DatabaseConnector(Context context) {
-            super(context, DATABASE, null, 5);
+            super(context, DATABASE, null, 6);
         }
 
         @Override
@@ -582,8 +631,8 @@ public class Memory {
         @Override
         public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
 
-            database.execSQL("DROP TABLE IF EXISTS " + ONLINE_DATABASE);
-            database.execSQL(ONLINE_DATABASE_CREATE);
+            database.execSQL("DROP TABLE IF EXISTS " + USER_DATABASE);
+            database.execSQL(USER_DATABASE_CREATE);
         }
 
     }

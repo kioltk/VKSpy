@@ -24,7 +24,15 @@ package com.vk.sdk.api.model;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.List;
+
 public class VKUsersArray extends VKList<VKApiUserFull> {
+    public VKUsersArray(){
+
+    }
+    public VKUsersArray(List<? extends VKApiUserFull> list){
+        super(list);
+    }
     @Override
     public VKApiModel parse(JSONObject response) throws JSONException {
         fill(response, VKApiUserFull.class);

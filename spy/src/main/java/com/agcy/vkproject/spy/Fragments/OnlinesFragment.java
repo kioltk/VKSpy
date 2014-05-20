@@ -29,7 +29,20 @@ public class OnlinesFragment extends ListFragment {
     public void onPause() {
         super.onPause();
         Log.i("AGCY SPY","OnlinesFragment paused");
-        notifyNowRecreate();
+        if(adapter!=null){
+            ((UpdatesAdapter)adapter).pauseNew();
+            ((UpdatesAdapter)adapter).recreateHeaders();
+        }
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.i("AGCY SPY","OnlinesFragment resumed");
+        if(adapter!=null){
+            ((UpdatesAdapter)adapter).resumeNew();
+        }
     }
 
     @Override
@@ -42,7 +55,8 @@ public class OnlinesFragment extends ListFragment {
     @Override
     public BaseAdapter adapter() {
 
-        UpdatesWithOwnerAdapter adapter = new UpdatesWithOwnerAdapter(Helper.convertToStatus(Memory.getOnlines()), context);
+        UpdatesWithOwnerAdapter adapter =
+                new UpdatesWithOwnerAdapter(Helper.convertToStatus(Memory.getOnlines()), context);
         return adapter;
 
     }
@@ -63,13 +77,14 @@ public class OnlinesFragment extends ListFragment {
     public void onDestroy() {
 
         super.onDestroy();
-        Memory.removeOnlineListener(((UpdatesAdapter)adapter).newItemListener);
+        if(adapter!=null)
+            Memory.removeOnlineListener(((UpdatesAdapter)adapter).newItemListener);
 
     }
 
-    public void notifyNowRecreate(){
+    public void recreateHeaders(){
 
         if(adapter!=null)
-            ((UpdatesAdapter)adapter).notifyRecreate();
+            ((UpdatesAdapter)adapter).recreateHeaders();
     }
 }

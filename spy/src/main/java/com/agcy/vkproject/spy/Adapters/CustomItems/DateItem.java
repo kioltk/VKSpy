@@ -3,9 +3,9 @@ package com.agcy.vkproject.spy.Adapters.CustomItems;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 
 import com.agcy.vkproject.spy.Core.Helper;
@@ -17,8 +17,8 @@ import com.agcy.vkproject.spy.R;
 public class DateItem extends Item {
 
     private int time;
-    private View rootView;
 
+    View rootView;
     public DateItem(int unix){
         this.time = unix;
     }
@@ -27,7 +27,6 @@ public class DateItem extends Item {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         rootView = inflater.inflate(R.layout.list_item_date, null);
-
         ((TextView)rootView.findViewById(R.id.time)).setText( getDate());
         return rootView;
     }
@@ -58,9 +57,9 @@ public class DateItem extends Item {
         if(rootView!=null){
 
             final TextView timeView = ((TextView) rootView.findViewById(R.id.time));
-            AlphaAnimation recreateAnimation = new AlphaAnimation(1, 0);
-            recreateAnimation.setInterpolator(new AccelerateInterpolator());
-            recreateAnimation.setDuration(400);
+            AlphaAnimation recreateAnimation = new AlphaAnimation(1, 0.5f);
+            recreateAnimation.setInterpolator(new DecelerateInterpolator());
+            recreateAnimation.setDuration(600);
             recreateAnimation.setRepeatMode(Animation.REVERSE);
             recreateAnimation.setRepeatCount(1);
             recreateAnimation.setAnimationListener(new Animation.AnimationListener() {
@@ -75,7 +74,6 @@ public class DateItem extends Item {
 
                 @Override
                 public void onAnimationRepeat(Animation animation) {
-
                     timeView.setText(getDate());
                 }
             });
@@ -84,5 +82,23 @@ public class DateItem extends Item {
     }
 
 
+    public boolean isToday() {
+        return Helper.isToday(this.time);
+    }
 
+    public boolean isNow() {
+        return getContent() == 0;
+    }
+
+    @Override
+    public void setDeleted() {
+        super.setDeleted();
+        if (rootView != null) {
+
+            final TextView timeView = ((TextView) rootView.findViewById(R.id.time));
+            AlphaAnimation recreateAnimation = new AlphaAnimation(1, 0);
+            recreateAnimation.setInterpolator(new DecelerateInterpolator());
+            recreateAnimation.setDuration(600);
+        }
+    }
 }

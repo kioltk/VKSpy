@@ -22,6 +22,12 @@ public class Online extends Update {
         streakConverted = Helper.getStreak(till, since);
 
     }
+
+    @Override
+    public String getTime(){
+        return since > 0 ? getSinceTime() : getTillTime();
+    }
+
     /**
     public String getSinceShort(){
         if(since==0){
@@ -44,6 +50,7 @@ public class Online extends Update {
         return Helper.getTimeShort(till);
     }
     */
+
 
 
     public int getTill() {

@@ -10,7 +10,8 @@ public abstract class Item {
 
     private boolean isNew = false;
 
-    private boolean isDeleted = false;
+    protected boolean alreadyDeleted = false;
+    protected boolean isDeleted = false;
     public abstract View getView(Context context);
 
     public void setDeleted(){
@@ -31,4 +32,5 @@ public abstract class Item {
     public boolean isDeleted() {
         return isDeleted;
     }
+
 }

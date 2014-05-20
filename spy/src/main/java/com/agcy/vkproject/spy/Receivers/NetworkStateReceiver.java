@@ -42,7 +42,7 @@ public class NetworkStateReceiver extends BroadcastReceiver {
 
         public NetworkStateChangeListener(int id){
             this.id = id;
-            if (!listeners.containsKey(id));
+            if (!listeners.containsKey(id))
                 listeners.put(id,this);
         }
         public abstract void onConnected();

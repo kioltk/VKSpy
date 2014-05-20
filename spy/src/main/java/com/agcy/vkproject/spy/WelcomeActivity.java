@@ -1,7 +1,6 @@
 package com.agcy.vkproject.spy;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -11,7 +10,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import com.agcy.vkproject.spy.Core.Helper;
 import com.vk.sdk.VKSdk;
@@ -22,19 +20,25 @@ import java.util.Locale;
 
 public class WelcomeActivity extends ActionBarActivity {
 
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        VKUIHelper.onResume(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        VKUIHelper.onDestroy(this);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        VKUIHelper.onActivityResult(requestCode, resultCode, data);
+    }
+
     SectionsPagerAdapter mSectionsPagerAdapter;
 
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
     ViewPager mViewPager;
 
     @Override
@@ -42,38 +46,32 @@ public class WelcomeActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
         VKUIHelper.onCreate(this);
-        com.agcy.vkproject.spy.Core.VKSdk.initialize(this);
 
-        SharedPreferences preferences = getSharedPreferences("start", MODE_MULTI_PROCESS);
-        if(!preferences.getBoolean("firstStart",true)) {
-            if (VKSdk.wakeUpSession()) {
+        Helper.initialize(this);
 
-                startActivity(new Intent(WelcomeActivity.this, MainActivity.class));
-                finish();
-                return;
+        if (VKSdk.wakeUpSession()) {
 
-            }
-            com.agcy.vkproject.spy.Core.VKSdk.authorize();
-            Helper.initialize(this);
-
+            startActivity(new Intent(WelcomeActivity.this, MainActivity.class));
             finish();
+            return;
 
         }
 
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
+
+
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
+
+
+
     }
 
     private void login(){
 
-        startActivity(new Intent(WelcomeActivity.this, StartActivity.class));
-
-        finish();
+        com.agcy.vkproject.spy.Core.VKSdk.authorizeFirst(this);
     }
 
 
@@ -135,7 +133,7 @@ public class WelcomeActivity extends ActionBarActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             rootView = inflater.inflate(R.layout.fragment_welcome, container, false);
-            ((Button)rootView.findViewById(R.id.start)).setOnClickListener(new View.OnClickListener() {
+            (rootView.findViewById(R.id.start)).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     login();

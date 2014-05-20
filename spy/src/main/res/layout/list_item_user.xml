@@ -5,7 +5,8 @@
     android:layout_width="wrap_content"
     android:paddingLeft="12dp"
     android:paddingRight="12dp"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/user_item_selector">
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="70dp">
@@ -32,6 +33,7 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
     <View
+        android:id="@+id/divider"
         android:background="@drawable/user_list_divider"
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"

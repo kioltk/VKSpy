@@ -17,10 +17,22 @@ public abstract class UpdateItem extends Item {
     }
     @Override
     public abstract View getView(Context context);
+
+    public void loadImage(View rootView){}
+
+    public void placeHolder(View rootView) {
+
+    }
+
     public abstract View getViewWithOwner(Context context);
 
     @Override
     public Update getContent() {
         return update;
+    }
+
+
+    public View reconvert(Context context, View rootView) {
+        return null;
     }
 }

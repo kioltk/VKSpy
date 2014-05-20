@@ -47,37 +47,42 @@ public class ItemHelper {
     }
     private static ArrayList<Item> convertUsers (List<? extends VKApiUserFull> users,boolean first) {
         ArrayList<Item> convertedUsers = new ArrayList<Item>();
-        if(first) {
-            convertedUsers.add(new HeaderItem("Important"));
+        if (first) {
 
-            for (VKApiUserFull user : users.subList(0, 5)) {
+            if (users.size() > 5) {
+                convertedUsers.add(new HeaderItem("Important"));
+            }
+            for (VKApiUserFull user : users.subList(0, users.size() > 5 ? 5 : users.size())) {
                 convertedUsers.add(new UserItem(user));
             }
         }
-        ArrayList<VKApiUserFull> tempUsers = new ArrayList<VKApiUserFull>();
-        for(VKApiUserFull user: users) {
-            tempUsers.add(user);
-        }
+        if (users.size() > 5) {
 
-        Collections.sort(tempUsers, new Comparator<VKApiUserFull>() {
-            @Override
-            public int compare(VKApiUserFull lhs, VKApiUserFull rhs) {
-                return lhs.first_name.compareTo(rhs.first_name);
+
+            ArrayList<VKApiUserFull> tempUsers = new ArrayList<VKApiUserFull>();
+            for (VKApiUserFull user : users) {
+                tempUsers.add(user);
             }
-        });
+
+            Collections.sort(tempUsers, new Comparator<VKApiUserFull>() {
+                @Override
+                public int compare(VKApiUserFull lhs, VKApiUserFull rhs) {
+                    return lhs.first_name.compareTo(rhs.first_name);
+                }
+            });
 
 
-        VKApiUserFull lastUser = null;
-        for(VKApiUserFull user:tempUsers) {
-            if (!theSameLastNameLetter(user,lastUser))
-                convertedUsers.add(new HeaderItem(user.first_name.substring(0,1)));
-            Item item = new UserItem(user);
-            convertedUsers.add(item);
-            lastUser = user;
+            VKApiUserFull lastUser = null;
+            for (VKApiUserFull user : tempUsers) {
+                if (!theSameLastNameLetter(user, lastUser))
+                    convertedUsers.add(new HeaderItem(user.first_name.substring(0, 1)));
+                Item item = new UserItem(user);
+                convertedUsers.add(item);
+                lastUser = user;
+            }
         }
         return convertedUsers;
     }
-
     private static boolean theSameLastNameLetter(VKApiUserFull user1, VKApiUserFull user2){
         if(user1 == null || user2 == null){
             return false;
@@ -85,30 +90,30 @@ public class ItemHelper {
         return user1.first_name.substring(0,1).equals(user2.first_name.substring(0,1));
     }
 
-    public static class ObservableUpdatesArray extends ObservableArray<Update>{
+    public static class ObservableUpdatesArray extends ObservableArray<Update> {
 
         private boolean addedNew = false;
 
         public ObservableUpdatesArray(ArrayList<? extends Update> items) {
-            super(items,20);
+            super(items, 20);
         }
 
         @Override
-        public List<Item> convert(List<? extends Update> source,boolean first) {
-            return convertUpdates(source,first);
+        public List<Item> convert(List<? extends Update> source, boolean first) {
+            return convertUpdates(source, first);
         }
 
         @Override
         public void newItem(final Update newUpdate) {
 
-            for(int i = 0; i < items.size() ; i++){
+            for (int i = 0; i < items.size(); i++) {
                 Object itemTemp = items.get(i);
                 int unix = 0;
 
                 Update updateTemp = (Update) itemTemp;
                 unix = updateTemp.getUnix();
-                if(unix<newUpdate.getUnix()){
-                    items.add(i,newUpdate);
+                if (unix < newUpdate.getUnix()) {
+                    items.add(i, newUpdate);
                     break;
                 }
             }
@@ -117,53 +122,51 @@ public class ItemHelper {
                 add(newUpdate);
             }}, false);
             Item convertedItem = newConvertedItems.get(0);
-            convertedItem.setNew(true);
+            convertedItem.setNew(newEnabled);
             //convertedItems.add(addedNew? 1: 0,convertedItem );
 
-            for(int i = 0; i < convertedItems.size() ; i++){
+            for (int i = 0; i < convertedItems.size(); i++) {
                 Object convertedItemTemp = get(i).getContent();
                 int unix = 0;
-                if(!(convertedItemTemp instanceof Update))
+                if (!(convertedItemTemp instanceof Update))
                     continue;
 
                 Update updateTemp = (Update) convertedItemTemp;
                 unix = updateTemp.getUnix();
-                if(unix<newUpdate.getUnix()){
-                    if(i==1)
-                        if(!addedNew){
+                if (unix < newUpdate.getUnix()) {
+                    if (i == 1)
+                        if (!addedNew) {
                             Item nowDivider = new DateItem(0);
-                            nowDivider.setNew(true);
+                            nowDivider.setNew(newEnabled);
                             convertedItems.add(0, nowDivider);
                             addedNew = true;
                         }
 
-                    convertedItems.add(i,convertedItem);
+                    convertedItems.add(i, convertedItem);
+                    offset++;
+                    // потому что ебать
                     break;
                 }
             }
-            offset++;// потому что ебать
         }
 
-        public boolean recreateHeaders(){
-            if( !convertedItems.isEmpty()) {
-                addedNew= false;
+        public Boolean recreateHeaders() {
+            if (!convertedItems.isEmpty()) {
+                addedNew = false;
                 Item topItem = convertedItems.get(0);
                 if (topItem instanceof DateItem) {
 
                     DateItem nowDateItem = (DateItem) topItem;
 
                     if (nowDateItem.getContent() == 0) {
-
                         Update update = items.get(1);
                         nowDateItem.recreate(update.getUnix());
 
                         return true;
-
-
                     }
-
                 }
             }
+            // мы не поменяли итемы, значит ничего не должно произойти
             return false;
         }
     }
@@ -189,6 +192,7 @@ public class ItemHelper {
         protected int offset = 0;
         protected final ArrayList<Item> convertedItems = new ArrayList<Item>();
         protected final ArrayList<T> items = new ArrayList<T>();
+        protected boolean newEnabled = true;
 
         public ObservableArray(ArrayList<? extends T> items, int startCount){
             for(T item : items) {
@@ -208,7 +212,7 @@ public class ItemHelper {
             //Log.i("AGCY SPY", "Converting. Items: " + adapter.size()+", offset: "+offset+", count: "+count);
             try {
                 int itemsCount = items.size();
-                if(offset == itemsCount)
+                if(offset >= itemsCount)
                     return false;
 
                 int least = items.size() - offset;
@@ -216,10 +220,10 @@ public class ItemHelper {
                     count = least;
                 }
                 convertedItems.addAll(convert(items.subList(offset, offset + count),first));
-                offset = offset+ count;
+                offset = offset + count;
             }
             catch(Exception exp){
-                Log.wtf("AGCY SPY", "WOWOW chill out guy");
+                Log.wtf("AGCY SPY", "Observer array error",exp);
                 return false;
             }
             return true;
@@ -247,6 +251,14 @@ public class ItemHelper {
         }
         public void removeConverted(Item item){
             convertedItems.remove(item);
+        }
+
+        public void disableNewAnimation() {
+            newEnabled = false;
+        }
+
+        public void enableNewAnimation() {
+            newEnabled = true;
         }
     }
 }

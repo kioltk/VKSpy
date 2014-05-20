@@ -22,9 +22,7 @@ public abstract class Update {
         this.userid = userid;
         this.unix = unix;
 
-        convertedTime = convertTime();
-        convertedDate = convertDate();
-        convertedSmartTime = convertSmartTime();
+        //convertedDate = convertDate();
 
         owner = Memory.getUserById(userid);
 
@@ -55,7 +53,7 @@ public abstract class Update {
     }
 
     public Boolean compareDays(Update anotherUpdate) {
-        return anotherUpdate != null && convertDate().equals(anotherUpdate.convertDate());
+        return anotherUpdate != null && Helper.checkOneDay(anotherUpdate.getUnix(), this.getUnix());
     }
 
     public Integer getUnix(){

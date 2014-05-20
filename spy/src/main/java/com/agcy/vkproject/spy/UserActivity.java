@@ -59,7 +59,7 @@ public class UserActivity extends ActionBarActivity {
             if (user.online_mobile)
                 status.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.online_mobile_grey, 0);
         }else{
-            status.setText(Helper.getLastSeen(userid));
+            status.setText(Helper.getLastSeen(user));
         }
         ImageLoader.getInstance().displayImage(user.getBiggestPhoto(), photo);
 

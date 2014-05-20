@@ -7,6 +7,8 @@ public class Status extends Update {
     public Status(int userid, int unix, boolean online) {
         super(userid,unix);
         this.online = online;
+
+        convertedTime = convertTime();
     }
     public boolean isOnline() {
         return online;

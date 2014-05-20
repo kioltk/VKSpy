@@ -1,6 +1,7 @@
 package com.agcy.vkproject.spy.Fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -16,7 +17,7 @@ import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
 import com.agcy.vkproject.spy.Models.Update;
 import com.agcy.vkproject.spy.R;
-import com.vk.sdk.api.model.VKApiUser;
+import com.agcy.vkproject.spy.UserActivity;
 import com.vk.sdk.api.model.VKApiUserFull;
 
 import java.util.ArrayList;
@@ -27,19 +28,18 @@ import java.util.ArrayList;
 public class UsersListFragment extends Fragment {
 
     private ArrayList<VKApiUserFull> users;
-    private final Context context;
-    private OnSelectedListener selectedListener;
+    private Context context;
     private Helper.InitializationListener initializationListener = new Helper.InitializationListener() {
         @Override
         public void onLoadingEnded() {
 
-            users = Memory.getUsers();
+            users = Memory.getFriends();
             create();
         }
 
         @Override
         public void onDownloadingEnded() {
-            users = Memory.getUsers();
+            users = Memory.getFriends();
             create();
         }
     };
@@ -56,19 +56,16 @@ public class UsersListFragment extends Fragment {
                     adapter.notifyDataSetChanged();
             }
         });
-    }
-
-    public UsersListFragment(Context context, OnSelectedListener userSelectedListener){
-        this.context = context;
+        this.context = getActivity();
         if(Memory.users.isEmpty()) {
             users = new ArrayList<VKApiUserFull>();
             Helper.addInitializationListener(initializationListener);
         }
         else{
-            users = Memory.getUsers();
+            users = Memory.getFriends();
         }
-        setOnUserSelectedListener(userSelectedListener);
     }
+
 
     View rootView;
     @Override
@@ -83,24 +80,27 @@ public class UsersListFragment extends Fragment {
 
             ListView listView = (ListView) rootView.findViewById(R.id.list);
             adapter = new UserListAdapter(users, context);
-            listView.setAdapter(adapter);
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    if(selectedListener !=null)
-                        selectedListener.onSelect(((UserItem) parent.getItemAtPosition(position)).getContent());
+
+                    UserItem item = (UserItem) parent.getItemAtPosition(position);
+
+                    VKApiUserFull user = item.getContent();
+
+                    Intent intent = new Intent(context, UserActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("id", user.id);
+                    intent.putExtras(bundle);
+                    startActivity(intent);
+
                 }
             });
+            listView.setAdapter(adapter);
             rootView.findViewById(R.id.loading).setVisibility(View.GONE);
         }else{
             rootView.findViewById(R.id.loading).setVisibility(View.VISIBLE);
         }
     }
 
-    public void setOnUserSelectedListener(OnSelectedListener listener){
-        this.selectedListener = listener;
-    }
-    public static abstract class OnSelectedListener {
-        public abstract void onSelect(VKApiUser user);
-    }
 }

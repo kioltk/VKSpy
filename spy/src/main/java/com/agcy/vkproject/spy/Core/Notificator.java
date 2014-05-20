@@ -50,7 +50,7 @@ public class Notificator {
                 notifyEvents.add(new Event(update));
             }
         }
-        showPopup(popupEvents);
+        //showPopup(popupEvents);
         showNotification(notifyEvents);
     }
 
@@ -60,11 +60,11 @@ public class Notificator {
         switch (update.getType()){
             case LongPollService.Update.TYPE_OFFLINE:
             case LongPollService.Update.TYPE_ONLINE:
-                return Memory.isTracked(update.getUser());
+                //return Memory.isTracked(update.getUser());
             case LongPollService.Update.TYPE_CHAT_TYPING:
             case LongPollService.Update.TYPE_USER_TYPING:
             default:
-                return true;
+                return false;
         }
     }
     public static Boolean updateShouldNotify(LongPollService.Update update){
@@ -73,6 +73,7 @@ public class Notificator {
             case LongPollService.Update.TYPE_ONLINE:
                 return Memory.isTracked(update.getUser());
             case LongPollService.Update.TYPE_CHAT_TYPING:
+                return false;
             case LongPollService.Update.TYPE_USER_TYPING:
             default:
                 return true;
@@ -85,7 +86,6 @@ public class Notificator {
         if(!preferences.getBoolean("status",true) || events.isEmpty()){
             return;
         }
-        //todo: define way to show popup
         Toast toast = new Toast(context);
 
 
@@ -112,8 +112,10 @@ public class Notificator {
                             .setSmallIcon(R.drawable.ic_stat_spy)
                             .setContentTitle(event.headerText)
                             .setContentText(event.messageText)
+                            .setAutoCancel(true)
                             .setDefaults( Notification.DEFAULT_LIGHTS | Notification.DEFAULT_VIBRATE)
                             .setContentInfo("VK Spy");
+
             SharedPreferences prefs = context.getSharedPreferences("notification", Context.MODE_MULTI_PROCESS);
 
             String ringtoneUri = prefs.getString("notifications_ringtone", "");
@@ -129,6 +131,7 @@ public class Notificator {
                             resultIntent,
                             PendingIntent.FLAG_UPDATE_CURRENT
                     );
+
             mBuilder.setContentIntent(resultPendingIntent);
             final NotificationManager mNotificationManager =
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -150,7 +153,8 @@ public class Notificator {
                 public void onLoadingComplete(String s, View view, Bitmap bitmap) {
 
                     mBuilder.setLargeIcon(bitmap);
-                    mNotificationManager.notify(mId, mBuilder.build());
+                    Notification notification = mBuilder.build();
+                    mNotificationManager.notify(mId, notification);
 
                 }
 

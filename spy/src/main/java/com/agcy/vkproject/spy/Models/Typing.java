@@ -7,6 +7,7 @@ public class Typing extends Update {
     public Typing(int userid,int time){
         super(userid,time);
 
+        convertedSmartTime = convertSmartTime();
         // :O нарефакторился, что класс совсемушки пустой стал(
     }
 

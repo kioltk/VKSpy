@@ -862,6 +862,12 @@ public class VKApiUserFull extends VKApiUser implements android.os.Parcelable {
             return new VKApiUserFull[size];
         }
     };
+
+    /**
+     * Моя шляпа
+     *
+     */
+    public Boolean isFriend = false;
     public String getBiggestPhoto(){
         String biggest = photo.getBiggest();
         if(biggest == null){
@@ -873,5 +879,8 @@ public class VKApiUserFull extends VKApiUser implements android.os.Parcelable {
 
         }
         return biggest;
+    }
+    public boolean isFemale(){
+        return sex == Sex.FEMALE;
     }
 }

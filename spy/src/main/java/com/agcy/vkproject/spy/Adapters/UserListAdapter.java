@@ -5,7 +5,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import com.agcy.vkproject.spy.Adapters.CustomItems.HeaderItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.Item;
+import com.agcy.vkproject.spy.Adapters.CustomItems.UserItem;
 import com.vk.sdk.api.model.VKApiUserFull;
 
 import java.util.ArrayList;
@@ -51,6 +53,12 @@ public class UserListAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         Item item = getItem(position);
         View rootView = item.getView(context);
+        if(!items.isLast(position)){
+            if(getItem(position+1) instanceof HeaderItem){
+                UserItem userItem = (UserItem) item;
+                userItem.removeDivider();
+            }
+        }
         return rootView;
     }
 }

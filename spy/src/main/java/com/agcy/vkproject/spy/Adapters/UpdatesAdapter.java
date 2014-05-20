@@ -7,10 +7,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.ScaleAnimation;
-import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 
@@ -20,6 +19,7 @@ import com.agcy.vkproject.spy.Adapters.CustomItems.OnlineItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.UpdateItem;
 import com.agcy.vkproject.spy.Models.Update;
 import com.agcy.vkproject.spy.R;
+import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.ValueAnimator;
 
 import java.util.ArrayList;
@@ -31,9 +31,11 @@ public class UpdatesAdapter extends BaseAdapter {
 
     protected final Context context;
     protected final ItemHelper.ObservableUpdatesArray items;
-    protected View lastTodayView;
-    protected Item lastTodayItem;
     protected boolean loading = false;
+    protected View nowView;
+    protected DateItem nowItem;
+    protected View todayView;
+    protected DateItem todayItem;
 
     public UpdatesAdapter(ArrayList<? extends Update> updates, Context context){
         this.items = new ItemHelper.ObservableUpdatesArray(updates);
@@ -101,7 +103,7 @@ public class UpdatesAdapter extends BaseAdapter {
 
                     View circle = bottomContentView.findViewById(R.id.circle);
 
-                    ScaleAnimation blinkAnimation = new ScaleAnimation(0.5f, 1, 0.5f, 1, Animation.RELATIVE_TO_SELF, (float)0.5, Animation.RELATIVE_TO_SELF, 0.5f);
+                    ScaleAnimation blinkAnimation = new ScaleAnimation(0.5f, 1, 0.5f, 1, Animation.RELATIVE_TO_SELF, (float) 0.5, Animation.RELATIVE_TO_SELF, 0.5f);
                     blinkAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
                     blinkAnimation.setDuration(750);
                     blinkAnimation.setRepeatMode(Animation.REVERSE);
@@ -111,15 +113,10 @@ public class UpdatesAdapter extends BaseAdapter {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            if(loading)
+                            if (loading)
                                 return;
                             loading = true;
-                            try {
-                                Thread.sleep(1500);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            items.convertMore(15);
+                            loadMore();
                             handler.post(new Runnable() {
                                 @Override
                                 public void run() {
@@ -130,8 +127,7 @@ public class UpdatesAdapter extends BaseAdapter {
                                 }
                             });
                         }
-                    })       .start()
-                    ;
+                    }).start();
                 }
             }
         } else {
@@ -149,7 +145,23 @@ public class UpdatesAdapter extends BaseAdapter {
                 ViewGroup bottomTimelineView = (ViewGroup) inflater.inflate(R.layout.list_item_timeline_middle_start,null);
                 bottomTimelineContainer.addView(bottomTimelineView);
 
+
+                DateItem dateItem = (DateItem) item;
+
+                if(dateItem.isNow()){
+                    nowView = rootView;
+                    nowItem = dateItem;
+                }else{
+                    if(dateItem.isToday()) {
+                        todayView = rootView;
+                        todayItem = dateItem;
+                    }
+                }
+
                 if(position==0) {
+                    // нам нужно сохранить Now и Today итемы, для дальнейшей работы с ними
+                    // костыль
+
 
                     topTimelineContainer.setVisibility(View.GONE);
                 }
@@ -181,63 +193,109 @@ public class UpdatesAdapter extends BaseAdapter {
             notifyDataSetChanged();
         }
     };
+
+    public void pauseNew() {
+        items.disableNewAnimation();
+    }
+
+    public void resumeNew() {
+
+        items.enableNewAnimation();
+    }
+
+    protected void loadMore() {
+
+        Log.i("AGCY SPY","Load more");
+        final Handler handler = new Handler();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if(loading)
+                    return;
+
+                loading = true;
+
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                items.convertMore(100);
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        loading = false;
+                        notifyDataSetChanged();
+                    }
+                });
+            }
+        }).start();
+    }
+
     public static abstract class NewItemListener {
         public abstract void newItem(Update Item);
     }
 
-    public void removeLastToday(){
-        if(lastTodayView != null){
-            ValueAnimator anim = ValueAnimator.ofFloat(1f, 0f);
-            anim.setDuration(700);
-            anim.setInterpolator(new AccelerateInterpolator());
 
-            final View finalRootView = lastTodayView;
+    public void recreateHeaders() {
+        Log.i("AGCY SPY","Notified to recreate headers");
+        Boolean recreateItemsStatus = items.recreateHeaders();
 
-            final int height = finalRootView.getMeasuredHeight();
-            Log.i("AGCY SPY ANIMATION", "Default height :" + height);
-            anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                    Float value = (Float) valueAnimator.getAnimatedValue();
-                    int convertedHeight = (int) ((height * value )+1);
-                    Log.i("AGCY SPY ANIMATION", "Height :" + convertedHeight);
-                    //if(finalRootView instanceof AbsListView) {
-                        finalRootView.setLayoutParams(
-                                new AbsListView.LayoutParams(
-                                        ViewGroup.LayoutParams.MATCH_PARENT,
-                                        convertedHeight
-                                )
-                        );
-                    /*}else {
-                        finalRootView.setLayoutParams(
-                                new RelativeLayout.LayoutParams(
-                                        ViewGroup.LayoutParams.MATCH_PARENT,
-                                        convertedHeight
-                                )
-                        );
-                    }*/
+        if(recreateItemsStatus) {
 
-                    if(value == 0){
-                        if(lastTodayItem!=null) {
-                            items.removeConverted(lastTodayItem);
-                            lastTodayItem = null;
-                            lastTodayView = null;
-                            notifyDataSetChanged();
-                        }
-                        //callback.run();
+            if(todayItem!=null && todayView!=null) {
+                todayItem.setDeleted();
+
+                final View dismissView = todayView;
+                final Item dismissItem = todayItem;
+                final ViewGroup.LayoutParams lp = dismissView.getLayoutParams();
+                final int originalHeight = dismissView.getHeight();
+
+                items.removeConverted(dismissItem);
+                ValueAnimator animator = ValueAnimator.ofInt(originalHeight,1).setDuration(1000);
+                animator.setInterpolator(new DecelerateInterpolator());
+
+                animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
+
+                        lp.height = (Integer) valueAnimator.getAnimatedValue();
+                        dismissView.setLayoutParams(lp);
+                        //Log.i("AGCY SPY ANIMATION","Current height: "+valueAnimator.getAnimatedValue()+" item's height: "+dismissView.getHeight()+" min height"+ dismissView.getMinimumHeight());
+                    }
+                });
+                animator.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animator) {
                     }
 
-                }
+                    @Override
+                    public void onAnimationEnd(Animator animator) {
+                        todayItem = nowItem;
+                        todayView = nowView;
 
-            });
-            anim.start();
+                        nowItem = null;
+                        nowView = null;
+
+                        notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animator) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animator) {
+
+                    }
+                });
+                animator.start();
+
+                //notifyDataSetChanged();
+            }
+
+
         }
-    }
-
-    public void notifyRecreate() {
-        if (items.recreateHeaders())
-            removeLastToday();
-
-
     }
 }

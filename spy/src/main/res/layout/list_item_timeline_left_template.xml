@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="1dp"
+    android:layout_height="match_parent"
     android:minHeight="1dp"
+    android:background="#fff"
     android:layout_width="match_parent">
     <RelativeLayout
-        android:id="@+id/timelineContainer"
-        android:gravity="center"
+        android:background="@drawable/update_item_selector"
+        android:layout_width="match_parent"
+        android:layout_height="54dp"/>
+    <com.agcy.vkproject.spy.Adapters.TimelineViews.TimelineView
+        android:id="@+id/timelineView"
         android:layout_marginLeft="110dp"
         android:layout_width="50dp"
-        android:layout_height="wrap_content">
+        android:minHeight="54dp"
+        android:layout_height="match_parent"/>
 
-        </RelativeLayout>
     <RelativeLayout
         android:id="@+id/contentContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="54dp"/>
 </RelativeLayout>

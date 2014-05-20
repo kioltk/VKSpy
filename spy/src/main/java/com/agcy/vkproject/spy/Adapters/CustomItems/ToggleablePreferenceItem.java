@@ -24,7 +24,7 @@ public abstract class ToggleablePreferenceItem extends PreferenceItem {
     @Override
     public View getView(Context context) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View rootView = inflater.inflate(R.layout.list_item_toggleable_preference, null);
+        View rootView = inflater.inflate(R.layout.list_item_preference_toggleable, null);
 
         TextView titleView = (TextView) rootView.findViewById(R.id.title);
         titleView.setText(title);
@@ -35,7 +35,7 @@ public abstract class ToggleablePreferenceItem extends PreferenceItem {
             descriptionView.setVisibility(View.VISIBLE);
         }
 
-        CompoundButton switcher = (CompoundButton) rootView.findViewById(R.id.toggler);
+        final CompoundButton switcher = (CompoundButton) rootView.findViewById(R.id.toggler);
         switcher.setChecked(isChecked);
         switcher.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -49,6 +49,7 @@ public abstract class ToggleablePreferenceItem extends PreferenceItem {
             @Override
             public void onClick(View v) {
                 isChecked = !isChecked;
+                switcher.setChecked(isChecked);
                 ToggleablePreferenceItem.this.onToggle(isChecked);
             }
         });

@@ -32,6 +32,7 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
     <TextView
+        android:visibility="gone"
         android:gravity="center"
         android:text="More settings coming soon"
         android:layout_below="@+id/user"
@@ -39,6 +40,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
     <ListView
+        android:divider="@drawable/list_item_divider"
+        android:id="@+id/list"
+        android:layout_below="@+id/user"
+        android:layout_above="@+id/logout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <ListView
+        android:visibility="gone"
         android:id="@android:id/list"
         android:layout_below="@+id/user"
         android:layout_above="@+id/logout"

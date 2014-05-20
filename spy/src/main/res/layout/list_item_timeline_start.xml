@@ -8,16 +8,16 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="54dp">
-    <View
-        android:id="@+id/circle"
-        android:background="@drawable/circle"
-        android:layout_width="12dp"
-        android:layout_height="12dp" />
-    <View
-        android:background="@color/blue_timeline"
-        android:layout_width="2dp"
-        android:layout_height="21dp"/>
+        <View
+            android:id="@+id/circle"
+            android:background="@drawable/circle"
+            android:layout_width="12dp"
+            android:layout_height="12dp" />
+        <View
+            android:background="@color/blue_timeline"
+            android:layout_width="2dp"
+            android:layout_height="21dp"/>
 
 
-</LinearLayout>
-    </RelativeLayout>
+    </LinearLayout>
+</RelativeLayout>

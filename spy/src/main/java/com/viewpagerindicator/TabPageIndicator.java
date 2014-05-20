@@ -282,7 +282,7 @@ public class TabPageIndicator extends HorizontalScrollView implements PageIndica
             }else {
                 TextView titleView = new TextView(context);
                 titleView.setText(((String) content).toUpperCase());
-                titleView.setTextColor(context.getResources().getColorStateList(R.drawable.text_color_selector));
+                titleView.setTextColor(context.getResources().getColorStateList(R.drawable.tab_text_color_selector));
                 titleView.setTypeface(Typeface.DEFAULT_BOLD);
 
                 titleView.setLayoutParams(new ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));

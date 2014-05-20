@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
+import com.agcy.vkproject.spy.R;
 import com.agcy.vkproject.spy.Receivers.NetworkStateReceiver;
 import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKRequest;
@@ -32,6 +33,8 @@ public class LongPollService extends Service {
     public static final int ACTION_START_SAFE = 2;
     public static final int ACTION_START = 1;
     public static final int ACTION_STOP =-1;
+    public static final int ACTION_LOGOUT =-2;
+
 
     private String key;
     private String ts;
@@ -58,7 +61,8 @@ public class LongPollService extends Service {
 
                 @Override
                 public void onLost() {
-                    connection.cancel(true);
+                    if(connection!=null)
+                        connection.cancel(true);
                 }
 
             };
@@ -92,12 +96,21 @@ public class LongPollService extends Service {
                         if (connection != null) {
 
                             Log.i("AGCY SPY LONGPOLLSERVICE","stop " );
-                            connection.cancel(false);
+                            connection.cancel(true);
                             connection = null;
                             saveSettings();
+                            //stopSelf();
                             return Service.START_NOT_STICKY;
                         }
                         break;
+                    case ACTION_LOGOUT:
+                        if(connection!=null){
+                            connection.cancel(true);
+                            connection = null;
+                            clearSettings();
+                            return START_NOT_STICKY;
+                        }
+
                 }
             }else{
                 Log.i("AGCY SPY LONGPOLLSERVICE","simple call" );
@@ -200,14 +213,14 @@ public class LongPollService extends Service {
                         startLongpoll();
 
                     } catch (Exception exp) {
-                        Log.e("AGCY SPY LONGPOLL", "refreshing error" + exp.getMessage());
+                        Log.e("AGCY SPY LONGPOLL", "refreshing error", exp);
 
                     }
                 }
             });
         }catch (Exception exp){
 
-            Log.e("AGCY SPY LONGPOLLSERVICE","refreshing error reinit ");
+            Log.e("AGCY SPY LONGPOLLSERVICE","refreshing error reinit ",exp);
             Helper.initialize(getApplicationContext());
             refreshSettings();
             return;
@@ -222,7 +235,20 @@ public class LongPollService extends Service {
         key = preferences.getString("key","");
 
     }
+    private void clearSettings(){
 
+        server = null;
+        ts = null;
+        key = null;
+
+        SharedPreferences.Editor preferences = getApplicationContext().getSharedPreferences("longpoll", MODE_MULTI_PROCESS).edit();
+        preferences.putString("server", server);
+        preferences.putString("ts", ts);
+        preferences.putString("key", key);
+        preferences.commit();
+        preferences.clear();
+
+    }
     private void startLongpoll() {
 
         if(connection!=null){
@@ -255,15 +281,26 @@ public class LongPollService extends Service {
                         Log.e("AGCY SPY LONGPOLL", "update parsing error: " + exp.toString());
                     }
                 }
-                Helper.newUpdates(updates);
+
+                Log.i("AGCY SPY","longoll updates count: "+ updates.size() );
+                if(!updates.isEmpty())
+                    Helper.newUpdates(updates);
                 startLongpoll();
                 saveLongpollExecuted();
             }
 
             @Override
             public void onError(Exception exp) {
+                if(exp !=null)
+                    Log.e("AGCY SPY LONGPOLL", exp.toString() + "" + exp.getMessage());
+                else{
 
-                Log.e("AGCY SPY LONGPOLL", exp.toString() + "" + exp.getMessage());
+                    Log.e("AGCY SPY", "Longpoll undetected error. It may be called also on logout.");
+                }
+                if(exp instanceof org.apache.http.conn.HttpHostConnectException){
+                    startLongpoll();
+                }
+
                 if (exp instanceof JSONException) {
                     refreshSettings();
                 }
@@ -287,7 +324,7 @@ public class LongPollService extends Service {
     private void saveLongpollExecuted(){
         SharedPreferences preferences = getBaseContext().getSharedPreferences("longpoll", Context.MODE_MULTI_PROCESS);
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putInt("lastUpdate", (int) Helper.unixNow());
+        editor.putInt("lastUpdate", (int) Helper.getUnixNow());
         editor.commit();
 
     }
@@ -298,7 +335,6 @@ public class LongPollService extends Service {
             case Update.TYPE_ONLINE:
             case Update.TYPE_OFFLINE:
             case Update.TYPE_USER_TYPING:
-            case Update.TYPE_CHAT_TYPING:
                 return true;
             case Update.TYPE_MESSAGE:
                 int flags = Integer.valueOf(updateArray[2]);
@@ -306,6 +342,7 @@ public class LongPollService extends Service {
                     return false;
                 }
                 return true;
+            case Update.TYPE_CHAT_TYPING:
             default:
                 return false;
         }
@@ -319,7 +356,7 @@ public class LongPollService extends Service {
         public static final int TYPE_ONLINE = 8;
         public static final int TYPE_OFFLINE = 9;
         public static final int TYPE_USER_TYPING = 61;
-        public static final int TYPE_CHAT_TYPING = 620;// rebuild architecture to get chats also
+        public static final int TYPE_CHAT_TYPING = 62;// rebuild architecture to get chats also
 
         public static final int FLAG_MESSAGE_CHAT = 8192;
 
@@ -354,11 +391,11 @@ public class LongPollService extends Service {
                 case Update.TYPE_MESSAGE:
                     return "Новое сообщение";
                 case Update.TYPE_ONLINE:
-                    return (user.sex ==2?"Зашёл в сеть":"Зашла в сеть" ) ;
+                    return (user.sex ==2?getString(R.string.come_online_m):getString(R.string.come_online_f) ) ;
                 case Update.TYPE_OFFLINE:
-                    return (user.sex ==2?"Вышел из сети":"Вышла из сети" ) ;
+                    return (user.sex ==2?getString(R.string.gone_offline_m):getString(R.string.gone_offline_f) ) ;
                 case Update.TYPE_USER_TYPING:
-                    return (user.sex ==2?"Писал 3 минуты назад":"Писала 3 минуты назад" ) ;
+                    return (user.sex ==2?getString(R.string.was_writing_m):getString(R.string.was_writing_f) ) ;
                 case Update.TYPE_CHAT_TYPING:
                     return (user.sex ==2?"Писал в беседе 3 минуты назад":"Писала в беседе 3 минуты назад" ) ;
             }

@@ -21,5 +21,25 @@
     <string name="offline">offline</string>
     <string name="signin">Sign In</string>
     <string name="start_text">Welcome to the new era of privacy and social networking</string>
+    <string name="come_online_m">Come online</string>
+    <string name="come_online_f">Come online</string>
+    <string name="gone_offline_m">Gone offline</string>
+    <string name="gone_offline_f">Gone offline</string>
+    <string name="was_writing_m">Was typing 3 minutes ago</string>
+    <string name="was_writing_f">Was typing 3 minutes ago</string>
+    <string name="last_seen">last seen</string>
+    <string name="at">at</string>
+    <string name="ago">ago</string>
+    <string name="last_seen_f">last seen</string>
+    <string name="now">now</string>
+    <string name="today">today</string>
+    <string name="yesterday">yesterday</string>
+    <string name="moment">a moment</string>
+    <string name="min">min</string>
+    <string name="hr">hr</string>
+    <string name="hrs">hrs</string>
+    <string name="undefined">undefined</string>
+    <string name="day">d</string>
+    <string name="sec">sec</string>
 
 </resources>

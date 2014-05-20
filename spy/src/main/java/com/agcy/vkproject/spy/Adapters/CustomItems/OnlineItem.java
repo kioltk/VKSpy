@@ -62,6 +62,8 @@ public class OnlineItem extends UpdateItem {
         return rootView;
     }
 
+
+
     @Override
     public View getViewWithOwner(Context context) {
         return null;

@@ -1,11 +1,16 @@
 package com.agcy.vkproject.spy.Core;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Process;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.util.Log;
 
+import com.agcy.vkproject.spy.Longpoll.LongPollService;
 import com.agcy.vkproject.spy.MainActivity;
+import com.agcy.vkproject.spy.WelcomeActivity;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKCaptchaDialog;
 import com.vk.sdk.VKScope;
@@ -38,6 +43,49 @@ public class VKSdk {
     public static void authorize(){
         com.vk.sdk.VKSdk.authorize(sMyScope, true, true);
     }
+    public static void authorizeFirst(final Activity firstActivity) {
+        final com.vk.sdk.VKSdk vksdk = com.vk.sdk.VKSdk.instance();
+                vksdk.setSdkListener(new VKSdkListener() {
+                    @Override
+                    public void onCaptchaError(VKError captchaError) {
+
+                    }
+
+                    @Override
+                    public void onTokenExpired(VKAccessToken expiredToken) {
+
+                    }
+
+                    @Override
+                    public void onAccessDenied(VKError authorizationError) {
+
+                    }
+
+                    @Override
+                    public void onRenewAccessToken(VKAccessToken token) {
+                        super.onRenewAccessToken(token);
+
+                    }
+
+                    @Override
+                    public void onReceiveNewToken(VKAccessToken newToken) {
+
+                        SharedPreferences prefs = context.getSharedPreferences("user", context.MODE_MULTI_PROCESS);
+                        int userid  = prefs.getInt("id", 0);
+                        if(!newToken.userId.equals(String.valueOf(userid))){
+                            Memory.clearAll();
+                        }
+
+                        startMainActivity();
+                        firstActivity.finish();
+
+                        vksdk.setSdkListener(sdkBackgroundListener);
+                    }
+
+                });
+        com.vk.sdk.VKSdk.authorize(sMyScope, true, true);
+
+    }
     private static final VKSdkListener sdkBackgroundListener = new VKSdkListener() {
         @Override
         public void onCaptchaError(VKError captchaError) {
@@ -51,27 +99,47 @@ public class VKSdk {
 
         @Override
         public void onAccessDenied(VKError authorizationError) {
-
-            try {
-                new AlertDialog.Builder(context)
-                        .setMessage(authorizationError.errorMessage)
-                        .show();
-                if (authorizationError.errorReason.equals("user_denied")){
-                    Helper.DESTROYALL();
-
-                }
-            }catch (Exception exp){
-
-                android.os.Process.killProcess(Process.myPid());
+            new AlertDialog.Builder(context)
+                    .setMessage(authorizationError.errorMessage)
+                    .show();
+            if(!authorizationError.errorReason.equals("user_denied")) {
+                context.startActivity(new Intent(context, WelcomeActivity.class));
+                Helper.stopLongpoll();
             }
         }
+
         @Override
         public void onReceiveNewToken(VKAccessToken newToken) {
             startMainActivity();
+
         }
 
         @Override
         public void onAcceptUserToken(VKAccessToken token) {
+        }
+
+        @Override
+        public void onLogout() {
+
+            Intent intent = new Intent(context, WelcomeActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+
+            Memory.clearAll();
+            context.deleteDatabase("webview.db");
+            context.deleteDatabase("webviewCache.db");
+            context.deleteDatabase("webviewCookiesChromium.db");
+            context.deleteDatabase("webviewCookiesChromiumPrivate.db");
+
+            Log.i("AGCY SPY", "Databases deleted");
+
+            Intent stopLongpoll = new Intent(context, LongPollService.class);
+            Bundle bundle = new Bundle();
+            bundle.putInt(LongPollService.ACTION, LongPollService.ACTION_LOGOUT);
+            stopLongpoll.putExtras(bundle);
+            context.startService(stopLongpoll);
+
+            Helper.stopMainActivity();
         }
     };
     private static void startMainActivity() {
@@ -80,4 +148,8 @@ public class VKSdk {
         context.startActivity(startMain);
     }
 
+
+    public static void logout() {
+        com.vk.sdk.VKSdk.logout();
+    }
 }

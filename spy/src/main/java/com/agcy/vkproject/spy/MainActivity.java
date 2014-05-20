@@ -31,7 +31,6 @@ import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
-import com.vk.sdk.api.model.VKApiUser;
 import com.vk.sdk.api.model.VKApiUserFull;
 import com.vk.sdk.api.model.VKList;
 import com.vk.sdk.api.model.VKUsersArray;
@@ -65,7 +64,9 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         VKUIHelper.onCreate(this);
-        Helper.initialize(this);
+        if(!Helper.isInitialized())
+            Helper.initialize(this);
+        Helper.mainActivity(this);
         TabPageIndicator indicator = (TabPageIndicator) findViewById(R.id.mainIndicator);
 
         final ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
@@ -82,24 +83,21 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             public void onPageSelected(int position) {
+                Log.i("AGCY SPY", "Page selected: " + position);
+                if (position != 1)
+                    if (onlinesFragment != null)
+                        onlinesFragment.recreateHeaders();
             }
 
             @Override
             public void onPageScrollStateChanged(int state) {
-
-                if (onlinesFragment != null)
-                    onlinesFragment.notifyNowRecreate();
             }
         });
 
         downloadData();
 
-        Bundle bundle = getIntent().getExtras();
-        if (bundle != null) {
-            boolean typing = bundle.getBoolean("TYPING", false);
-            if(typing)
-                mViewPager.setCurrentItem(1,true);
-        }
+
+
     }
 
 
@@ -123,7 +121,7 @@ public class MainActivity extends ActionBarActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if(Memory.loadFriends()){
+                if(Memory.loadUsers()){
                     startLongpoll();
                 }
                 handler.post(new Runnable() {
@@ -145,7 +143,8 @@ public class MainActivity extends ActionBarActivity {
                                             @Override
                                             public void run() {
 
-                                                Memory.saveUsers((VKUsersArray) response.parsedModel);
+                                                Memory.saveFriends((VKUsersArray) response.parsedModel);
+
                                                 handler.post(new Runnable() {
                                                     @Override
                                                     public void run() {
@@ -206,6 +205,7 @@ public class MainActivity extends ActionBarActivity {
                                 SharedPreferences.Editor editor = getSharedPreferences("user",MODE_MULTI_PROCESS).edit();
                                 editor.putString("name",user.first_name+ " " + user.last_name);
                                 editor.putString("photo",user.getBiggestPhoto());
+                                editor.putInt("id",user.id);
                                 editor.commit();
                             }
                         });
@@ -248,15 +248,15 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         public Integer getContent(int index) {
-            switch (index){
+            switch (index) {
                 case 0:
-                    return R.drawable.tab_vkpsy;
-                case 1:
                     return R.drawable.tab_typings;
-                case 2:
+                case 1:
                     return R.drawable.tab_onlines;
-                default:
+                case 2:
                     return R.drawable.tab_friends;
+                default:
+                    return R.drawable.tab_vkpsy;
             }
 
         }
@@ -271,24 +271,14 @@ public class MainActivity extends ActionBarActivity {
 
             switch (position) {
                 case 0:
-                    return new MainFragment();
-                case 1:
                     return new TypingsFragment();
-                case 2:
+                case 1:
                     onlinesFragment = new OnlinesFragment();
                     return onlinesFragment;
+                case 2:
+                    return new UsersListFragment();
                 default:
-                    return new UsersListFragment(getBaseContext(), new UsersListFragment.OnSelectedListener() {
-                        @Override
-                        public void onSelect(VKApiUser user) {
-
-                            Intent intent = new Intent(getBaseContext(), UserActivity.class);
-                            Bundle bundle = new Bundle();
-                            bundle.putInt("id", user.id);
-                            intent.putExtras(bundle);
-                            startActivity(intent);
-                        }
-                    });
+                    return new MainFragment();
 
             }
 
