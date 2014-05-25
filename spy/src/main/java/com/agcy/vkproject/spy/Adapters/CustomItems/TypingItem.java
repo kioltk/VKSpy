@@ -34,6 +34,14 @@ public class TypingItem extends UpdateItem {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rootView = inflater.inflate(R.layout.list_item_update_with_owner, null);
 
+
+        return reconvert(context,rootView);
+
+
+    }
+
+    @Override
+    public View reconvert(Context context, View rootView) {
         ImageView photo = (ImageView) rootView.findViewById(R.id.photo);
         TextView name = (TextView) rootView.findViewById(R.id.name);
         TextView time = (TextView) rootView.findViewById(R.id.time);
@@ -46,8 +54,6 @@ public class TypingItem extends UpdateItem {
 
 
         return rootView;
-
-
     }
 
     @Override

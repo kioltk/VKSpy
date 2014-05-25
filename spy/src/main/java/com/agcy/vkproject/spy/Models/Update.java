@@ -18,14 +18,12 @@ public abstract class Update {
     protected VKApiUserFull owner;
 
     public Update(int userid, int unix){
+        this(Memory.getUserById(userid),unix);
+    }
 
-        this.userid = userid;
+    public Update(VKApiUserFull user, int unix) {
+        this.owner = user;
         this.unix = unix;
-
-        //convertedDate = convertDate();
-
-        owner = Memory.getUserById(userid);
-
     }
 
     public VKApiUserFull getOwner(){

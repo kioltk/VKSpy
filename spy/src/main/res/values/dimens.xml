@@ -3,4 +3,16 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
-    </resources>
+    <!-- carousel temp -->
+
+    <!-- Text size -->
+    <dimen name="text_size_large">18.0sp</dimen>
+
+    <!-- Padding around the text label -->
+    <dimen name="carousel_indicator_height">48.0dip</dimen>
+    <dimen name="carousel_container_height">180.0dip</dimen>
+    <dimen name="carousel_height">228.0dip</dimen>
+
+    <!-- carousel temp -->
+
+</resources>

@@ -1,4 +1,4 @@
-package com.agcy.vkproject.spy.Adapters.TimelineViews;
+package com.agcy.vkproject.spy.Views;
 
 import android.content.Context;
 import android.content.res.Resources;

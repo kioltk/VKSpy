@@ -1,7 +1,6 @@
 package com.agcy.vkproject.spy.Adapters;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +10,7 @@ import android.widget.AbsListView;
 import com.agcy.vkproject.spy.Adapters.CustomItems.DateItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.Item;
 import com.agcy.vkproject.spy.Adapters.CustomItems.UpdateItem;
-import com.agcy.vkproject.spy.Adapters.TimelineViews.TimelineView;
+import com.agcy.vkproject.spy.Views.TimelineView;
 import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Models.Update;
 import com.agcy.vkproject.spy.R;
@@ -46,7 +45,7 @@ public class UpdatesWithOwnerAdapter extends UpdatesAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
 
 
-        long startTime = System.nanoTime();
+        //long startTime = System.nanoTime();
 
         final int height = (int) Helper.convertToDp(54);
 
@@ -184,9 +183,9 @@ public class UpdatesWithOwnerAdapter extends UpdatesAdapter {
             contentContainer.removeAllViews();
             contentContainer.addView(contentView);
         }
-        long elapsedTime = System.nanoTime() - startTime;
-        Log.i("AGCY SPY TIMER","Item created in "
-                + elapsedTime / 1000000);
+        //long elapsedTime = System.nanoTime() - startTime;
+        //Log.i("AGCY SPY TIMER","Item created in "
+          //      + elapsedTime / 1000000);
         return rootView;
     }
 

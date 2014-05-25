@@ -15,11 +15,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.agcy.vkproject.spy.Adapters.CustomItems.PreferenceItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.ToggleablePreferenceItem;
 import com.agcy.vkproject.spy.Adapters.PreferenceAdapter;
+import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Longpoll.LongPollService;
 import com.agcy.vkproject.spy.R;
 import com.agcy.vkproject.spy.SettingsActivity;
@@ -37,16 +37,15 @@ public class MainFragment extends android.support.v4.app.Fragment {
         context = getActivity();
         View rootView = inflater.inflate(R.layout.fragment_main,null);
 
-        SharedPreferences popupPreferences = context.getSharedPreferences("popup", Context.MODE_MULTI_PROCESS);
-        boolean popupStatus = popupPreferences.getBoolean("status", true);
 
         SharedPreferences longpollPreferences = context.getSharedPreferences("longpoll", Context.MODE_MULTI_PROCESS);
         boolean longpollStatus = longpollPreferences.getBoolean("status", true);
 
+        View happySanta = inflater.inflate(R.layout.main_santa, null);
 
-        TextView happySantaText = (TextView) rootView.findViewById(R.id.happySantaText);
+        TextView happySantaText = (TextView) happySanta.findViewById(R.id.happySantaText);
         happySantaText.setText(Html.fromHtml(context.getString(R.string.desc)));
-        TextView happySantaLink = (TextView) rootView.findViewById(R.id.happySantaLink);
+        TextView happySantaLink = (TextView) happySanta.findViewById(R.id.happySantaLink);
         happySantaLink.setText(Html.fromHtml("vk.com/<b>happysanta</b>"));
         happySantaLink.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,18 +70,20 @@ public class MainFragment extends android.support.v4.app.Fragment {
                 getResources(), R.drawable.underline2));
         bitmap.setTileModeX(Shader.TileMode.REPEAT);
         */
-        LinearLayout layout = (LinearLayout)rootView.findViewById(R.id.line);
+        LinearLayout layout = (LinearLayout)happySanta.findViewById(R.id.line);
         Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         int width = display.getWidth();  // deprecated
 
         for(int i = 0; width%(341*i + 1) < width;i++ ){
             layout.addView(new ImageView(context){{
-                setBackgroundDrawable(context.getResources().getDrawable(R.drawable.underline));
-                setLayoutParams(new ViewGroup.LayoutParams(341, ViewGroup.LayoutParams.MATCH_PARENT));
+                setImageResource(R.drawable.underline2);
+                setLayoutParams(new ViewGroup.LayoutParams(341, Helper.convertToDp(4)));
+                setScaleType(ScaleType.CENTER_CROP);
             }});
         }
 
         ListView preferencesView = (ListView) rootView.findViewById(R.id.preference);
+        preferencesView.addHeaderView(happySanta,null,false);
         ArrayList<PreferenceItem> preferences = new ArrayList<PreferenceItem>();
         preferences.add(new ToggleablePreferenceItem("Enable spy",null,longpollStatus) {
             @Override
@@ -95,26 +96,10 @@ public class MainFragment extends android.support.v4.app.Fragment {
                 longpollToggle(isChecked);
             }
         });
-        preferences.add(new ToggleablePreferenceItem("Enable notification", null, popupStatus) {
-            @Override
-            public void onToggle(Boolean isChecked) {
-
-                SharedPreferences preferences = context.getSharedPreferences("popup", Context.MODE_MULTI_PROCESS);
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putBoolean("status",isChecked);
-                editor.commit();
-            }
-
-            @Override
-            public void onClick() {
-
-            }
-        });
-        preferences.add(new PreferenceItem("Advanced settings",null) {
+        preferences.add(new PreferenceItem("Advanced settings") {
             @Override
             public void onClick() {
                 startActivity(new Intent(context,SettingsActivity.class));
-                Toast.makeText(context, "Ещё не сделано..", Toast.LENGTH_SHORT).show();
             }
         });
         preferencesView.setAdapter(new PreferenceAdapter(context,preferences));

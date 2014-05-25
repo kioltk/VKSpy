@@ -39,5 +39,35 @@
     <string name="undefined">undefined</string>
     <string name="day">д</string>
     <string name="sec">сек</string>
+    <string name="title_activity_filter">За кем следить</string>
+    <string name="apply">Apply</string>
+    <string name="no_tracks">Не за кем следить</string>
+    <string name="no_events">Событий пока нет</string>
+    <string name="filter_tip">Выберите за кем следить</string>
+    <string name="select_way_to_notify">Способ уведомления</string>
+    <string name="popup">Всплывающее уведомление</string>
+    <string name="notification">Уведомление в шторке</string>
+    <string name="enabled">Включено</string>
+    <string name="offline_notifications">Оффлайн уведомления</string>
+    <string name="online_notifications">Онлайн уведомления</string>
+    <string name="sound">Звук</string>
+    <string name="vibrate">Вибро</string>
+    <string name="notifications">Уведомления</string>
+    <string name="about">О приложении</string>
+    <string name="uberfunction">Суперфункция</string>
+    <string name="uberfunction_description">Слежка за Павлом Дуровым!</string>
+    <string name="got_it">Ясно</string>
+    <string name="about_desc">Какая-то инфа</string>
+    <string name="important">Important</string>
+    <string name="select_all">Select all</string>
+    <string name="deselect_all">Deselect all</string>
+
+    <plurals name="usersSelected">
+        <item quantity="zero">Никого не выбрано</item>
+        <item quantity="one">Выбран %d</item>
+        <item quantity="few">Выбрано %d</item>
+        <item quantity="many">Выбрано %d</item>
+        <item quantity="other">Выбрано %d</item>
+    </plurals>
 
 </resources>

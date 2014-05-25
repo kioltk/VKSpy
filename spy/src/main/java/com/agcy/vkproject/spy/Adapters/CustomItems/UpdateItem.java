@@ -2,15 +2,21 @@ package com.agcy.vkproject.spy.Adapters.CustomItems;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.ImageView;
 
+import com.agcy.vkproject.spy.Adapters.CustomItems.Interfaces.LoadableImage;
+import com.agcy.vkproject.spy.Adapters.CustomItems.Interfaces.Reconvertable;
 import com.agcy.vkproject.spy.Models.Update;
+import com.agcy.vkproject.spy.R;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 /**
  * Created by kiolt_000 on 28-Apr-14.
  */
-public abstract class UpdateItem extends Item {
+public abstract class UpdateItem extends Item implements LoadableImage, Reconvertable {
 
     protected final Update update;
+    protected boolean imageLoaded = false;
 
     public UpdateItem(Update update){
         this.update = update;
@@ -18,11 +24,24 @@ public abstract class UpdateItem extends Item {
     @Override
     public abstract View getView(Context context);
 
-    public void loadImage(View rootView){}
+    @Override
+    public void loadImage(View rootView) {
+        if(rootView!=null) {
+            imageLoaded = true;
+            ImageView photo = (ImageView) rootView.findViewById(R.id.photo);
 
-    public void placeHolder(View rootView) {
-
+            ImageLoader.getInstance().displayImage(update.getOwner().getBiggestPhoto(), photo);
+        }
     }
+    @Override
+    public void placeHolder(View rootView) {
+        if(rootView!=null) {
+            imageLoaded = true;
+            ImageView photo = (ImageView) rootView.findViewById(R.id.photo);
+            photo.setImageResource(R.drawable.user_placeholder);
+        }
+    }
+
 
     public abstract View getViewWithOwner(Context context);
 
@@ -32,7 +51,4 @@ public abstract class UpdateItem extends Item {
     }
 
 
-    public View reconvert(Context context, View rootView) {
-        return null;
-    }
 }

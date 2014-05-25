@@ -1,7 +1,7 @@
 <component name="libraryTable">
-  <library name="sendmelogs-0.1">
+  <library name="bugsense-3.6.1">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/spy/libs/sendmelogs-0.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/spy/libs/bugsense-3.6.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

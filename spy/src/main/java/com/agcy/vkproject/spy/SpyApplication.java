@@ -5,14 +5,19 @@ import android.app.Application;
 import android.os.Build;
 import android.util.Log;
 
+import com.bugsense.trace.BugSenseHandler;
+import com.bugsense.trace.ExceptionCallback;
+
 /**
  * Created by kiolt_000 on 02-May-14.
  */
-public class SpyApplication extends Application {
+public class SpyApplication extends Application implements ExceptionCallback {
 
     @Override
     public void onCreate() {
         super.onCreate();
+        BugSenseHandler.initAndStartSession(this,"07310e3f");
+        BugSenseHandler.setExceptionCallback(this);
         /*
         Thread.currentThread().setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
@@ -35,14 +40,18 @@ public class SpyApplication extends Application {
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        Log.i("AGCY SPY APPLICATION", "Terminate");
+        Log.i("AGCY SPY APPLICATION", "Low memory");
     }
 
     @Override
     public void onTerminate() {
         super.onTerminate();
         Log.i("AGCY SPY APPLICATION","Terminate");
+        BugSenseHandler.closeSession(this);
 
     }
 
+    @Override
+    public void lastBreath(Exception ex) {
+    }
 }

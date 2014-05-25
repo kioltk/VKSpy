@@ -17,6 +17,8 @@ import com.agcy.vkproject.spy.Adapters.CustomItems.DateItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.Item;
 import com.agcy.vkproject.spy.Adapters.CustomItems.OnlineItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.UpdateItem;
+import com.agcy.vkproject.spy.Core.Helper;
+import com.agcy.vkproject.spy.Listeners.NewUpdateListener;
 import com.agcy.vkproject.spy.Models.Update;
 import com.agcy.vkproject.spy.R;
 import com.nineoldandroids.animation.Animator;
@@ -50,8 +52,6 @@ public class UpdatesAdapter extends BaseAdapter {
 
     @Override
     public Item getItem(int position) {
-
-
         return items.get(position);
     }
 
@@ -109,25 +109,7 @@ public class UpdatesAdapter extends BaseAdapter {
                     blinkAnimation.setRepeatMode(Animation.REVERSE);
                     blinkAnimation.setRepeatCount(Animation.INFINITE);
                     circle.startAnimation(blinkAnimation);
-                    final Handler handler = new Handler();
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (loading)
-                                return;
-                            loading = true;
-                            loadMore();
-                            handler.post(new Runnable() {
-                                @Override
-                                public void run() {
-
-                                    loading = false;
-                                    notifyDataSetChanged();
-                                    bottomContentView.setVisibility(View.GONE);
-                                }
-                            });
-                        }
-                    }).start();
+                    loadMore();
                 }
             }
         } else {
@@ -159,9 +141,8 @@ public class UpdatesAdapter extends BaseAdapter {
                 }
 
                 if(position==0) {
-                    // нам нужно сохранить Now и Today итемы, для дальнейшей работы с ними
-                    // костыль
 
+                    rootView.setPadding(0, Helper.convertToDp(16),0,0);
 
                     topTimelineContainer.setVisibility(View.GONE);
                 }
@@ -186,7 +167,7 @@ public class UpdatesAdapter extends BaseAdapter {
         return rootView;
 
     }
-    public NewItemListener newItemListener = new NewItemListener() {
+    public NewUpdateListener newUpdateListener = new NewUpdateListener() {
         @Override
         public void newItem(Update item) {
             items.newItem(item);
@@ -230,10 +211,6 @@ public class UpdatesAdapter extends BaseAdapter {
                 });
             }
         }).start();
-    }
-
-    public static abstract class NewItemListener {
-        public abstract void newItem(Update Item);
     }
 
 

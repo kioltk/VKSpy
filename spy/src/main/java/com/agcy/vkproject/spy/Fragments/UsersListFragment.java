@@ -10,11 +10,11 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.agcy.vkproject.spy.Adapters.CustomItems.UserItem;
-import com.agcy.vkproject.spy.Adapters.UpdatesAdapter;
 import com.agcy.vkproject.spy.Adapters.UserListAdapter;
 import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
+import com.agcy.vkproject.spy.Fragments.Interfaces.LoadImagesOnScrollListener;
+import com.agcy.vkproject.spy.Listeners.NewUpdateListener;
 import com.agcy.vkproject.spy.Models.Update;
 import com.agcy.vkproject.spy.R;
 import com.agcy.vkproject.spy.UserActivity;
@@ -27,8 +27,8 @@ import java.util.ArrayList;
  */
 public class UsersListFragment extends Fragment {
 
-    private ArrayList<VKApiUserFull> users;
-    private Context context;
+    public ArrayList<VKApiUserFull> users;
+    protected Context context;
     private Helper.InitializationListener initializationListener = new Helper.InitializationListener() {
         @Override
         public void onLoadingEnded() {
@@ -43,13 +43,13 @@ public class UsersListFragment extends Fragment {
             create();
         }
     };
-    private UserListAdapter adapter;
+    protected UserListAdapter adapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
-        Memory.addOnlineListener(new UpdatesAdapter.NewItemListener() {
+        //setRetainInstance(true);
+        Memory.addOnlineListener(new NewUpdateListener() {
             @Override
             public void newItem(Update Item) {
                 if(adapter!=null)
@@ -67,7 +67,7 @@ public class UsersListFragment extends Fragment {
     }
 
 
-    View rootView;
+    protected View rootView;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_list, null);
@@ -75,28 +75,26 @@ public class UsersListFragment extends Fragment {
         return rootView;
     }
 
-    private void create() {
+    protected void create() {
         if(!users.isEmpty()) {
 
-            ListView listView = (ListView) rootView.findViewById(R.id.list);
+            final ListView listView = (ListView) rootView.findViewById(R.id.list);
             adapter = new UserListAdapter(users, context);
+            listView.setAdapter(adapter);
+            listView.setOnScrollListener(new LoadImagesOnScrollListener(listView));
+
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                    UserItem item = (UserItem) parent.getItemAtPosition(position);
-
-                    VKApiUserFull user = item.getContent();
-
                     Intent intent = new Intent(context, UserActivity.class);
                     Bundle bundle = new Bundle();
-                    bundle.putInt("id", user.id);
+                    bundle.putInt("id", (int) id);
                     intent.putExtras(bundle);
                     startActivity(intent);
 
                 }
             });
-            listView.setAdapter(adapter);
             rootView.findViewById(R.id.loading).setVisibility(View.GONE);
         }else{
             rootView.findViewById(R.id.loading).setVisibility(View.VISIBLE);

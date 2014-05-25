@@ -10,6 +10,8 @@
         <item name="android:actionBarStyle">@style/MyActionBar</item>
         <item name="android:homeAsUpIndicator">@drawable/ic_back_button</item>
         <item name="android:windowContentOverlay">@null</item>
+        
+        
     </style>
     <style name="AppTheme.NoTitle" parent="AppTheme">
         <item name="android:windowNoTitle">true</item>
@@ -51,7 +53,8 @@
 
         <item name="android:background">@drawable/tab_indicator_item_normal</item>
         <item name="android:titleTextStyle">@style/MyActionBar.TextStyle</item>
-
+        <item name="android:divider">@drawable/tab_indicator_divider</item>
+        
     </style>
     <style name="MyActionBar.TextStyle" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
 

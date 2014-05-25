@@ -1,90 +1,103 @@
 package com.agcy.vkproject.spy.Fragments;
 
-import android.util.Log;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.TextView;
 
 import com.agcy.vkproject.spy.Adapters.UpdatesAdapter;
 import com.agcy.vkproject.spy.Adapters.UpdatesWithOwnerAdapter;
 import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
+import com.agcy.vkproject.spy.Listeners.NewUpdateListener;
 import com.agcy.vkproject.spy.Models.Update;
+import com.agcy.vkproject.spy.R;
 
 
-public class OnlinesFragment extends ListFragment {
+public class OnlinesFragment extends UpdatesFragment {
 
-    private UpdatesAdapter.NewItemListener fillContentListener = new UpdatesAdapter.NewItemListener() {
+    private NewUpdateListener contentListener = new NewUpdateListener() {
         @Override
         public void newItem(Update item) {
-            startLoading();
+            createContent();
+        }
+    };
+    private Helper.TrackUpdatedListener trackUpdateListener = new Helper.TrackUpdatedListener() {
+        @Override
+        public void onUpdate() {
+            recreateContent();
         }
     };
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        Log.i("AGCY SPY","OnlinesFragment destroyed");
-    }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        Log.i("AGCY SPY","OnlinesFragment paused");
-        if(adapter!=null){
-            ((UpdatesAdapter)adapter).pauseNew();
-            ((UpdatesAdapter)adapter).recreateHeaders();
-        }
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
+        inflater.inflate(R.layout.filter_button, (ViewGroup) rootView, true);
 
+        return rootView;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.i("AGCY SPY","OnlinesFragment resumed");
-        if(adapter!=null){
-            ((UpdatesAdapter)adapter).resumeNew();
-        }
-    }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-
-        Log.i("AGCY SPY","OnlinesFragment detached");
-    }
 
     @Override
     public BaseAdapter adapter() {
 
         UpdatesWithOwnerAdapter adapter =
-                new UpdatesWithOwnerAdapter(Helper.convertToStatus(Memory.getOnlines()), context);
+                new UpdatesWithOwnerAdapter(Helper.convertToStatus(Memory.getTrackedOnlines()), context);
         return adapter;
 
     }
 
     @Override
-    protected void onLoad() {
-        super.onLoad();
+    public void recreateContent() {
 
-        if(adapter == null || adapter.isEmpty()){
-            Memory.addOnlineOnceListener(this.fillContentListener);
-        }else{
-            Memory.addOnlineListener(((UpdatesAdapter)adapter).newItemListener);
+        rootView.findViewById(R.id.filter_tip).setVisibility(View.GONE);
+        super.recreateContent();
+    }
+
+    @Override
+    protected void onContentBinded() {
+        if (adapter == null || adapter.isEmpty()) {
+            if (Memory.getCountOfTracked() == 0) {
+                rootView.findViewById(R.id.filter_tip).setVisibility(View.VISIBLE);
+                ((TextView) rootView.findViewById(R.id.status)).setText(R.string.no_tracks);
+            }else{
+                rootView.findViewById(R.id.filter_tip).setVisibility(View.GONE);
+                ((TextView) rootView.findViewById(R.id.status)).setText(getAdapterEmptyText());
+            }
+        } else {
+            rootView.findViewById(R.id.filter_tip).setVisibility(View.GONE);
         }
 
     }
+
+
+    @Override
+    public void bindContentListener(){
+        Memory.addOnlineOnceListener(contentListener);
+    }
+
+    @Override
+    public void bindGlobalListener() {
+        Helper.setTrackUpdatedListener(this.trackUpdateListener);
+    }
+
+    @Override
+    public void bindNewItemListener() {
+        Memory.addOnlineListener(((UpdatesAdapter) adapter).newUpdateListener);
+    }
+
 
     @Override
     public void onDestroy() {
 
         super.onDestroy();
-        if(adapter!=null)
-            Memory.removeOnlineListener(((UpdatesAdapter)adapter).newItemListener);
-
+        if(adapter!=null) {
+            Memory.removeOnlineListener(((UpdatesAdapter) adapter).newUpdateListener);
+        }
     }
 
-    public void recreateHeaders(){
-
-        if(adapter!=null)
-            ((UpdatesAdapter)adapter).recreateHeaders();
-    }
 }

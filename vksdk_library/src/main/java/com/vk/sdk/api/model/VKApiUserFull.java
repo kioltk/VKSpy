@@ -529,6 +529,8 @@ public class VKApiUserFull extends VKApiUser implements android.os.Parcelable {
         return this;
     }
 
+
+
     public static class Relative extends VKApiModel implements android.os.Parcelable, Identifiable {
 
         public int id;
@@ -864,9 +866,13 @@ public class VKApiUserFull extends VKApiUser implements android.os.Parcelable {
     };
 
     /**
-     * Моя шляпа
+     * атсибятина
      *
      */
+    public boolean tracked = false;
+    public boolean isTracked() {
+        return tracked;
+    }
     public Boolean isFriend = false;
     public String getBiggestPhoto(){
         String biggest = photo.getBiggest();

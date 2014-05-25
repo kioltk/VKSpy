@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,11 +13,13 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.agcy.vkproject.spy.Adapters.CustomItems.UpdateItem;
 import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.R;
 import com.agcy.vkproject.spy.UserActivity;
+import com.bugsense.trace.BugSenseHandler;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -30,39 +33,56 @@ public abstract class ListFragment extends Fragment {
     protected final Helper.InitializationListener initializationListener = new Helper.InitializationListener() {
         @Override
         public void onLoadingEnded() {
-            startLoading();
+            createContent();
         }
 
         @Override
         public void onDownloadingEnded() {
-            startLoading();
+            createContent();
         }
     };
     protected BaseAdapter adapter;
     protected Thread task;
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         if(Helper.isLoaded()){
-            startLoading();
+            createContent();
         }else{
             Helper.addInitializationListener(initializationListener);
         }
         context = getActivity();
-        setRetainInstance(true);
     }
 
     View rootView;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        rootView =  inflater.inflate(R.layout.fragment_list, container, false);
-        fillListView();
+        rootView = inflateRootView(inflater, container);
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                createContent();
+            }
+        });
         return rootView;
     }
-    public void startLoading(){
+
+    protected View inflateRootView(LayoutInflater inflater, ViewGroup container) {
+        View view = inflater.inflate(R.layout.fragment_list, container, false);
+        if(hasHeader())
+            (view.findViewById(R.id.faux_padding)).setVisibility(View.VISIBLE);
+        else
+            (view.findViewById(R.id.faux_padding)).setVisibility(View.GONE);
+
+        return view;
+    }
+
+    public void createContent(){
         if(task==null){
 
             final Handler handler = new Handler();
@@ -71,71 +91,95 @@ public abstract class ListFragment extends Fragment {
                 @Override
                 public void run() {
                     if(adapter==null || adapter.isEmpty()) {
-                        adapter = adapter();
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                onLoad();
+                        boolean adapterCreated = false;
+                        while(!adapterCreated) {
+                            try {
+                                adapter = adapter();
+                                adapterCreated = true;
+                            }catch (Exception exp){
+
                             }
-                        });
+                        }
                     }
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            bindContent();
+                        }
+                    });
+                    task = null;
                 }
             });
             task.start();
         }
     }
-    protected void onLoad(){
+    public void recreateContent(){
+        if(task!=null) {
+            task.interrupt();
+        }
+        if(rootView!=null){
+            rootView.findViewById(R.id.loading).setVisibility(View.VISIBLE);
+            rootView.findViewById(R.id.list).setVisibility(View.GONE);
+            rootView.findViewById(R.id.status).setVisibility(View.GONE);
 
-        fillListView();
-        task = null;
+        }
+        final Handler handler = new Handler();
+
+        task = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                boolean adapterCreated = false;
+                while(!adapterCreated) {
+                    try {
+                        adapter = adapter();
+                        adapterCreated = true;
+                    }catch (Exception exp){
+                        BugSenseHandler.sendException(exp);
+                    }
+                }
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            bindContent();
+                        }
+                    });
+                    task = null;
+            }
+        });
+        task.start();
 
     }
-    protected void fillListView(){
+
+    protected abstract BaseAdapter adapter();
+
+    protected abstract void onContentBinded();
+    protected void bindContent(){
 
 
         if(adapter!=null && rootView != null) {
             (rootView.findViewById(R.id.loading)).setVisibility(View.GONE);
             if (adapter.isEmpty()) {
-                (rootView.findViewById(R.id.status)).setVisibility(View.VISIBLE);
+
+                TextView statusView = (TextView) rootView.findViewById(R.id.status);
+                statusView.setVisibility(View.VISIBLE);
+                statusView.setText(getAdapterEmptyText());
+
             } else {
-                (rootView.findViewById(R.id.status)).setVisibility(View.GONE);
-                final ListView listView = (ListView) rootView.findViewById(R.id.list);
+
+                rootView.findViewById(R.id.status).setVisibility(View.GONE);
+                final ListView listView = getListView();
+                listView.setVisibility(View.VISIBLE);
+                listView.setAdapter(null);
+                if(hasHeader())
+                try {
+                    if(listView.getHeaderViewsCount()==0)
+                        listView.addHeaderView(getListViewHeaderView(),null,false);
+                }catch(Exception exp){
+                }
                 listView.setAdapter(adapter);
-                listView.setOnScrollListener(new AbsListView.OnScrollListener() {
-                    private int visibleItemCount;
-                    private int firstVisibleItem;
-                    public boolean firstLoading = true;
-
-                    void loadImages(){
-                        for(int i = firstVisibleItem;i < visibleItemCount+ firstVisibleItem;i++) {
-                            Object item = adapter.getItem(i);
-                            if(item instanceof UpdateItem){
-                                UpdateItem updateItem = (UpdateItem) item;
-                                updateItem.loadImage(listView.getChildAt(i-firstVisibleItem));
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onScrollStateChanged(AbsListView view, int scrollState) {
-                        if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
-                            loadImages();
-                        }
-                    }
-
-                    @Override
-                    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-
-                        this.firstVisibleItem = firstVisibleItem;
-                        this.visibleItemCount = visibleItemCount;
-
-                        if(firstLoading && visibleItemCount!=0){
-                            firstLoading = false;
-                            loadImages();
-                        }
-
-                    }
-                });
+                AbsListView.OnScrollListener scrollListener = getScrollListener();
+                if(scrollListener!=null)
+                    listView.setOnScrollListener(scrollListener);
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -152,9 +196,38 @@ public abstract class ListFragment extends Fragment {
                 });
             }
         }
+
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                onContentBinded();
+            }
+        });
     }
 
+    public int getAdapterEmptyText() {
+        return R.string.no_events;
+    }
+    public ListView getListView(){
+        if(rootView!=null){
+            return (ListView) rootView.findViewById(R.id.list);
+        }
+        return null;
+    }
 
+    public View getListViewHeaderView(){
+        TextView text = new TextView(context);
+        text.setText("IM HEADER!!1");
+        text.setGravity(Gravity.CENTER);
+        return text;
+    }
 
-    public abstract BaseAdapter adapter();
+    public AbsListView.OnScrollListener getScrollListener() {
+        return null;
+    }
+
+    protected boolean hasHeader(){
+        return false;
+    }
+
 }

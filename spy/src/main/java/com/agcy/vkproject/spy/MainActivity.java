@@ -14,6 +14,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.View;
 
 import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
@@ -41,6 +42,12 @@ import java.net.UnknownHostException;
 public class MainActivity extends ActionBarActivity {
 
     private OnlinesFragment onlinesFragment;
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
 
     @Override
     protected void onResume() {
@@ -238,6 +245,10 @@ public class MainActivity extends ActionBarActivity {
             return false;
         } else
             return true;
+    }
+
+    public void filter(View view) {
+        startActivity(new Intent(this, FilterActivity.class));
     }
 
     private class MainPagerAdapter extends FragmentPagerAdapter implements ContentPagerAdapter<Integer> {

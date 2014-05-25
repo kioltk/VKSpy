@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout
-
-    android:paddingLeft="22dp"
-    android:paddingRight="22dp"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@drawable/user_item_selector"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <include layout="@layout/list_item_preference_template" />
     <CheckBox
             android:id="@+id/toggler"
-
+            android:layout_marginRight="22dp"
             android:layout_centerInParent="true"
             android:layout_alignParentRight="true"
             android:layout_width="wrap_content"

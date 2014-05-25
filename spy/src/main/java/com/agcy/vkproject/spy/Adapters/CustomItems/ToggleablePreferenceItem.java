@@ -19,6 +19,16 @@ public abstract class ToggleablePreferenceItem extends PreferenceItem {
         this.isChecked = isChecked;
     }
 
+    public ToggleablePreferenceItem(String title, boolean isChecked) {
+        super(title);
+        this.isChecked= isChecked;
+    }
+
+
+    @Override
+    public void onClick() {
+    }
+
     public abstract void onToggle(Boolean isChecked);
 
     @Override

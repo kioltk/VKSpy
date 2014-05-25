@@ -1,6 +1,5 @@
 package com.agcy.vkproject.spy.Core;
 
-import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -8,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -44,54 +42,107 @@ public class Notificator {
         ArrayList<Event> popupEvents = new ArrayList<Event>();
         ArrayList<Event> notifyEvents = new ArrayList<Event>();
         for (LongPollService.Update update : updates) {
-            if(updateShouldPopup(update))
+            Boolean checkShowPopup = checkShowPopup(update);
+            if(checkShowPopup==null)
+                continue;
+            if(checkShowPopup)
                 popupEvents.add(new Event(update));
-            if(updateShouldNotify(update)){
+            else
                 notifyEvents.add(new Event(update));
-            }
         }
-        //showPopup(popupEvents);
+        showPopup(popupEvents);
         showNotification(notifyEvents);
+
     }
 
+    /**
+     *
+     * @param update
+     * @return Returns null if should notify at all. False if it's simple notification and true if it's popup (toast).
+     */
+    public static Boolean checkShowPopup(LongPollService.Update update) {
 
+
+        SharedPreferences notificationPreferences = context.getSharedPreferences("notification", Context.MODE_MULTI_PROCESS);
+
+        boolean enabled = notificationPreferences.getBoolean("status", true);
+        if (!enabled)
+            return null;
+        switch (update.getType()) {
+            case LongPollService.Update.TYPE_OFFLINE:
+                if (!Memory.isTracked(update.getUser()))
+                    return null;
+
+                boolean enabledOffline = notificationPreferences.getBoolean("notificationOffline", true);
+                if (!enabledOffline)
+                    return null;
+
+                return notificationPreferences.getInt("wayToNotifyOffline", 0) > 0;
+
+            case LongPollService.Update.TYPE_ONLINE:
+                if (!Memory.isTracked(update.getUser()))
+                    return null;
+
+                boolean enabledOnline = notificationPreferences.getBoolean("notificationOffline", true);
+                if (!enabledOnline)
+                    return null;
+
+                return notificationPreferences.getInt("wayToNotifyOnline", 0) > 0;
+
+            case LongPollService.Update.TYPE_USER_TYPING:
+                return false;
+            case LongPollService.Update.TYPE_CHAT_TYPING:
+            default:
+                return null;
+        }
+
+
+    }
 
     public static Boolean updateShouldPopup(LongPollService.Update update){
-        switch (update.getType()){
-            case LongPollService.Update.TYPE_OFFLINE:
-            case LongPollService.Update.TYPE_ONLINE:
-                //return Memory.isTracked(update.getUser());
-            case LongPollService.Update.TYPE_CHAT_TYPING:
-            case LongPollService.Update.TYPE_USER_TYPING:
-            default:
-                return false;
-        }
-    }
-    public static Boolean updateShouldNotify(LongPollService.Update update){
+
+        SharedPreferences prefs = context.getSharedPreferences("popup", Context.MODE_MULTI_PROCESS);
         switch (update.getType()){
             case LongPollService.Update.TYPE_OFFLINE:
             case LongPollService.Update.TYPE_ONLINE:
                 return Memory.isTracked(update.getUser());
             case LongPollService.Update.TYPE_CHAT_TYPING:
-                return false;
             case LongPollService.Update.TYPE_USER_TYPING:
             default:
+                return false;
+        }
+    }
+    public static Boolean updateShouldNotify(LongPollService.Update update) {
+
+        SharedPreferences prefs = context.getSharedPreferences("notification", Context.MODE_MULTI_PROCESS);
+
+        switch (update.getType()) {
+            case LongPollService.Update.TYPE_OFFLINE:
+                boolean offlineNotify = prefs.getBoolean("notificationOffline", true);
+                if (!offlineNotify)
+                    return false;
+                return update.getUser().isTracked();
+            case LongPollService.Update.TYPE_ONLINE:
+
+                boolean onlineNotify = prefs.getBoolean("notificationOnline", true);
+                if (!onlineNotify)
+                    return false;
+                return update.getUser().isTracked();
+            case LongPollService.Update.TYPE_USER_TYPING:
                 return true;
+            case LongPollService.Update.TYPE_CHAT_TYPING:
+            default:
+                return false;
         }
     }
     public static void showPopup(ArrayList<Event> events) {
 
 
-        SharedPreferences preferences = context.getSharedPreferences("popup", Activity.MODE_MULTI_PROCESS);
-        if(!preferences.getBoolean("status",true) || events.isEmpty()){
-            return;
-        }
         Toast toast = new Toast(context);
 
 
         LinearLayout rootView = new LinearLayout(context);
         rootView.setOrientation(LinearLayout.VERTICAL);
-
         rootView.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.popup_message));
 
         for (Event event : events) {
@@ -103,26 +154,32 @@ public class Notificator {
         toast.setDuration(Toast.LENGTH_SHORT);
         toast.show();
     }
-    private static void showNotification(ArrayList<Event> notifyEvents) {
+    public static void showNotification(ArrayList<Event> notifyEvents) {
 
         for(Event event: notifyEvents) {
 
-            final NotificationCompat.Builder mBuilder =
+            final NotificationCompat.Builder notificationBuilder =
                     new NotificationCompat.Builder(context)
                             .setSmallIcon(R.drawable.ic_stat_spy)
                             .setContentTitle(event.headerText)
                             .setContentText(event.messageText)
                             .setAutoCancel(true)
-                            .setDefaults( Notification.DEFAULT_LIGHTS | Notification.DEFAULT_VIBRATE)
+                            .setDefaults( Notification.DEFAULT_LIGHTS )
                             .setContentInfo("VK Spy");
+            notificationBuilder.setTicker(event.headerText + " " + event.messageText);
 
             SharedPreferences prefs = context.getSharedPreferences("notification", Context.MODE_MULTI_PROCESS);
 
-            String ringtoneUri = prefs.getString("notifications_ringtone", "");
-            Uri parsedRingtonUri = Uri.parse(ringtoneUri);
-            mBuilder.setSound(parsedRingtonUri);
+            boolean soundEnabled = prefs.getBoolean("sound", true);
+            if(soundEnabled)
+                notificationBuilder.setDefaults( Notification.DEFAULT_LIGHTS | Notification.DEFAULT_SOUND  );
+
+            boolean vibrateOn = prefs.getBoolean("vibrate", true);
+            if(vibrateOn)
+                notificationBuilder.setVibrate(new long[]{ 750 });
 
 
+            //todo: navigate to user or to onlines
             Intent resultIntent = new Intent(context, MainActivity.class);
             PendingIntent resultPendingIntent =
                     PendingIntent.getActivity(
@@ -132,7 +189,7 @@ public class Notificator {
                             PendingIntent.FLAG_UPDATE_CURRENT
                     );
 
-            mBuilder.setContentIntent(resultPendingIntent);
+            notificationBuilder.setContentIntent(resultPendingIntent);
             final NotificationManager mNotificationManager =
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             // mId allows you to update the notification later on.
@@ -151,9 +208,15 @@ public class Notificator {
 
                 @Override
                 public void onLoadingComplete(String s, View view, Bitmap bitmap) {
+                    int height = (int) context.getResources().getDimension(android.R.dimen.notification_large_icon_height);
+                    int width = (int) context.getResources().getDimension(android.R.dimen.notification_large_icon_width);
+                    try {
+                        bitmap = Bitmap.createScaledBitmap(bitmap, width, height, true);
+                    }catch (Exception exp) {
 
-                    mBuilder.setLargeIcon(bitmap);
-                    Notification notification = mBuilder.build();
+                    }
+                    notificationBuilder.setLargeIcon(bitmap);
+                    Notification notification = notificationBuilder.build();
                     mNotificationManager.notify(mId, notification);
 
                 }
@@ -168,6 +231,10 @@ public class Notificator {
     }
     public static void DESTROY() {
         context = null;
+    }
+
+    public static void exampleNotify() {
+
     }
 
     public static class Event {

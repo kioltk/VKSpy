@@ -9,7 +9,7 @@
         android:background="@drawable/update_item_selector"
         android:layout_width="match_parent"
         android:layout_height="54dp"/>
-    <com.agcy.vkproject.spy.Adapters.TimelineViews.TimelineView
+    <com.agcy.vkproject.spy.Views.TimelineView
         android:id="@+id/timelineView"
         android:layout_marginLeft="110dp"
         android:layout_width="50dp"

@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="MainMenuItemView">
-        <attr name="android:text"/>
-        <attr name="image" format="integer" />
-    </declare-styleable>
 
     <declare-styleable name="RoundedImageView">
         <attr name="corner_radius" format="dimension" />

@@ -12,6 +12,7 @@ import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
 import com.agcy.vkproject.spy.R;
 import com.agcy.vkproject.spy.Receivers.NetworkStateReceiver;
+import com.bugsense.trace.BugSenseHandler;
 import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
@@ -53,7 +54,8 @@ public class LongPollService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         if(networkStateChangeListener==null) {
-            new NetworkStateReceiver.NetworkStateChangeListener(LONGPOLL_CONNECTION_ID) {
+
+            networkStateChangeListener = new NetworkStateReceiver.NetworkStateChangeListener(LONGPOLL_CONNECTION_ID) {
                 @Override
                 public void onConnected() {
                     startLongpoll();
@@ -214,13 +216,15 @@ public class LongPollService extends Service {
 
                     } catch (Exception exp) {
                         Log.e("AGCY SPY LONGPOLL", "refreshing error", exp);
-
+                        BugSenseHandler.sendExceptionMessage("Longpoll","Refreshing error",exp);
                     }
                 }
             });
         }catch (Exception exp){
 
             Log.e("AGCY SPY LONGPOLLSERVICE","refreshing error reinit ",exp);
+
+            BugSenseHandler.sendExceptionMessage("Longpoll","Refreshing error. Need reinit",exp);
             Helper.initialize(getApplicationContext());
             refreshSettings();
             return;
@@ -291,17 +295,16 @@ public class LongPollService extends Service {
 
             @Override
             public void onError(Exception exp) {
-                if(exp !=null)
-                    Log.e("AGCY SPY LONGPOLL", exp.toString() + "" + exp.getMessage());
-                else{
+                    Log.e("AGCY SPY LONGPOLL","", exp);
+                    BugSenseHandler.sendExceptionMessage("Longpoll","Execution error",exp);
 
-                    Log.e("AGCY SPY", "Longpoll undetected error. It may be called also on logout.");
-                }
                 if(exp instanceof org.apache.http.conn.HttpHostConnectException){
                     startLongpoll();
                 }
 
-                if (exp instanceof JSONException) {
+                if (exp instanceof JSONException || exp instanceof TsException) {
+                    Log.e("AGCY SPY LONGPOLL","Response error",exp);
+                    BugSenseHandler.sendExceptionMessage("Longpoll","Response error",exp);
                     refreshSettings();
                 }
             }

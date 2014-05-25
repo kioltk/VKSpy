@@ -8,22 +8,23 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.agcy.vkproject.spy.Adapters.UpdatesAdapter;
+import com.agcy.vkproject.spy.Listeners.NewUpdateListener;
 import com.agcy.vkproject.spy.Models.Online;
 import com.agcy.vkproject.spy.Models.Status;
-import com.agcy.vkproject.spy.Models.Track;
 import com.agcy.vkproject.spy.Models.Typing;
+import com.bugsense.trace.BugSenseHandler;
 import com.vk.sdk.api.model.VKApiUserFull;
 import com.vk.sdk.api.model.VKUsersArray;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class Memory {
 
 
+    private static int filteredUsersCount;
     public static VKUsersArray users = new VKUsersArray();
-    public static ArrayList<Track> tracks = new ArrayList<Track>();
     private static Context context;
     private static DatabaseConnector databaseConnector;
     private static SQLiteDatabase database;
@@ -52,18 +53,33 @@ public class Memory {
         clearOnlines();
     }
 
-    private static ArrayList<UpdatesAdapter.NewItemListener> onlineListeners = new ArrayList<UpdatesAdapter.NewItemListener>();
-    private static ArrayList<UpdatesAdapter.NewItemListener> onlineOnceListeners = new ArrayList<UpdatesAdapter.NewItemListener>();
+    private static ArrayList<NewUpdateListener> typingListeners = new ArrayList<NewUpdateListener>();
+    private static ArrayList<NewUpdateListener> typingOnceListeners = new ArrayList<NewUpdateListener>();
 
-    public static void addOnlineOnceListener(UpdatesAdapter.NewItemListener onlineOnceListener) {
+    private static ArrayList<NewUpdateListener> onlineListeners = new ArrayList<NewUpdateListener>();
+    private static ArrayList<NewUpdateListener> onlineOnceListeners = new ArrayList<NewUpdateListener>();
+
+    public static void addTypingOnceListener(NewUpdateListener typingOnceListener) {
+        if(!typingOnceListeners.contains(typingOnceListener))
+            typingOnceListeners.add(typingOnceListener);
+    }
+    public static void addTypingListener(NewUpdateListener typingListener) {
+        if(!typingListeners.contains(typingListener))
+            typingListeners.add(typingListener);
+    }
+    public static void removeTypingListener(NewUpdateListener typingListener){
+        typingListeners.remove(typingListener);
+    }
+
+    public static void addOnlineOnceListener(NewUpdateListener onlineOnceListener) {
         if(!onlineOnceListeners.contains(onlineOnceListener))
             onlineOnceListeners.add(onlineOnceListener);
     }
-    public static void addOnlineListener(UpdatesAdapter.NewItemListener onlineListener) {
+    public static void addOnlineListener(NewUpdateListener onlineListener) {
         if(!onlineListeners.contains(onlineListener))
             onlineListeners.add(onlineListener);
     }
-    public static void removeOnlineListener(UpdatesAdapter.NewItemListener onlineListener){
+    public static void removeOnlineListener(NewUpdateListener onlineListener){
         onlineListeners.remove(onlineListener);
     }
 
@@ -79,7 +95,8 @@ public class Memory {
         final int photoColumnIndex = cursor.getColumnIndex("photo");
         final int first_nameColumnIndex = cursor.getColumnIndex("first_name");
         final int last_nameColumnIndex = cursor.getColumnIndex("last_name");
-        final int isFriend_nameColumnIndex = cursor.getColumnIndex("isFriend");
+        final int isFriend_ColumnIndex = cursor.getColumnIndex("isFriend");
+        final int tracked_ColumnIndex = cursor.getColumnIndex("tracked");
         if (cursor.moveToFirst())
             do {
                 VKApiUserFull user = new VKApiUserFull() {{
@@ -88,7 +105,8 @@ public class Memory {
                     this.first_name = cursor.getString(first_nameColumnIndex);
                     this.last_name = cursor.getString(last_nameColumnIndex);
                     this.sex = cursor.getInt(sexColumnIndex);
-                    this.isFriend = cursor.getInt(isFriend_nameColumnIndex)>0;
+                    this.isFriend = cursor.getInt(isFriend_ColumnIndex)>0;
+                    this.tracked = cursor.getInt(tracked_ColumnIndex)>0;
                 }};
                 if (users.getById(user.id) == null)
                     loadedUsers.add(user);
@@ -99,42 +117,30 @@ public class Memory {
         return !users.isEmpty();
     }
 
-    public static void loadTracks() {
 
-        Cursor cursor = getCursor(DatabaseConnector.TRACK_DATABASE,
-                DatabaseConnector.TRACK_DATABASE_FIELDS,
-                null,
-                null);
-        int useridColumnIndex = cursor.getColumnIndex("userid");
-        int notificationColumnIndex = cursor.getColumnIndex("notification");
-
-
-        Track track;
-        if (cursor.moveToFirst())
-            do {
-                int userid = cursor.getInt(useridColumnIndex);
-                Boolean notification = cursor.getInt(notificationColumnIndex) > 0;
-                track = new Track(userid, notification);
-                tracks.add(track);
-            } while (cursor.moveToNext());
-        close();
-    }
 
     public static VKApiUserFull getUserById(int userid) {
         if (users.isEmpty()) {
             loadUsers();
         }
-        VKApiUserFull user = users.getById(userid);
-        if (user == null) {
-            if(!downloadingIds.contains(userid)) {
-                Helper.downloadUser(userid);
-                downloadingIds.add(userid);
-            }
+        VKApiUserFull user = null;
+        if (downloadingIds.contains(userid)) {
             Log.w("AGCY SPY", "No such userid in memory: userid = " + userid);
             user = new VKApiUserFull();
             user.id = userid;
+        } else {
+            user = users.getById(userid);
+            if (user == null) {
 
+                Helper.downloadUser(userid);
+                downloadingIds.add(userid);
+
+                user = new VKApiUserFull();
+                user.id = userid;
+            }
         }
+
+
         return user;
     }
 
@@ -152,25 +158,11 @@ public class Memory {
 
         return friends;
     }
-    public static Track getTrackById(int userid) {
-        if (tracks.isEmpty())
-            loadTracks();
-        for (Track track : tracks) {
-            if (track.userid == userid) {
-                return track;
-            }
-        }
-        return null;
-    }
+
 
     public static Boolean isTracked(int userid) {
 
-        if (tracks.isEmpty())
-            loadTracks();
-        Track track = getTrackById(userid);
-        if (track == null)
-            return false;
-        return track.notification;
+        return getUserById(userid).isTracked();
 
     }
 
@@ -187,7 +179,10 @@ public class Memory {
             cursor = database.query(databaseName, fields, selector, null, null, null, orderby);
         }
         catch(Exception exp) {
-            Log.e("AGCY SPY SQL", "Cursor error " + exp.toString());
+            HashMap<String,String> expHashmap = new HashMap<String, String>();
+            expHashmap.put("databaseName",databaseName);
+            expHashmap.put("selector",selector);
+            BugSenseHandler.sendExceptionMap(expHashmap,exp);
             close();
             open();
             return getCursor(databaseName,fields,selector,orderby);
@@ -195,7 +190,22 @@ public class Memory {
         return cursor;
         // don't forget to close !!1
     }
+    public static ArrayList<Online> getTrackedOnlines(){
+        Log.i("AGCY SPY SQL", "Loading onlines");
+        String selector = "";
+        for(VKApiUserFull user:users){
+            if(user.isTracked()) {
+                if (!selector.equals("")) {
+                    selector += " or ";
+                }
 
+                selector += "userid = " + user.id;
+            }
+        }
+        if(selector.equals(""))
+            return new ArrayList<Online>();
+        return getOnlines(selector, "id desc");
+    }
     public static ArrayList<Online> getOnlines() {
 
         Log.i("AGCY SPY SQL", "Loading onlines");
@@ -204,7 +214,7 @@ public class Memory {
 
     public static ArrayList<Online> getOnlines(final int userid) {
 
-        Log.i("AGCY SPY SQL", "Loading onlines by userid:"+ userid);
+        Log.i("AGCY SPY SQL", "Loading onlines by userid:" + userid);
         return getOnlines("userid = " + userid, "id desc");
     }
 
@@ -233,26 +243,7 @@ public class Memory {
 
     }
 
-    public static Track getTrack(int userid) {
 
-        Log.i("AGCY SPY SQL", "Loading track");
-        Cursor cursor = getCursor(DatabaseConnector.TRACK_DATABASE,
-                DatabaseConnector.TRACK_DATABASE_FIELDS,
-                "userid = " + userid,
-                null);
-
-        int useridColumnIndex = cursor.getColumnIndex("userid");
-        int notificationColumnIndex = cursor.getColumnIndex("notification");
-
-        Track track = null;
-        if (cursor.moveToFirst()) {
-
-            Boolean notification = cursor.getInt(notificationColumnIndex) > 0;
-            track = new Track(userid, notification);
-        }
-        close();
-        return track;
-    }
 
     public static ArrayList<Typing> getTyping() {
         Log.i("AGCY SPY SQL", "Loading typings");
@@ -288,15 +279,35 @@ public class Memory {
     //endregion
     //region Setters
 
-    public static Boolean setTracked(int userid) {
-        Track track = getTrackById(userid);
-        if (track == null) {
-            track = new Track(userid, true);
-            saveTrack(track);
-            tracks.add(track);
-        } else
-            updateTrack(track.toggle());
-        return track.notification;
+    public static Boolean setTracked(int id) {
+        VKApiUserFull user = getUserById(id);
+        return setTracked(user);
+
+    }
+    public static Boolean setTracked(VKApiUserFull user) {
+        user.tracked = updateTrack(user.id);
+        Helper.trackedUpdated();
+        return user.tracked;
+
+    }
+    public static void setTracked(ArrayList<VKApiUserFull> tracked) {
+        Log.i("AGCY SPY SQL","Saving tracks: " + tracked.size());
+        database.execSQL("update " + DatabaseConnector.USER_DATABASE + " set tracked = 0");
+        for (VKApiUserFull user : users) {
+            user.tracked= false;
+
+        };
+        open();
+        for (VKApiUserFull user : tracked) {
+            int id = user.id;
+            user.tracked = true;
+            ContentValues updateValues = new ContentValues();
+            updateValues.put("userid", id);
+            updateValues.put("tracked", true);
+            forceUpdate(DatabaseConnector.USER_DATABASE, updateValues, "userid", String.valueOf(id));
+        }
+        close();
+        Helper.trackedUpdated();
     }
 
 
@@ -311,11 +322,13 @@ public class Memory {
             user.last_seen = Helper.getUnixNow();
         }
 
+        if (!user.isTracked())
+            return;
         Status status = new Status(user.id, (int) time, online);
-        for(UpdatesAdapter.NewItemListener onlineListener: onlineListeners){
+        for (NewUpdateListener onlineListener : onlineListeners) {
             onlineListener.newItem(status);
         }
-        for(UpdatesAdapter.NewItemListener onlineListener: onlineOnceListeners){
+        for (NewUpdateListener onlineListener : onlineOnceListeners) {
             onlineListener.newItem(status);
         }
         onlineOnceListeners.clear();
@@ -324,22 +337,38 @@ public class Memory {
 
     //endregion
     //region Updaters
-
+    private static void forceUpdate(String databaseName, ContentValues values, String primaryKeyName, String primaryKeyValue) {
+        database.update(databaseName, values, primaryKeyName + " = " + primaryKeyValue, null);
+    }
     private static void update(String databaseName, ContentValues values, String primaryKeyName, String primaryKeyValue) {
         open();
-        database.update(databaseName, values, primaryKeyName + " = " + primaryKeyValue, null);
+        forceUpdate(databaseName,values,primaryKeyName,primaryKeyValue);
         close();
     }
 
-    public static void updateTrack(Track track) {
+    public static Boolean updateTrack(int userid) {
 
 
-        Log.i("AGCY SPY SQL","Updating track.");
-        ContentValues values = new ContentValues();
-        values.put("notification", track.notification);
+        Log.i("AGCY SPY SQL", "Updating track.");
 
-        update(DatabaseConnector.TRACK_DATABASE, values, "userid", String.valueOf(track.userid));
+        Cursor cursor = getCursor(DatabaseConnector.USER_DATABASE,
+                DatabaseConnector.USER_DATABASE_FIELDS,
+                "userid = " + userid,null);
 
+        int trackedColumnIndex = cursor.getColumnIndex("tracked");
+
+        Boolean tracked = false;
+        if (cursor.moveToFirst()) {
+            tracked = cursor.getInt(trackedColumnIndex) > 0;
+
+            ContentValues values = new ContentValues();
+            values.put("tracked", !tracked);
+            tracked = !tracked;
+            forceUpdate(DatabaseConnector.USER_DATABASE, values, "userid", String.valueOf(userid));
+
+        }
+        close();
+        return tracked;
 
     }
     public static void updateStatus(VKApiUserFull user, Boolean online, long time){
@@ -405,7 +434,7 @@ public class Memory {
 
     public static void saveUser(VKApiUserFull user) {
 
-        Log.i("AGCY SPY SQL","Saving user.");
+        Log.i("AGCY SPY SQL", "Saving user.");
         ContentValues values = new ContentValues();
         values.put("userid", user.id);
         values.put("sex", user.sex);
@@ -413,11 +442,19 @@ public class Memory {
         values.put("first_name", user.first_name);
         values.put("last_name", user.last_name);
         values.put("isFriend", user.isFriend);
+        values.put("tracked", user.tracked);
         save(DatabaseConnector.USER_DATABASE, values);
         users.add(user);
     }
 
     public static void saveFriends(VKUsersArray friends){
+
+        if(users==null || users.isEmpty()){
+            for(int i = 0 ; i < 5 && i < friends.size();i++){
+                friends.get(i).tracked = true;
+            }
+        }
+
         for(VKApiUserFull friend : friends){
             friend.isFriend = true;
         }
@@ -425,11 +462,14 @@ public class Memory {
     }
 
     public static void saveUsers(VKUsersArray newUsers) {
+
         VKUsersArray alreadyStoredUsers = new VKUsersArray(Memory.users);
         for (VKApiUserFull alreadyStoredUser : alreadyStoredUsers) {
-            VKApiUserFull storedOld = newUsers.getById(alreadyStoredUser.id);
-            if (storedOld == null) {
+            VKApiUserFull newUser = newUsers.getById(alreadyStoredUser.id);
+            if (newUser == null) {
                 newUsers.add(alreadyStoredUser);
+            }else{
+                newUser.tracked = alreadyStoredUser.tracked;
             }
         }
         Memory.users = newUsers;
@@ -445,6 +485,7 @@ public class Memory {
             values.put("first_name", user.first_name);
             values.put("last_name", user.last_name);
             values.put("isFriend",user.isFriend);
+            values.put("tracked",user.tracked);
             values.put("hint", i);
             valuesList.add(values);
         }
@@ -457,22 +498,13 @@ public class Memory {
     public static void saveStatus(VKApiUserFull user, boolean status, int time) {
 
 
-        Log.i("AGCY SPY SQL","Saving online.");
+        Log.i("AGCY SPY SQL", "Saving online.");
         ContentValues values = new ContentValues();
         values.put("userid", user.id);
-        values.put(status? "since":"till", time);
+        values.put(status ? "since" : "till", time);
         save(DatabaseConnector.ONLINE_DATABASE, values);
     }
 
-    public static void saveTrack(Track track) {
-
-
-        Log.i("AGCY SPY SQL","Saving track.");
-        ContentValues values = new ContentValues();
-        values.put("userid", track.userid);
-        values.put("notification", track.notification);
-        save(DatabaseConnector.TRACK_DATABASE, values);
-    }
 
     public static void saveTyping(VKApiUserFull user) {
 
@@ -482,6 +514,9 @@ public class Memory {
         values.put("time", Helper.getUnixNow() - 3 * 60);
 
         save(DatabaseConnector.TYPING_DATABASE, values);
+
+
+
     }
     //endregion
     //region Clearer
@@ -502,6 +537,7 @@ public class Memory {
     private static void clearDatabase(String databaseName, String createDatabase) {
         open();
 
+        Log.i("AGCY SPY SQL","Clearing database "+ databaseName);
         database.execSQL("DROP TABLE IF EXISTS " + databaseName);
         database.execSQL(createDatabase);
 
@@ -541,6 +577,29 @@ public class Memory {
         Log.i("AGCY SPY SQL", "Operation ended. Count of operation: " + dbOperations);
     }
 
+    public static int getCountOfTracked() {
+        filteredUsersCount = 0;
+        for (VKApiUserFull user : users) {
+            if (user.isTracked()) {
+                filteredUsersCount++;
+            }
+        }
+        return filteredUsersCount;
+    }
+
+    public static void setTyping(VKApiUserFull user) {
+
+        Typing typing = new Typing(user, Helper.getUnixNow());
+        for (NewUpdateListener onlineListener : typingListeners) {
+            onlineListener.newItem(typing);
+        }
+        for (NewUpdateListener onlineListener : typingOnceListeners) {
+            onlineListener.newItem(typing);
+        }
+        typingOnceListeners.clear();
+
+        saveTyping(user);
+    }
 
 
 
@@ -552,11 +611,6 @@ public class Memory {
         private static final String ONLINE_DATABASE = "online_database";
         private static final String TYPING_DATABASE = "typing_database";
         private static final String USER_DATABASE = "user_database";
-        private static final String TRACK_DATABASE = "track_database";
-        private static final String[] TRACK_DATABASE_FIELDS = {
-                "userid",
-                "notification"
-        };
         private static final String[] ONLINE_DATABASE_FIELDS = {
                 "id",
                 "userid",
@@ -574,15 +628,9 @@ public class Memory {
                 "photo",
                 "first_name",
                 "last_name",
-                "isFriend"
+                "isFriend",
+                "tracked"
         };
-        private static final String TRACK_DATABASE_CREATE =
-                "create table " +
-                        TRACK_DATABASE +
-                        " ( " +
-                        "userid integer primary key," +
-                        "notification integer not null" +
-                        " ) ";
         private static final String USER_DATABASE_CREATE =
                 "create table " +
                         USER_DATABASE +
@@ -593,7 +641,8 @@ public class Memory {
                         "first_name text not null," +
                         "last_name text not null," +
                         "hint int DEFAULT 99999," +
-                        "isFriend int default 0"+
+                        "isFriend int default 0,"+
+                        "tracked int default 0" +
                         " ) ";
         private static final String ONLINE_DATABASE_CREATE =
                 "create table " +
@@ -614,7 +663,7 @@ public class Memory {
                         " ) ";
 
         public DatabaseConnector(Context context) {
-            super(context, DATABASE, null, 6);
+            super(context, DATABASE, null, 8);
         }
 
         @Override
@@ -623,7 +672,6 @@ public class Memory {
             database.execSQL(ONLINE_DATABASE_CREATE);
             database.execSQL(TYPING_DATABASE_CREATE);
             database.execSQL(USER_DATABASE_CREATE);
-            database.execSQL(TRACK_DATABASE_CREATE);
 
 
         }
@@ -631,6 +679,7 @@ public class Memory {
         @Override
         public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
 
+            database.execSQL("DROP TABLE IF EXISTS " + "track_database");
             database.execSQL("DROP TABLE IF EXISTS " + USER_DATABASE);
             database.execSQL(USER_DATABASE_CREATE);
         }

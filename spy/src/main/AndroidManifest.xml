@@ -7,24 +7,24 @@
     <uses-permission android:name="android.permission.READ_LOGS" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.VIBRATE"/>
-    <application
+    <uses-permission android:name="android.permission.VIBRATE" />
 
-        android:name=".SpyApplication"
+    <application
+        android:name="com.agcy.vkproject.spy.SpyApplication"
         android:allowBackup="true"
         android:icon="@drawable/icon"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:theme="@style/AppTheme.NoTitle"
             android:name="com.agcy.vkproject.spy.StartActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoTitle" >
         </activity>
         <activity
-            android:configChanges="orientation"
-            android:theme="@style/AppTheme.NoTitle"
             android:name="com.agcy.vkproject.spy.MainActivity"
-            android:label="@string/main" >
+            android:configChanges="orientation"
+            android:label="@string/main"
+            android:theme="@style/AppTheme.NoTitle" >
         </activity>
         <activity
             android:name="com.agcy.vkproject.spy.FriendsActivity"
@@ -45,8 +45,6 @@
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
-
-
         <receiver
             android:name="com.agcy.vkproject.spy.Receivers.BootCompleteReceiver"
             android:enabled="true"
@@ -57,9 +55,9 @@
         </receiver>
 
         <activity
-            android:theme="@style/AppTheme.NoTitle"
             android:name="com.agcy.vkproject.spy.WelcomeActivity"
-            android:label="VK Spy" >
+            android:label="VK Spy"
+            android:theme="@style/AppTheme.NoTitle" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -74,6 +72,12 @@
             android:name="com.agcy.vkproject.spy.SettingsActivity"
             android:label="@string/settings" >
         </activity>
+        <activity
+            android:name="com.agcy.vkproject.spy.FilterActivity"
+            android:label="@string/title_activity_filter" />
+        <activity
+            android:name="com.viewpagerindicator.demo.DemoActivity"
+            android:label="carousel test" />
     </application>
 
 </manifest>

@@ -1,5 +1,8 @@
 package com.agcy.vkproject.spy;
 
+import android.content.Intent;
+import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -7,7 +10,12 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -17,6 +25,8 @@ import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
 import com.agcy.vkproject.spy.Fragments.ListFragment;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.tabcarousel.BackScrollManager;
+import com.tabcarousel.CarouselContainer;
 import com.viewpagerindicator.ContentPagerAdapter;
 import com.viewpagerindicator.TabPageIndicator;
 import com.vk.sdk.api.model.VKApiUserFull;
@@ -26,16 +36,9 @@ import java.util.Locale;
 
 public class UserActivity extends ActionBarActivity {
 
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
     SectionsPagerAdapter mSectionsPagerAdapter;
 
+    CarouselContainer carouselHeader;
     /**
      * The {@link ViewPager} that will host the section contents.
      */
@@ -43,10 +46,8 @@ public class UserActivity extends ActionBarActivity {
     VKApiUserFull user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(null);
         setContentView(R.layout.activity_user);
-
-
 
 
         int userid = getIntent().getExtras().getInt("id");
@@ -58,32 +59,71 @@ public class UserActivity extends ActionBarActivity {
             status.setText(R.string.online);
             if (user.online_mobile)
                 status.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.online_mobile_grey, 0);
-        }else{
+        } else {
             status.setText(Helper.getLastSeen(user));
         }
         ImageLoader.getInstance().displayImage(user.getBiggestPhoto(), photo);
 
-
-
-        TabPageIndicator tabPager = (TabPageIndicator) findViewById(R.id.pager_indicator);
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
-        // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.pager);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-
-        tabPager.setViewPager(mViewPager);
-
-        // When swiping between different sections, select the corresponding
-        // tab. We can also use ActionBar.Tab#select() to do this if we have
-        // a reference to the Tab.
-
         ActionBar bar = getSupportActionBar();
-        bar.setTitle(user.first_name+" "+ user.last_name);
+        bar.setTitle(user.first_name + " " + user.last_name);
         bar.setDisplayHomeAsUpEnabled(true);
 
+        TabPageIndicator tabPager = (TabPageIndicator) findViewById(R.id.pager_indicator);
+
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+        mViewPager = (ViewPager) findViewById(R.id.pager);
+
+
+        // Resources
+        final Resources res = getResources();
+
+        // Initialize the header
+        carouselHeader = (CarouselContainer) findViewById(R.id.carousel_container);
+
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+        
+        tabPager.setViewPager(mViewPager);
+
+        tabPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                carouselHeader.setSelectedTab(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                if(state== ViewPager.SCROLL_STATE_IDLE){
+                    carouselHeader.setMoving(false);
+                }else{
+                    carouselHeader.setMoving(false);
+                }
+            }
+        });
+    }
+
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.user, menu);
+
+        MenuItem trackedButton = menu.getItem(0);
+        updateTrackMenuItem(trackedButton);
+        return true;
+    }
+
+    void updateTrackMenuItem(MenuItem item){
+
+        if(user.tracked)
+            item.setIcon(R.drawable.ic_tab_onlines_selected);
+        else
+            item.setIcon(R.drawable.ic_tab_onlines);
     }
 
     @Override
@@ -91,6 +131,14 @@ public class UserActivity extends ActionBarActivity {
     {
         switch (item.getItemId())
         {
+            case R.id.track:
+                Memory.setTracked(user);
+                updateTrackMenuItem(item);
+                break;
+            case R.id.profile:
+                Intent profile = new Intent(Intent.ACTION_VIEW, Uri.parse("http://vk.com/id"+user.id));
+                startActivity(profile);
+                break;
             case android.R.id.home:
                 onBackPressed();
                 break;
@@ -101,10 +149,15 @@ public class UserActivity extends ActionBarActivity {
         return true;
     }
 
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
+    public CarouselContainer getCarousel() {
+        return carouselHeader;
+    }
+
+    public VKApiUserFull getUser() {
+        return user;
+    }
+
+
     public class SectionsPagerAdapter extends FragmentPagerAdapter implements ContentPagerAdapter<String> {
 
         public SectionsPagerAdapter(FragmentManager fm) {
@@ -113,24 +166,12 @@ public class UserActivity extends ActionBarActivity {
 
         @Override
         public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
             switch (position) {
+                case 1:
+                    return new TypingsListFragment();
                 case 0:
-                    return new ListFragment() {
-                        @Override
-                        public BaseAdapter adapter() {
-                            return new UpdatesAdapter(Helper.convertLastUndefinedToOnline(Memory.getOnlines(user.id)),context);
-                        }
-                    };
                 default:
-                    return new ListFragment() {
-                        @Override
-                        public BaseAdapter adapter() {
-                            return new UpdatesAdapter(Memory.getTyping(user.id),context);
-                        }
-                    };
-
+                    return new OnlinesListFragment();
             }
         }
 
@@ -157,4 +198,90 @@ public class UserActivity extends ActionBarActivity {
         }
     }
 
+
+    public static abstract class UpdatesListFragment extends ListFragment{
+
+
+        protected CarouselContainer carouselHeader;
+        protected VKApiUserFull user;
+
+        @Override
+        protected View inflateRootView(LayoutInflater inflater, ViewGroup container) {
+            View view = super.inflateRootView(inflater, container);
+            TextView statusView = ((TextView) view.findViewById(R.id.status));
+            statusView.setTextSize(18);
+            return view;
+        }
+
+        @Override
+        protected void onContentBinded() {
+        }
+
+        protected abstract int getTabIndex();
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+
+            super.onCreate(savedInstanceState);
+
+            UserActivity userActivity = ((UserActivity) getActivity());
+            user = userActivity.getUser();
+            carouselHeader = userActivity.getCarousel();
+
+        }
+
+        @Override
+        public AbsListView.OnScrollListener getScrollListener() {
+
+            return new BackScrollManager(carouselHeader, getTabIndex() );
+        }
+
+        @Override
+        public View getListViewHeaderView() {
+            return getActivity().getLayoutInflater().inflate(R.layout.faux_carousel_width_indicator,null);
+        }
+
+        @Override
+        protected boolean hasHeader() {
+            return true;
+        }
+
+    }
+
+    public static class TypingsListFragment extends UpdatesListFragment{
+
+        @Override
+        public AbsListView.OnScrollListener getScrollListener() {
+
+            return new BackScrollManager(carouselHeader,1 );
+        }
+
+        @Override
+        public BaseAdapter adapter() {
+            return new UpdatesAdapter(Memory.getTyping(user.id),context);
+        }
+
+        @Override
+        protected int getTabIndex() {
+            return 1;
+        }
+    }
+    public static class OnlinesListFragment extends UpdatesListFragment {
+
+
+        @Override
+        public AbsListView.OnScrollListener getScrollListener() {
+
+            return new BackScrollManager(carouselHeader,0 );
+        }
+        @Override
+        public BaseAdapter adapter() {
+            return new UpdatesAdapter(Helper.convertLastUndefinedToOnline(Memory.getOnlines(user.id)),context);
+        }
+
+        @Override
+        protected int getTabIndex() {
+            return 0;
+        }
+    }
 }

@@ -22,10 +22,30 @@ public class OnlineItem extends UpdateItem {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rootView = null;
 
-
-        Online item = getContent();
-
         rootView = inflater.inflate(R.layout.list_item_online, null);
+
+
+
+
+
+        return reconvert(context,rootView);
+    }
+
+
+
+    @Override
+    public View getViewWithOwner(Context context) {
+        return null;
+    }
+
+    @Override
+    public Online getContent() {
+        return (Online) update;
+    }
+
+    @Override
+    public View reconvert(Context context, View rootView) {Online item = getContent();
+
 
         TextView tillView = ((TextView) rootView.findViewById(R.id.till));
         TextView sinceView = ((TextView) rootView.findViewById(R.id.since));
@@ -56,21 +76,6 @@ public class OnlineItem extends UpdateItem {
             }
 
         }
-
-
-
         return rootView;
-    }
-
-
-
-    @Override
-    public View getViewWithOwner(Context context) {
-        return null;
-    }
-
-    @Override
-    public Online getContent() {
-        return (Online) update;
     }
 }

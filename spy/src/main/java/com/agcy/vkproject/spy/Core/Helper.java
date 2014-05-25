@@ -294,7 +294,7 @@ public class Helper {
 
         if (isToday(time))
             return res.getString(R.string.today);
-        if (getDate((int) getUnixNow() - 24 * 3600).equals(getDate(time)))
+        if (getDate( getUnixNow() - 24 * 3600).equals(getDate(time)))
             return res.getString(R.string.yesterday);
         return getDate(time);
     }
@@ -388,7 +388,7 @@ public class Helper {
         boolean isFemale = user.isFemale();
         Resources res = context.getResources();
         String lastSeen = res.getString(isFemale ? R.string.last_seen_f : R.string.last_seen) + " ";
-        Boolean today = checkOneDay((int) getUnixNow(), time);
+        Boolean today = checkOneDay( getUnixNow(), time);
         if (!today) {
             lastSeen += getSmartDate(time) + " " + res.getString(R.string.at) + " ";
         }
@@ -429,6 +429,8 @@ public class Helper {
     }
 
 
+
+
     static class TypingTimer extends Thread {
         public LongPollService.Update update;
         private boolean again = false;
@@ -452,6 +454,7 @@ public class Helper {
                             denyTyping(update.getUser());
                         }
                     });
+                    Log.i("AGCY SPY THREAD", "Task ended");
                 } catch (InterruptedException e) {
                     // если оборвалось
                     e.printStackTrace();
@@ -502,7 +505,9 @@ public class Helper {
 
     public static void showTyping(final LongPollService.Update update) {
         VKApiUserFull user = update.getUser();
-        Memory.saveTyping(user);
+
+        Memory.setTyping(user);
+
         Notificator.announce(new ArrayList<LongPollService.Update>() {{
             add(update);
         }});
@@ -553,12 +558,25 @@ public class Helper {
         }
     }
 
+    // listeners сюда вообще не смотреть
+    public static void trackedUpdated() {
+        if(trackUpdatedListener!=null)
+            trackUpdatedListener.onUpdate();
+    }
+    public static void setTrackUpdatedListener(TrackUpdatedListener trackUpdatedListener){
+        Helper.trackUpdatedListener = trackUpdatedListener;
+    }
+    public static abstract class TrackUpdatedListener{
+        public abstract void onUpdate();
+    }
+    private static TrackUpdatedListener trackUpdatedListener;
 
     private static ArrayList<InitializationListener> initializationEndListeners = new ArrayList<InitializationListener>();
 
     public static void addInitializationListener(InitializationListener listener) {
         initializationEndListeners.add(listener);
     }
+
 
     private static boolean loadingEnded = false;
     private static boolean downloadingEnded = false;

@@ -19,16 +19,27 @@
             android:gravity="right"
             android:textAllCaps="true"
             android:layout_height="wrap_content" />
-        <com.roundedimage.RoundedImageView
+        <RelativeLayout
             xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/photo"
-            android:src="@drawable/user_placeholder"
-            app:corner_radius="30dip"
-            app:border_width="3dip"
-            app:border_color="@drawable/user_list_selector"
-            app:is_oval="true"
+            android:id="@+id/photo_holder"
             android:layout_width="50dp"
-            android:layout_height="50dp"  />
+            android:layout_height="50dp">
+            <com.roundedimage.RoundedImageView
+                android:src="#0fff"
+                app:border_width="3dp"
+                app:border_color="@drawable/update_owner_border_selector"
+                app:is_oval="true"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+            <com.roundedimage.RoundedImageView
+                android:id="@+id/photo"
+                android:src="@drawable/user_placeholder"
+                app:corner_radius="30dip"
+                android:padding="3dp"
+                app:is_oval="true"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"  />
+            </RelativeLayout>
         <TextView
             android:text="HAPPY SANTA!!1"
             android:layout_marginLeft="10dp"

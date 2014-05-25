@@ -1,35 +1,38 @@
 package com.agcy.vkproject.spy;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
+import android.text.Html;
+import android.view.Display;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.agcy.vkproject.spy.Adapters.CustomItems.HeaderItem;
+import com.agcy.vkproject.spy.Adapters.CustomItems.Item;
 import com.agcy.vkproject.spy.Adapters.CustomItems.PreferenceItem;
+import com.agcy.vkproject.spy.Adapters.CustomItems.ToggleablePreferenceItem;
 import com.agcy.vkproject.spy.Core.Helper;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.vk.sdk.VKUIHelper;
-
-import org.focuser.sendmelogs.LogCollector;
 
 import java.util.ArrayList;
 
 /**
  * Created by kiolt_000 on 10-May-14.
  */
-public class SettingsActivity extends PreferenceActivity {
+public class SettingsActivity extends ActionBarActivity {
 
 
     @Override
@@ -40,31 +43,37 @@ public class SettingsActivity extends PreferenceActivity {
         VKUIHelper.onCreate(this);
 
         String title = getResources().getString(R.string.settings);
-        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
-        if (currentapiVersion >= Build.VERSION_CODES.HONEYCOMB) {
 
-            android.app.ActionBar bar = getActionBar();
+            ActionBar bar = getSupportActionBar();
             bar.setTitle(title);
             bar.setDisplayHomeAsUpEnabled(true);
-        }
 
 
         ListView listView = (ListView) findViewById(R.id.list);
         SettingsAdapter adapter = new SettingsAdapter();
+
+        View userView = getLayoutInflater().inflate(R.layout.user_view, null);
+        View logoutButtonView = getLayoutInflater().inflate(R.layout.logout_button_view, null);
+        listView.addHeaderView(userView,null,false);
+        listView.addFooterView(logoutButtonView);
+
         listView.setAdapter(adapter);
 
         SharedPreferences prefs = getSharedPreferences("user", MODE_MULTI_PROCESS);
         String name = prefs.getString("name", "");
         String photoUrl = prefs.getString("photo","");
-        ImageView photoView = (ImageView) findViewById(R.id.photo);
-        TextView nameView = (TextView) findViewById(R.id.name);
+        ImageView photoView = (ImageView) userView.findViewById(R.id.photo);
+        TextView nameView = (TextView) userView.findViewById(R.id.name);
 
         nameView.setText(name);
         ImageLoader.getInstance().displayImage(photoUrl, photoView);
 
-        //SharedPreferences notification
-
-
+        logoutButtonView.findViewById(R.id.logout).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logout(v);
+            }
+        });
     }
 
 
@@ -105,43 +114,174 @@ public class SettingsActivity extends PreferenceActivity {
         return true;
     }
 
+
+
     private class SettingsAdapter extends BaseAdapter {
 
 
-        ArrayList<PreferenceItem> items = new ArrayList<PreferenceItem>(){{
-            add(new PreferenceItem("Report","Send logs") {
+        ArrayList<Item> items = new ArrayList<Item>(){{
+
+            final SharedPreferences notificationPreferences = getSharedPreferences("notification", Context.MODE_MULTI_PROCESS);
+            boolean notificationEnable = notificationPreferences.getBoolean("status", true);
+            boolean notificationVibrate = notificationPreferences.getBoolean("vibrate", true);
+            boolean notificationSound = notificationPreferences.getBoolean("sound", true);
+
+            boolean notificationOnline = notificationPreferences.getBoolean("notificationOnline", true);
+            int wayToNotifyOnline = notificationPreferences.getInt("wayToNotifyOnline", 0);
+
+            boolean notificationOffline = notificationPreferences.getBoolean("notificationOffline", true);
+            int wayToNotifyOffline = notificationPreferences.getInt("wayToNotifyOffline", 0);
+
+            add(new PreferenceItem(getUberfunction(),getUberfunctionDescription()) {
                 @Override
-                public void onClick() {
-                    new AsyncTask<Void, Void, Boolean>() {
-
-                        LogCollector mLogCollector = new LogCollector(SettingsActivity.this);
-                        ProgressDialog progressDialog = new ProgressDialog(SettingsActivity.this);
-                        @Override
-                        protected Boolean doInBackground(Void... params) {
-                            return mLogCollector.collect();
-                        }
-                        @Override
-                        protected void onPreExecute() {
-                            progressDialog.setMessage("Collecting..");
-                            progressDialog.setTitle("Sending logs");
-                            progressDialog.setIndeterminate(true);
-                            progressDialog.show();
-                        }
-                        @Override
-                        protected void onPostExecute(Boolean result) {
-                            progressDialog.dismiss();
-                            if (result)
-                                mLogCollector.sendLog("kioltk@gmail.com", "VK Spy - Application log", "Log report");
-                            else
-                                Toast.makeText(getBaseContext(),"Sending error",Toast.LENGTH_SHORT).show();
-                        }
-
-                    }.execute();
+                public void onClick() {AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
+                    final AlertDialog selector;
+                    builder.setTitle(R.string.app_name);
+                    selector = builder.create();
+                    selector.show();
                 }
             });
+
+            add(new HeaderItem(getNotifications()));
+            add(new ToggleablePreferenceItem(getEnabled(), notificationEnable) {
+                @Override
+                public void onToggle(Boolean isChecked) {
+
+                    SharedPreferences.Editor editor = notificationPreferences.edit();
+                    editor.putBoolean("status", isChecked);
+                    editor.commit();
+
+                }
+            });
+            add(new ToggleablePreferenceItem(getVibrate(),notificationVibrate) {
+                @Override
+                public void onToggle(Boolean isChecked) {
+
+                    SharedPreferences.Editor editor = notificationPreferences.edit();
+                    editor.putBoolean("vibrate",isChecked);
+                    editor.commit();
+                }
+            });
+            add(new ToggleablePreferenceItem(getSound(),notificationSound) {
+                @Override
+                public void onToggle(Boolean isChecked) {
+
+                    SharedPreferences.Editor editor = notificationPreferences.edit();
+                    editor.putBoolean("sound",isChecked);
+                    editor.commit();
+                }
+            });
+
+            add(new HeaderItem(getOnlineNotifications()));
+            add(new ToggleablePreferenceItem(getEnabled(),notificationOnline) {
+                @Override
+                public void onToggle(Boolean isChecked) {
+
+                    SharedPreferences.Editor editor = notificationPreferences.edit();
+                    editor.putBoolean("notificationOnline", isChecked);
+                    editor.commit();
+                }
+            });
+            add(new PreferenceItem(getWayToNotify(),wayToNotifyOnline>0?getPopupText():getNotificationText()) {
+                @Override
+                public void onClick() {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
+                    final AlertDialog selector;
+                    builder.setTitle(R.string.select_way_to_notify)
+                            .setItems(R.array.ways_to_notify, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    SharedPreferences.Editor editor = notificationPreferences.edit();
+                                    editor.putInt("wayToNotifyOnline", which);
+                                    editor.commit();
+
+                                    String text = which> 0 ? getPopupText() : getNotificationText();
+                                    setDescription(text);
+
+
+                                }
+                            });
+                    selector = builder.create();
+                    selector.show();
+
+                }
+            });
+
+            add(new HeaderItem(getOfflineNotifications()));
+            add(new ToggleablePreferenceItem(getEnabled(),notificationOffline) {
+                @Override
+                public void onToggle(Boolean isChecked) {
+
+                    SharedPreferences.Editor editor = notificationPreferences.edit();
+                    editor.putBoolean("notificationOffline", isChecked);
+                    editor.commit();
+                }
+            });
+            add(new PreferenceItem(getWayToNotify(),wayToNotifyOffline>0?getPopupText():getNotificationText()) {
+                @Override
+                public void onClick() {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
+                    final AlertDialog selector;
+                    builder.setTitle(R.string.select_way_to_notify)
+                            .setItems(R.array.ways_to_notify, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    SharedPreferences.Editor editor = notificationPreferences.edit();
+                                    editor.putInt("wayToNotifyOffline", which);
+                                    editor.commit();
+
+                                    String text = which> 0 ? getPopupText() : getNotificationText();
+                                    setDescription(text);
+
+
+                                }
+                            });
+                    selector = builder.create();
+                    selector.show();
+
+                }
+            });
+
+            add(new PreferenceItem(getAbout()) {
+                @Override
+                public void onClick() {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
+                    final AlertDialog selector;
+                    builder.setTitle(R.string.about).setPositiveButton(R.string.got_it,new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+
+                    View happySanta = getLayoutInflater().inflate(R.layout.main_santa, null);
+
+                    TextView happySantaText = (TextView) happySanta.findViewById(R.id.happySantaText);
+                    happySantaText.setText(Html.fromHtml(getResources().getString(R.string.about_desc)));
+                    TextView happySantaLink = (TextView) happySanta.findViewById(R.id.happySantaLink);
+                    happySantaLink.setVisibility(View.GONE);
+                    LinearLayout layout = (LinearLayout)happySanta.findViewById(R.id.line);
+                    Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+                    int width = display.getWidth();  // deprecated
+
+                    for(int i = 0; width%(341*i + 1) < width;i++ ){
+                        layout.addView(new ImageView(getBaseContext()){{
+                            setBackgroundDrawable(getResources().getDrawable(R.drawable.underline));
+                            setLayoutParams(new ViewGroup.LayoutParams(341, ViewGroup.LayoutParams.MATCH_PARENT));
+                        }});
+                    }
+
+
+                    builder.setView(happySanta);
+                    selector = builder.create();
+                    selector.show();
+                }
+            });
+
         }};
 
-
+        @Override
+        public boolean isEnabled(int position) {
+            return getItem(position).isEnabled();
+        }
 
         @Override
         public int getCount() {
@@ -149,7 +289,7 @@ public class SettingsActivity extends PreferenceActivity {
         }
 
         @Override
-        public PreferenceItem getItem(int position) {
+        public Item getItem(int position) {
             return items.get(position);
         }
 
@@ -160,7 +300,55 @@ public class SettingsActivity extends PreferenceActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            return getItem(position).getView(getBaseContext());
+            Item item = getItem(position);
+            View view = item.getView(getBaseContext());
+            if(
+                    item instanceof PreferenceItem &&
+                    position+1 != items.size() &&
+                    !(getItem(position+1) instanceof HeaderItem)
+                    ){
+                view.findViewById(R.id.divider).setVisibility(View.VISIBLE);
+            }
+            return view;
         }
+    }
+
+    public String getNotifications(){
+        return getResources().getString(R.string.notifications);
+    }
+    public String getOnlineNotifications() {
+        return getResources().getString(R.string.online_notifications);
+    }
+    public String getOfflineNotifications() {
+        return getResources().getString(R.string.offline_notifications);
+    }
+    private String getSound(){
+        return getResources().getString(R.string.sound);
+    }
+    private String getVibrate(){
+        return getResources().getString(R.string.vibrate);
+    }
+    private String getAbout(){
+
+        return getResources().getString(R.string.about);
+    }
+    private String getUberfunction() {
+        return getResources().getString(R.string.uberfunction);
+    }
+    private String getUberfunctionDescription() {
+        return getResources().getString(R.string.uberfunction_description);
+    }
+    private String getEnabled(){
+
+        return getResources().getString(R.string.enabled);
+    }
+    private String getWayToNotify(){
+        return getResources().getString(R.string.select_way_to_notify);
+    }
+    private String getPopupText(){
+        return getResources().getString(R.string.popup);
+    }
+    private String getNotificationText(){
+        return getResources().getString(R.string.notification);
     }
 }

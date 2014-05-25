@@ -23,7 +23,10 @@ public class UserListAdapter extends BaseAdapter {
         this.context = context;
         items = new ItemHelper.ObservableUsersArray(users);
     }
-
+    public UserListAdapter(ItemHelper.ObservableUsersArray items, Context context){
+        this.items = items;
+        this.context = context;
+    }
     @Override
     public boolean isEnabled(int position) {
         return getItem(position).isEnabled();
@@ -36,29 +39,43 @@ public class UserListAdapter extends BaseAdapter {
 
     @Override
     public Item getItem(int position) {
-
-        if(items.size()-15<position){
-            if(items.convertMore(15))
-                notifyDataSetChanged();
-        }
         return items.get(position);
     }
 
     @Override
     public long getItemId(int position) {
+        Item item = getItem(position);
+        if(item instanceof UserItem)
+            return ((VKApiUserFull)item.getContent()).id;
         return 0;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         Item item = getItem(position);
-        View rootView = item.getView(context);
+        View rootView;
+        if(convertView!=null && convertView.getTag()!=null && item instanceof UserItem)
+            rootView = ((UserItem)item).reconvert(context, convertView);
+        else
+            rootView= item.getView(context);
+        if(item instanceof UserItem)
+            rootView.setTag("user");
         if(!items.isLast(position)){
             if(getItem(position+1) instanceof HeaderItem){
                 UserItem userItem = (UserItem) item;
-                userItem.removeDivider();
+                userItem.removeDivider(rootView);
+            }else{
+                if(item instanceof UserItem) {
+
+                    ((UserItem)item).setDivider(rootView);
+                }
             }
         }
         return rootView;
+    }
+
+
+    public ArrayList<Item> getItems() {
+        return items.convertedItems;
     }
 }

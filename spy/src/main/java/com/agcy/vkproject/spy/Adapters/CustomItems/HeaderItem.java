@@ -12,8 +12,11 @@ import com.agcy.vkproject.spy.R;
  */
 public class HeaderItem extends Item {
 
-    private String text;
-
+    private int resId;
+    private String text = null;
+    public HeaderItem(int resId){
+        this.resId = resId;
+    }
     public HeaderItem(String text){
         this.text = text;
     }
@@ -29,7 +32,10 @@ public class HeaderItem extends Item {
         View rootView =  inflater.inflate(R.layout.list_item_header, null);
 
         TextView textView = (TextView) rootView.findViewById(R.id.text);
-        textView.setText(getContent());
+        if(text !=null)
+            textView.setText(getContent());
+        else
+        textView.setText(resId);
         return rootView;
     }
 

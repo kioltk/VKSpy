@@ -3,6 +3,7 @@ package com.agcy.vkproject.spy.Adapters;
 import android.util.Log;
 
 import com.agcy.vkproject.spy.Adapters.CustomItems.DateItem;
+import com.agcy.vkproject.spy.Adapters.CustomItems.FilterUserItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.HeaderItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.Item;
 import com.agcy.vkproject.spy.Adapters.CustomItems.OnlineItem;
@@ -13,6 +14,7 @@ import com.agcy.vkproject.spy.Models.Online;
 import com.agcy.vkproject.spy.Models.Status;
 import com.agcy.vkproject.spy.Models.Typing;
 import com.agcy.vkproject.spy.Models.Update;
+import com.agcy.vkproject.spy.R;
 import com.vk.sdk.api.model.VKApiUserFull;
 
 import java.util.ArrayList;
@@ -50,7 +52,7 @@ public class ItemHelper {
         if (first) {
 
             if (users.size() > 5) {
-                convertedUsers.add(new HeaderItem("Important"));
+                convertedUsers.add(new HeaderItem(R.string.important));
             }
             for (VKApiUserFull user : users.subList(0, users.size() > 5 ? 5 : users.size())) {
                 convertedUsers.add(new UserItem(user));
@@ -171,6 +173,25 @@ public class ItemHelper {
         }
     }
 
+
+    public static class ObservableFilterUsersArray extends ObservableUsersArray{
+
+        public ObservableFilterUsersArray(ArrayList<? extends VKApiUserFull> items) {
+            super(items);
+            reconvert();
+        }
+        public void reconvert(){
+            ArrayList<Item> newItems = new ArrayList<Item>();
+            for(Item item: convertedItems) {
+                if (item instanceof UserItem) {
+                    newItems.add(new FilterUserItem((VKApiUserFull) item.getContent()));
+                } else {
+                    newItems.add(item);
+                }
+            }
+            convertedItems = newItems;
+        }
+    }
     public static class ObservableUsersArray extends ObservableArray<VKApiUserFull>{
         public ObservableUsersArray(ArrayList<? extends VKApiUserFull> items) {
             super(items,items.size());
@@ -190,7 +211,7 @@ public class ItemHelper {
     public static abstract class ObservableArray<T>{
 
         protected int offset = 0;
-        protected final ArrayList<Item> convertedItems = new ArrayList<Item>();
+        protected ArrayList<Item> convertedItems = new ArrayList<Item>();
         protected final ArrayList<T> items = new ArrayList<T>();
         protected boolean newEnabled = true;
 

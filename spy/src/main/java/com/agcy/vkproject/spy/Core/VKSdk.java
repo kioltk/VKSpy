@@ -11,6 +11,7 @@ import android.util.Log;
 import com.agcy.vkproject.spy.Longpoll.LongPollService;
 import com.agcy.vkproject.spy.MainActivity;
 import com.agcy.vkproject.spy.WelcomeActivity;
+import com.bugsense.trace.BugSenseHandler;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKCaptchaDialog;
 import com.vk.sdk.VKScope;
@@ -90,11 +91,13 @@ public class VKSdk {
         @Override
         public void onCaptchaError(VKError captchaError) {
             new VKCaptchaDialog(captchaError).show();
+            BugSenseHandler.sendEvent("Captcha error");
         }
 
         @Override
         public void onTokenExpired(VKAccessToken expiredToken) {
             com.vk.sdk.VKSdk.authorize(sMyScope);
+            BugSenseHandler.sendEvent("Token expired");
         }
 
         @Override
@@ -102,6 +105,8 @@ public class VKSdk {
             new AlertDialog.Builder(context)
                     .setMessage(authorizationError.errorMessage)
                     .show();
+
+            BugSenseHandler.sendEvent("Access denied");
             if(!authorizationError.errorReason.equals("user_denied")) {
                 context.startActivity(new Intent(context, WelcomeActivity.class));
                 Helper.stopLongpoll();
@@ -120,6 +125,8 @@ public class VKSdk {
 
         @Override
         public void onLogout() {
+
+            BugSenseHandler.sendEvent("Logout");
 
             Intent intent = new Intent(context, WelcomeActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

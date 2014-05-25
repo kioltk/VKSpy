@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- carousel temp -->
+
+    <color name="white">#ffffffff</color>
+
+    <color name="transparent_black">#99000000</color>
+
+    <!-- carousel temp -->
     <color name="blue_light">#add5f2</color>
     <color name="blue">#2994e2</color>
     <color name="blue_dark">#2B587A</color>
@@ -7,11 +14,11 @@
     <color name="red_dark">#ffd86d6b</color>
     <color name="green">#ff09aa38</color>
     <color name="green_dark">#ff77cc33</color>
-    <color name="grey_light_extra">#f0f0f0</color>
 
+    <color name="grey_dark">#737373</color>
     <color name="grey">#9fa2a6</color>
     <color name="grey_light">#999999</color>
-    <color name="grey_dark">#737373</color>
+    <color name="grey_light_extra">#f0f0f0</color>
     <color name="grey_user_item_background">#f2f2f2</color>
 
     <color name="grey_user_background">#e3eff9</color>
@@ -26,4 +33,19 @@
 
     <color name="link_color_pressed">#0060ac</color>
     <color name="link_color_normal">#0180dc</color>
+
+    <color name="filter_background">#4db2b2b2</color>
+    <color name="filter_background_pressed">#66b2b2b2</color>
+
+    <color name="text_center_screen">@color/grey_light</color>
+    <color name="date_blue">@color/blue</color>
+    <color name="time_grey">#88000b1a</color>
+
+    <color name="logout_text">#1a1a1a</color>
+    <color name="logout_bg_normal">@color/grey_light_extra</color>
+    <color name="logout_border_normal">#dedede</color>
+    <color name="logout_bg_selected">#e6e6e6</color>
+    <color name="logout_border_selected">#d1d1d1</color>
+
+    <color name="user_item_text_color">#0080d5</color>
 </resources>

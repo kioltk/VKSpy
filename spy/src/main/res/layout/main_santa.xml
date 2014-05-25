@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:paddingTop="35dp"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:id="@+id/line"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/ground_bg"
+            android:layout_width="match_parent"
+            android:layout_height="4dp" />
+        <ImageView
+            android:src="@drawable/santa"
+            android:layout_width="match_parent"
+            android:layout_height="80dp" />
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:paddingBottom="14dp"
+        android:paddingTop="14dp"
+        android:paddingLeft="32dp"
+        android:paddingRight="32dp"
+        android:background="#f0f0f0"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:gravity="center"
+            android:textSize="17sp"
+            android:text="@string/desc"
+            android:lineSpacingExtra="6dp"
+            android:id="@+id/happySantaText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:gravity="center"
+            android:textSize="17sp"
+            android:textColor="@color/link_color_selector"
+            android:text="vk.com/happysanta"
+            android:layout_marginTop="4dp"
+            android:id="@+id/happySantaLink"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</LinearLayout>
