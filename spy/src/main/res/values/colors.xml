@@ -48,4 +48,6 @@
     <color name="logout_border_selected">#d1d1d1</color>
 
     <color name="user_item_text_color">#0080d5</color>
+
+    <color name="action_bar_divider">#d4d5d6</color>
 </resources>

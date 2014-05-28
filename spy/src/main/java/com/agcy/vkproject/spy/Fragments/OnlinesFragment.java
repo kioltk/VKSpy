@@ -60,6 +60,9 @@ public class OnlinesFragment extends UpdatesFragment {
 
     @Override
     protected void onContentBinded() {
+
+        if(rootView==null)
+            return;
         if (adapter == null || adapter.isEmpty()) {
             if (Memory.getCountOfTracked() == 0) {
                 rootView.findViewById(R.id.filter_tip).setVisibility(View.VISIBLE);

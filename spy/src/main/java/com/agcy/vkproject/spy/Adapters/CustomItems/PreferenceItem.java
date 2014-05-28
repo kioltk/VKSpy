@@ -61,4 +61,10 @@ public abstract class PreferenceItem extends Item {
             descriptionView.setVisibility(View.GONE);
         }
     }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        rootView.setEnabled(false);
+    }
 }

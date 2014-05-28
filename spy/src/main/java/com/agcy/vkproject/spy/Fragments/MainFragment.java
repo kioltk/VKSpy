@@ -1,6 +1,8 @@
 package com.agcy.vkproject.spy.Fragments;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -15,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.agcy.vkproject.spy.Adapters.CustomItems.PreferenceItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.ToggleablePreferenceItem;
@@ -23,6 +26,8 @@ import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Longpoll.LongPollService;
 import com.agcy.vkproject.spy.R;
 import com.agcy.vkproject.spy.SettingsActivity;
+import com.bugsense.trace.BugSenseHandler;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.ArrayList;
 
@@ -85,21 +90,85 @@ public class MainFragment extends android.support.v4.app.Fragment {
         ListView preferencesView = (ListView) rootView.findViewById(R.id.preference);
         preferencesView.addHeaderView(happySanta,null,false);
         ArrayList<PreferenceItem> preferences = new ArrayList<PreferenceItem>();
-        preferences.add(new ToggleablePreferenceItem("Enable spy",null,longpollStatus) {
+        preferences.add(new PreferenceItem(getUberfunction(), getUberfunctionDescription()) {
             @Override
             public void onClick() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                final AlertDialog selector;
+                View durov = getActivity().getLayoutInflater().inflate(R.layout.durov, null);
+                ImageLoader.getInstance().displayImage("http://cs9591.vk.me/v9591001/70/VPSmUR954fQ.jpg",(ImageView) durov.findViewById(R.id.photo));
 
+                builder.setTitle(R.string.exclusive).
+                        setPositiveButton(R.string.sure,new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                BugSenseHandler.sendEvent("Следим за Дуровым");
+                                Toast.makeText(context,"Not implemented",Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                .setNegativeButton(R.string.nope,new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        BugSenseHandler.sendEvent("Не следим за дуровым");
+                        Toast.makeText(context,"Not implemented",Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                builder.setView(durov);
+                selector = builder.create();
+                selector.show();
             }
+        });
+        preferences.add(new ToggleablePreferenceItem(getEnableSpy(),null,longpollStatus) {
 
             @Override
             public void onToggle(Boolean isChecked) {
                 longpollToggle(isChecked);
             }
         });
-        preferences.add(new PreferenceItem("Advanced settings") {
+
+        preferences.add(new PreferenceItem(getAdvancedSettings()) {
             @Override
             public void onClick() {
                 startActivity(new Intent(context,SettingsActivity.class));
+            }
+        });
+
+        preferences.add(new PreferenceItem(getAbout()) {
+            @Override
+            public void onClick() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                final AlertDialog selector;
+                builder.setTitle(R.string.about).
+                        setPositiveButton(R.string.got_it, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        });
+
+                View happySanta = getActivity().getLayoutInflater().inflate(R.layout.main_santa, null);
+
+                TextView happySantaText = (TextView) happySanta.findViewById(R.id.happySantaText);
+                happySantaText.setText(Html.fromHtml(getResources().getString(R.string.about_desc)));
+                TextView happySantaLink = (TextView) happySanta.findViewById(R.id.happySantaLink);
+                happySantaLink.setVisibility(View.GONE);
+                LinearLayout layout = (LinearLayout)happySanta.findViewById(R.id.line);
+                Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+                int width = display.getWidth();  // deprecated
+
+                for(int i = 0; width%(341*i + 1) < width;i++ ){
+                    layout.addView(new ImageView(context){{
+                        setBackgroundDrawable(getResources().getDrawable(R.drawable.underline));
+                        setLayoutParams(new ViewGroup.LayoutParams(341, ViewGroup.LayoutParams.MATCH_PARENT));
+                    }});
+                }
+
+
+                builder.setView(happySanta);
+                selector = builder.create();
+                selector.show();
             }
         });
         preferencesView.setAdapter(new PreferenceAdapter(context,preferences));
@@ -122,5 +191,26 @@ public class MainFragment extends android.support.v4.app.Fragment {
         longPollService.putExtras(bundle);
         context.startService(longPollService);
 
+    }
+
+
+    private String getUberfunction() {
+        return getResources().getString(R.string.uberfunction);
+    }
+    private String getUberfunctionDescription() {
+        return getResources().getString(R.string.uberfunction_description);
+    }
+
+    private String getAbout(){
+
+        return getResources().getString(R.string.about);
+    }
+
+    public String getAdvancedSettings() {
+        return getResources().getString(R.string.settings);
+    }
+
+    public String getEnableSpy() {
+        return getResources().getString(R.string.enable_spy);
     }
 }

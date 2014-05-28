@@ -17,6 +17,7 @@ import com.agcy.vkproject.spy.Models.Status;
 import com.agcy.vkproject.spy.Models.Update;
 import com.agcy.vkproject.spy.R;
 import com.agcy.vkproject.spy.Receivers.NetworkStateReceiver;
+import com.bugsense.trace.BugSenseHandler;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -69,6 +70,7 @@ public class Helper {
         ImageLoader.getInstance().init(config);
 
         VKSdk.initialize(context);
+        BugSenseHandler.initAndStartSession(context,"07310e3f");
     }
 
     public static void logout() {
@@ -325,7 +327,7 @@ public class Helper {
         try {
             int time_format = Settings.System.getInt(context.getContentResolver(), Settings.System.TIME_12_24);
 
-            //Log.i("AGCY SPY","Time format detected: "+ time_format);
+            Log.i("AGCY SPY","Time format detected: "+ time_format);
             if (time_format == 24) {
 
                 return String.format("%tR",
@@ -384,11 +386,12 @@ public class Helper {
         if (time == 0) {
             return "";
         }
-
         boolean isFemale = user.isFemale();
         Resources res = context.getResources();
         String lastSeen = res.getString(isFemale ? R.string.last_seen_f : R.string.last_seen) + " ";
-        Boolean today = checkOneDay( getUnixNow(), time);
+        if(getUnixNow()-time<10)
+            return lastSeen+res.getString(R.string.moment_ago);
+                    Boolean today = checkOneDay( getUnixNow(), time);
         if (!today) {
             lastSeen += getSmartDate(time) + " " + res.getString(R.string.at) + " ";
         }
@@ -445,7 +448,7 @@ public class Helper {
             do {
                 try {
                     // Ждем три минуты
-                    Thread.sleep(3 * 60 * 1000);
+                    Thread.sleep(15 * 1000);
                     // если дождались, тогда постим, что споймали новый тайпинг
                     typingHandler.post(new Runnable() {
                         @Override

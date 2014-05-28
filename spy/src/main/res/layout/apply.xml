@@ -3,13 +3,16 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
-    android:paddingLeft="5dp"
-    android:paddingRight="5dp"
     android:gravity="center"
     android:background="@drawable/tab_indicator_item"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <View
+        android:background="@color/action_bar_divider"
+        android:layout_width="1dp"
+        android:layout_height="32dp"/>
     <ImageView
+        android:paddingLeft="16dp"
         android:src="@drawable/ic_ab_ok"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
@@ -20,5 +23,10 @@
         android:text="@string/apply"
         android:textAllCaps="true"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:paddingRight="16dp"/>
+    <View
+        android:background="@color/action_bar_divider"
+        android:layout_width="1dp"
+        android:layout_height="32dp"/>
 </LinearLayout>

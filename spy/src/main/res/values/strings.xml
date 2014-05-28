@@ -64,13 +64,26 @@
     <string name="important">Important</string>
     <string name="select_all">Select all</string>
     <string name="deselect_all">Deselect all</string>
-
+    <string name="moment_ago">right now</string>
+    <string name="enable_spy">Enable spy</string>
+    <string name="durov_description">Do you want to spy upon Durov?</string>
+    <string name="exclusive">Exclusive feature</string>
+    <string name="sure">Sure!</string>
+    <string name="nope">Who is it?</string>
     <plurals name="usersSelected">
         <item quantity="zero">None is selected</item>
         <item quantity="one">One user selected</item>
         <item quantity="few">%d users selected</item>
         <item quantity="many">%d users selected</item>
         <item quantity="other">%d users selected</item>
+    </plurals>
+    <plurals name="onlines_notification" >
+        <item quantity="one">And one more appeared online</item>
+        <item quantity="many">And %d more appeared online</item>
+    </plurals>
+    <plurals name="offlines_notification" >
+        <item quantity="one">And one more gone offline</item>
+        <item quantity="many">And %d more gone offline</item>
     </plurals>
 
 

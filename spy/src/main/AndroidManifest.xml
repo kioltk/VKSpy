@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.agcy.vkproject.spy" >
 
+    <uses-permission android:name="android.permission.GET_TASKS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_LOGS" />
@@ -15,11 +16,6 @@
         android:icon="@drawable/icon"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        <activity
-            android:name="com.agcy.vkproject.spy.StartActivity"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoTitle" >
-        </activity>
         <activity
             android:name="com.agcy.vkproject.spy.MainActivity"
             android:configChanges="orientation"
@@ -53,6 +49,10 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".Core.Notificator$ClearNotificationsReceiver"
+            android:enabled="true"
+            android:exported="true"/>
 
         <activity
             android:name="com.agcy.vkproject.spy.WelcomeActivity"
@@ -75,9 +75,6 @@
         <activity
             android:name="com.agcy.vkproject.spy.FilterActivity"
             android:label="@string/title_activity_filter" />
-        <activity
-            android:name="com.viewpagerindicator.demo.DemoActivity"
-            android:label="carousel test" />
     </application>
 
 </manifest>

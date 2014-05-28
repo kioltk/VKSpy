@@ -16,7 +16,7 @@
         <TextView
             android:id="@+id/title"
             android:text="Enable spy"
-            android:textColor="#222"
+            android:textColor="@color/preference_text_color"
             android:textSize="17sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />

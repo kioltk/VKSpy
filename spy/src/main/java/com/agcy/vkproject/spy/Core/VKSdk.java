@@ -60,6 +60,11 @@ public class VKSdk {
                     @Override
                     public void onAccessDenied(VKError authorizationError) {
 
+                        new AlertDialog.Builder(context)
+                                .setMessage(authorizationError.errorMessage)
+                                .show();
+                        //com.vk.sdk.VKSdk.authorize(sMyScope);
+                        BugSenseHandler.sendEvent("Access denied");
                     }
 
                     @Override

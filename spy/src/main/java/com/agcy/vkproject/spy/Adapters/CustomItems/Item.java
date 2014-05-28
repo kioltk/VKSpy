@@ -12,6 +12,8 @@ public abstract class Item {
 
     protected boolean alreadyDeleted = false;
     protected boolean isDeleted = false;
+    private boolean enabled = true;
+
     public abstract View getView(Context context);
 
     public void setDeleted(){
@@ -26,7 +28,10 @@ public abstract class Item {
     public abstract Object getContent();
 
     public boolean isEnabled() {
-        return true;
+        return enabled;
+    }
+    public void setEnabled(boolean enabled){
+        this.enabled = enabled;
     }
 
     public boolean isDeleted() {

@@ -2,7 +2,6 @@ package com.agcy.vkproject.spy;
 
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,9 +36,9 @@ public class FilterActivity extends ActionBarActivity {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.container, fragment)
                     .commit();
+        }else{
+
         }
-        ActionBar bar = getSupportActionBar();
-        bar.setDisplayHomeAsUpEnabled(true);
     }
 
     public boolean trackClicked(VKApiUserFull user){
@@ -187,7 +186,7 @@ public class FilterActivity extends ActionBarActivity {
     private void updateActionBarInfo() {
         if (applyButton != null) {
             Resources res = getBaseContext().getResources();
-            getSupportActionBar().setTitle((res.getQuantityString(R.plurals.usersSelected, ids.size(), ids.size())));
+            getSupportActionBar().setTitle((res.getQuantityString(R.plurals.usersSelected, ids.size(),ids.size())));
 
         }
     }

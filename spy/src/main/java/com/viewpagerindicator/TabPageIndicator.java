@@ -67,7 +67,7 @@ public class TabPageIndicator extends HorizontalScrollView implements PageIndica
             final int oldSelected = mViewPager.getCurrentItem();
             final int newSelected = tabView.getIndex();
 
-            mViewPager.setCurrentItem(newSelected);
+            mViewPager.setCurrentItem(newSelected,true);
             if (oldSelected == newSelected && mTabReselectedListener != null) {
                 mTabReselectedListener.onTabReselected(newSelected);
             }
@@ -242,8 +242,7 @@ public class TabPageIndicator extends HorizontalScrollView implements PageIndica
             throw new IllegalStateException("ViewPager has not been bound.");
         }
         mSelectedTabIndex = item;
-        mViewPager.setCurrentItem(item);
-
+        mViewPager.setCurrentItem(item, true);
         final int tabCount = mTabLayout.getChildCount();
         for (int i = 0; i < tabCount; i++) {
             final View child = mTabLayout.getChildAt(i);
@@ -288,7 +287,7 @@ public class TabPageIndicator extends HorizontalScrollView implements PageIndica
                 titleView.setLayoutParams(new ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
                 addView(titleView);
             }
-            setBackgroundDrawable(context.getResources().getDrawable(R.drawable.tab_indicator_item));
+            setBackgroundResource(R.drawable.tab_indicator_item);
 
 
             setGravity(Gravity.CENTER);

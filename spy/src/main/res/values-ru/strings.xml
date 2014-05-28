@@ -58,9 +58,16 @@
     <string name="uberfunction_description">Слежка за Павлом Дуровым!</string>
     <string name="got_it">Ясно</string>
     <string name="about_desc">Какая-то инфа</string>
-    <string name="important">Important</string>
-    <string name="select_all">Select all</string>
-    <string name="deselect_all">Deselect all</string>
+    <string name="important">Важные</string>
+    <string name="select_all">Выбрать всех</string>
+    <string name="deselect_all">Снять выделение</string>
+    <string name="moment_ago">только что</string>
+    <string name="enable_spy">Включить слежку</string>
+    <string name="onlines_notification" />
+    <string name="durov_description">Следить тоже за Дуровым?</string>
+    <string name="exclusive">Эксклюзивная фича</string>
+    <string name="sure">Канешна!</string>
+    <string name="nope">Кто это?</string>
 
     <plurals name="usersSelected">
         <item quantity="zero">Никого не выбрано</item>
@@ -68,6 +75,18 @@
         <item quantity="few">Выбрано %d</item>
         <item quantity="many">Выбрано %d</item>
         <item quantity="other">Выбрано %d</item>
+    </plurals>
+    <plurals name="onlines_notification" >
+        <item quantity="one">И ещё %d человек зашёл в сеть</item>
+        <item quantity="few">И ещё %d человека зашли в сеть</item>
+        <item quantity="many">И ещё %d человек зашли в сеть</item>
+        <item quantity="other">И ещё %d человека зашли в сеть</item>
+    </plurals>
+    <plurals name="offlines_notification">
+        <item quantity="one">И ещё %d человек вышел из сети</item>
+        <item quantity="few">И ещё %d человека вышли из сети</item>
+        <item quantity="many">И ещё %d человек вышли из сети</item>
+        <item quantity="other">И ещё %d человека  вышли из сети</item>
     </plurals>
 
 </resources>

@@ -5,6 +5,7 @@ import android.app.Application;
 import android.os.Build;
 import android.util.Log;
 
+import com.agcy.vkproject.spy.Core.Notificator;
 import com.bugsense.trace.BugSenseHandler;
 import com.bugsense.trace.ExceptionCallback;
 
@@ -34,7 +35,7 @@ public class SpyApplication extends Application implements ExceptionCallback {
         super.onTrimMemory(level);
 
         Log.i("AGCY SPY APPLICATION","Trim");
-
+        Notificator.clearNotifications();
     }
 
     @Override
@@ -48,6 +49,7 @@ public class SpyApplication extends Application implements ExceptionCallback {
         super.onTerminate();
         Log.i("AGCY SPY APPLICATION","Terminate");
         BugSenseHandler.closeSession(this);
+        Notificator.clearNotifications();
 
     }
 

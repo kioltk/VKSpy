@@ -38,7 +38,7 @@ public abstract class LongPollConnection extends AsyncTask<Void, Void, String> {
             HttpResponse httpResponse = httpClient.execute(get);
             HttpEntity httpEntity = httpResponse.getEntity();
             response = EntityUtils.toString(httpEntity);
-            Log.i("AGCY SPY","longoll responses: "+ response);
+            Log.i("AGCY SPY","longoll responses");
             if(!isCancelled())
                 return response;
         }catch (Exception exp){
@@ -54,7 +54,7 @@ public abstract class LongPollConnection extends AsyncTask<Void, Void, String> {
             try {
                 JSONObject response = new JSONObject(jsonResponse);
                 if (response.has("failed")) {
-                    throw new TsException();
+                    throw new ServerException();
                 }
                 String ts = response.getString("ts");
                 JSONArray updates = response.getJSONArray("updates");
@@ -74,6 +74,6 @@ public abstract class LongPollConnection extends AsyncTask<Void, Void, String> {
         return finished;
     }
 
-    public static class TsException extends Exception {
+    public static class ServerException extends Exception {
     }
 }

@@ -170,7 +170,7 @@ public class LongPollService extends Service {
         preferences.commit();
 
     }
-    private void refreshSettings() {
+    private void refreshSettings(final boolean saveNewTs) {
 
 
 
@@ -204,7 +204,8 @@ public class LongPollService extends Service {
                     try {
 
                         JSONObject responseJson = response.json.getJSONObject("response");
-                        ts = responseJson.getString("ts");
+                        if(saveNewTs)
+                            ts = responseJson.getString("ts");
                         server = responseJson.getString("server");
                         key = responseJson.getString("key");
 
@@ -296,16 +297,22 @@ public class LongPollService extends Service {
             @Override
             public void onError(Exception exp) {
                     Log.e("AGCY SPY LONGPOLL","", exp);
-                    BugSenseHandler.sendExceptionMessage("Longpoll","Execution error",exp);
-
+                    //BugSenseHandler.sendExceptionMessage("Longpoll","Execution error",exp);
+                if(exp instanceof UnknownHostException){
+                    refreshSettings(false);
+                }
                 if(exp instanceof org.apache.http.conn.HttpHostConnectException){
                     startLongpoll();
                 }
-
-                if (exp instanceof JSONException || exp instanceof TsException) {
+                if(exp instanceof ServerException){
+                    BugSenseHandler.sendEvent("Server settings error");
+                    Log.e("AGCY SPY LONGPOLL","Server settings error",exp);
+                    refreshSettings(false);
+                }
+                if (exp instanceof JSONException) {
                     Log.e("AGCY SPY LONGPOLL","Response error",exp);
                     BugSenseHandler.sendExceptionMessage("Longpoll","Response error",exp);
-                    refreshSettings();
+                    refreshSettings(false);
                 }
             }
 
@@ -319,6 +326,11 @@ public class LongPollService extends Service {
             Log.i("AGCY SPY", "Longpoll disabled");
         }
     }
+
+    private void refreshSettings() {
+        refreshSettings(true);
+    }
+
     private Boolean checkLongpollEnabled(){
 
         SharedPreferences preferences = getApplicationContext().getSharedPreferences("longpoll", MODE_MULTI_PROCESS);
@@ -428,6 +440,10 @@ public class LongPollService extends Service {
 
         public boolean isStatusUpdate() {
             return updateType == TYPE_OFFLINE || updateType == TYPE_ONLINE;
+        }
+
+        public String getShortMessage() {
+            return getUser().first_name;
         }
     }
 }

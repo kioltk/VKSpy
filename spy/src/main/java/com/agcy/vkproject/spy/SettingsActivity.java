@@ -7,15 +7,11 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.text.Html;
-import android.view.Display;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -132,16 +128,6 @@ public class SettingsActivity extends ActionBarActivity {
             boolean notificationOffline = notificationPreferences.getBoolean("notificationOffline", true);
             int wayToNotifyOffline = notificationPreferences.getInt("wayToNotifyOffline", 0);
 
-            add(new PreferenceItem(getUberfunction(),getUberfunctionDescription()) {
-                @Override
-                public void onClick() {AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
-                    final AlertDialog selector;
-                    builder.setTitle(R.string.app_name);
-                    selector = builder.create();
-                    selector.show();
-                }
-            });
-
             add(new HeaderItem(getNotifications()));
             add(new ToggleablePreferenceItem(getEnabled(), notificationEnable) {
                 @Override
@@ -180,6 +166,9 @@ public class SettingsActivity extends ActionBarActivity {
                     SharedPreferences.Editor editor = notificationPreferences.edit();
                     editor.putBoolean("notificationOnline", isChecked);
                     editor.commit();
+                    if(isChecked){
+
+                    }
                 }
             });
             add(new PreferenceItem(getWayToNotify(),wayToNotifyOnline>0?getPopupText():getNotificationText()) {
@@ -240,41 +229,6 @@ public class SettingsActivity extends ActionBarActivity {
                 }
             });
 
-            add(new PreferenceItem(getAbout()) {
-                @Override
-                public void onClick() {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
-                    final AlertDialog selector;
-                    builder.setTitle(R.string.about).setPositiveButton(R.string.got_it,new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                        }
-                    });
-
-                    View happySanta = getLayoutInflater().inflate(R.layout.main_santa, null);
-
-                    TextView happySantaText = (TextView) happySanta.findViewById(R.id.happySantaText);
-                    happySantaText.setText(Html.fromHtml(getResources().getString(R.string.about_desc)));
-                    TextView happySantaLink = (TextView) happySanta.findViewById(R.id.happySantaLink);
-                    happySantaLink.setVisibility(View.GONE);
-                    LinearLayout layout = (LinearLayout)happySanta.findViewById(R.id.line);
-                    Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-                    int width = display.getWidth();  // deprecated
-
-                    for(int i = 0; width%(341*i + 1) < width;i++ ){
-                        layout.addView(new ImageView(getBaseContext()){{
-                            setBackgroundDrawable(getResources().getDrawable(R.drawable.underline));
-                            setLayoutParams(new ViewGroup.LayoutParams(341, ViewGroup.LayoutParams.MATCH_PARENT));
-                        }});
-                    }
-
-
-                    builder.setView(happySanta);
-                    selector = builder.create();
-                    selector.show();
-                }
-            });
 
         }};
 
@@ -328,16 +282,7 @@ public class SettingsActivity extends ActionBarActivity {
     private String getVibrate(){
         return getResources().getString(R.string.vibrate);
     }
-    private String getAbout(){
 
-        return getResources().getString(R.string.about);
-    }
-    private String getUberfunction() {
-        return getResources().getString(R.string.uberfunction);
-    }
-    private String getUberfunctionDescription() {
-        return getResources().getString(R.string.uberfunction_description);
-    }
     private String getEnabled(){
 
         return getResources().getString(R.string.enabled);

@@ -41,6 +41,7 @@ import java.net.UnknownHostException;
 
 public class MainActivity extends ActionBarActivity {
 
+    public static final int ONLINES = 1;
     private OnlinesFragment onlinesFragment;
 
 
@@ -69,6 +70,7 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         VKUIHelper.onCreate(this);
         if(!Helper.isInitialized())
@@ -103,7 +105,13 @@ public class MainActivity extends ActionBarActivity {
 
         downloadData();
 
-
+        if(savedInstanceState==null) {
+            Bundle bundle = getIntent().getExtras();
+            if (bundle != null) {
+                int page = bundle.getInt("page", 0);
+                mViewPager.setCurrentItem(page);
+            }
+        }
 
     }
 
