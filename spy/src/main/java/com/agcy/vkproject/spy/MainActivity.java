@@ -4,6 +4,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.TransitionDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
@@ -102,7 +104,11 @@ public class MainActivity extends ActionBarActivity {
             public void onPageScrollStateChanged(int state) {
             }
         });
-
+        /*
+            View setView = ((ViewGroup)indicator.getChildAt(0)).getChildAt(1);
+            setView.findViewWithTag("icon").setSelected(true);
+            setView.setPressed(true);
+        */
         downloadData();
 
         if(savedInstanceState==null) {
@@ -157,12 +163,18 @@ public class MainActivity extends ActionBarActivity {
                                         new Thread(new Runnable() {
                                             @Override
                                             public void run() {
-
+                                                boolean firstLoading = false;
+                                                if(Memory.users.isEmpty()){
+                                                    firstLoading = true;
+                                                }
                                                 Memory.saveFriends((VKUsersArray) response.parsedModel);
-
+                                                final boolean finalFirstLoading = firstLoading;
                                                 handler.post(new Runnable() {
                                                     @Override
                                                     public void run() {
+                                                        if(finalFirstLoading){
+                                                            Helper.trackedUpdated();
+                                                        }
                                                         Helper.downloadingEnded();
                                                         startLongpoll();
                                                     }
@@ -177,7 +189,6 @@ public class MainActivity extends ActionBarActivity {
                                     @Override
                                     public void onError(VKError error) {
                                         super.onError(error);
-                                        //unknownhost
 
                                         switch (error.errorCode) {
                                             case VKError.VK_API_REQUEST_HTTP_FAILED:
@@ -295,7 +306,9 @@ public class MainActivity extends ActionBarActivity {
                     onlinesFragment = new OnlinesFragment();
                     return onlinesFragment;
                 case 2:
-                    return new UsersListFragment();
+                    UsersListFragment fragment = new UsersListFragment();
+                    Memory.addUsersListener(fragment.getListener());
+                    return fragment;
                 default:
                     return new MainFragment();
 

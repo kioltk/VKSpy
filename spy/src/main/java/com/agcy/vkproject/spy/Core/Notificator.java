@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.Gravity;
@@ -191,6 +192,8 @@ public class Notificator {
         mNotificationManager.cancelAll();
         onlinesNotification.clear();
         offlinesNotification.clear();
+        offlinePhotosStack.clear();
+        onlinePhotosStack.clear();
     }
     private static ArrayList<Bitmap> onlinePhotosStack = new ArrayList<Bitmap>();
     private static ArrayList<Bitmap> offlinePhotosStack = new ArrayList<Bitmap>();
@@ -277,6 +280,13 @@ public class Notificator {
         int id = OFFLINES_NOTIFICATION;
 
         final int mId = id;
+        Handler handler = new Handler();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        });
         ImageLoader.getInstance().loadImage(imageUrl, new ImageLoadingListener() {
             @Override
             public void onLoadingStarted(String s, View view) {
@@ -292,7 +302,7 @@ public class Notificator {
             public void onLoadingComplete(String s, View view, Bitmap bitmap) {
 
                 try {
-                     notificationBuilder.setLargeIcon(getImage(bitmap, offlinePhotosStack));
+                    notificationBuilder.setLargeIcon(getImage(bitmap, offlinePhotosStack));
                 } catch (Exception exp) {
 
                 }

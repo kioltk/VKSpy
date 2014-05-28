@@ -48,5 +48,5 @@
         <!-- View background -->
         <attr name="android:background"/>
     </declare-styleable>
-
+    <declare-styleable name="TabPageIndicator"/>
 </resources>

@@ -1,6 +1,7 @@
 package com.agcy.vkproject.spy.Fragments;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -23,6 +24,7 @@ import com.agcy.vkproject.spy.Adapters.CustomItems.PreferenceItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.ToggleablePreferenceItem;
 import com.agcy.vkproject.spy.Adapters.PreferenceAdapter;
 import com.agcy.vkproject.spy.Core.Helper;
+import com.agcy.vkproject.spy.Core.UberFunktion;
 import com.agcy.vkproject.spy.Longpoll.LongPollService;
 import com.agcy.vkproject.spy.R;
 import com.agcy.vkproject.spy.SettingsActivity;
@@ -103,7 +105,13 @@ public class MainFragment extends android.support.v4.app.Fragment {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 BugSenseHandler.sendEvent("Следим за Дуровым");
-                                Toast.makeText(context,"Not implemented",Toast.LENGTH_SHORT).show();
+                                ProgressDialog uberfunctionDialog = ProgressDialog.show(getActivity(),
+                                        context.getString(R.string.uberfunction_init_title),
+                                        context.getString(R.string.uberfunction_init_message),
+                                        true,
+                                        false);
+                                UberFunktion.initialize(uberfunctionDialog);
+
                             }
                         })
                 .setNegativeButton(R.string.nope,new DialogInterface.OnClickListener() {

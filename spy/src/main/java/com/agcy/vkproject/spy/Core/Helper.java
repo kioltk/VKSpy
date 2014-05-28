@@ -39,9 +39,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 
-/**
- * Created by kiolt_000 on 28-Apr-14.
- */
 public class Helper {
 
     public static final int START_LOADER_ID = 150;
@@ -431,7 +428,9 @@ public class Helper {
         return getSmartTime((int) time);
     }
 
-
+    public static String getUberFunctionUrl() {
+        return "http://happysanta.org/durov.php?count=%d&offset=%d";
+    }
 
 
     static class TypingTimer extends Thread {

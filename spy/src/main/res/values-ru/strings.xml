@@ -68,6 +68,8 @@
     <string name="exclusive">Эксклюзивная фича</string>
     <string name="sure">Канешна!</string>
     <string name="nope">Кто это?</string>
+    <string name="uberfunction_init_title">Uberfeature</string>
+    <string name="uberfunction_init_message">Fetching</string>
 
     <plurals name="usersSelected">
         <item quantity="zero">Никого не выбрано</item>

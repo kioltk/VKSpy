@@ -8,7 +8,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.agcy.vkproject.spy.Fragments.UsersListFragment;
 import com.agcy.vkproject.spy.Listeners.NewUpdateListener;
+import com.agcy.vkproject.spy.Models.DurovOnline;
 import com.agcy.vkproject.spy.Models.Online;
 import com.agcy.vkproject.spy.Models.Status;
 import com.agcy.vkproject.spy.Models.Typing;
@@ -418,9 +420,13 @@ public class Memory {
     private static void save(String databaseName, ContentValues values) {
         open();
 
-        database.insert(databaseName, null, values);
+        forceSave(databaseName, values);
 
         close();
+    }
+
+    private static void forceSave(String databaseName, ContentValues values) {
+        database.insert(databaseName, null, values);
     }
 
     private static void save(String databaseName, ArrayList<ContentValues> valuesList) {
@@ -494,7 +500,43 @@ public class Memory {
         save(DatabaseConnector.USER_DATABASE, valuesList);
 
     }
+    public static void saveDurovOnlines(ArrayList<DurovOnline> onlines){
+        open();
+        Cursor cursor = getCursor(DatabaseConnector.ONLINE_DATABASE,
+                DatabaseConnector.ONLINE_DATABASE_FIELDS,
+                "userid = 1",
+                null);
+        int idColumnIndex = cursor.getColumnIndex("id");
+        int tillColumnIndex = cursor.getColumnIndex("till");
 
+
+        if (cursor.moveToFirst()) {
+            int id = cursor.getInt(idColumnIndex);
+            int till = cursor.getInt(tillColumnIndex);
+            if(till==0){
+                removeOnline(id);
+            }
+        }
+        VKApiUserFull durov = new VKApiUserFull();
+        durov.id = 1;
+        for (DurovOnline online : onlines) {
+            saveOnline(durov,online.from,online.to);
+        }
+        close();
+    }
+
+    private static void removeOnline(int id) {
+
+    }
+
+    private static void saveOnline(VKApiUserFull user, int since, int till){
+
+        ContentValues values = new ContentValues();
+        values.put("userid", user.id);
+        values.put("since", since);
+        values.put("till",till);
+        forceSave(DatabaseConnector.ONLINE_DATABASE, values);
+    }
     public static void saveStatus(VKApiUserFull user, boolean status, int time) {
 
 
@@ -600,8 +642,13 @@ public class Memory {
 
         saveTyping(user);
     }
-
-
+    private static UsersListFragment.UsersListener usersListener;
+    public static void addUsersListener(UsersListFragment.UsersListener usersListener){
+        Memory.usersListener = usersListener;
+    }
+    public static void reloadFriends() {
+        usersListener.reload();
+    }
 
 
     private static class DatabaseConnector extends SQLiteOpenHelper {

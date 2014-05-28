@@ -35,6 +35,7 @@ public abstract class LongPollConnection extends AsyncTask<Void, Void, String> {
             String finalUrl = String.format(url,server,key,ts);
             DefaultHttpClient httpClient = new DefaultHttpClient();
             HttpGet get = new HttpGet(finalUrl);
+
             HttpResponse httpResponse = httpClient.execute(get);
             HttpEntity httpEntity = httpResponse.getEntity();
             response = EntityUtils.toString(httpEntity);
@@ -63,6 +64,8 @@ public abstract class LongPollConnection extends AsyncTask<Void, Void, String> {
             } catch (Exception e) {
                 this.exception = e;
             }
+        else
+            this.exception = new ConnectionLostException();
         onError(exception);
     }
 
@@ -75,5 +78,8 @@ public abstract class LongPollConnection extends AsyncTask<Void, Void, String> {
     }
 
     public static class ServerException extends Exception {
+    }
+
+    private class ConnectionLostException extends Exception {
     }
 }

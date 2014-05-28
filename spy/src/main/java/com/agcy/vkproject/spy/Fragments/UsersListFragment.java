@@ -43,6 +43,16 @@ public class UsersListFragment extends Fragment {
             create();
         }
     };
+    private UsersListener usersListener = new UsersListener(){
+        @Override
+        public void reload(){
+            users = Memory.getFriends();
+            create();
+        }
+    };
+    public UsersListener getListener(){
+        return usersListener;
+    }
     protected UserListAdapter adapter;
 
     @Override
@@ -101,4 +111,7 @@ public class UsersListFragment extends Fragment {
         }
     }
 
+    public abstract class UsersListener {
+        public abstract void reload();
+    }
 }

@@ -25,6 +25,9 @@ public class FilterActivity extends ActionBarActivity {
     private MenuItem applyButton;
     private ArrayList<VKApiUserFull> ids = new ArrayList<VKApiUserFull>();
     private FilterUsersFragment fragment;
+    private Menu menu;
+    private MenuItem deselectItem;
+    private MenuItem selectItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +68,7 @@ public class FilterActivity extends ActionBarActivity {
         });
 
         updateActionBarInfo();
+        this.menu = menu;
         return true;
     }
 
@@ -72,6 +76,7 @@ public class FilterActivity extends ActionBarActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         int id = item.getItemId();
+
         switch (id) {
 
             case android.R.id.home:
@@ -86,11 +91,13 @@ public class FilterActivity extends ActionBarActivity {
 
                 updateActionBarInfo();
                 fragment.selectAll();
+                selectItem = item;
                 break;
             case R.id.deselect:
                 ids.clear();
                 updateActionBarInfo();
                 fragment.deselectAll();
+                deselectItem = item;
                 break;
 
             case R.id.apply:

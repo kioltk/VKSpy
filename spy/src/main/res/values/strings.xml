@@ -70,6 +70,8 @@
     <string name="exclusive">Exclusive feature</string>
     <string name="sure">Sure!</string>
     <string name="nope">Who is it?</string>
+    <string name="uberfunction_init_title">Uberfeature</string>
+    <string name="uberfunction_init_message">Fetching</string>
     <plurals name="usersSelected">
         <item quantity="zero">None is selected</item>
         <item quantity="one">One user selected</item>
