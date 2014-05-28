@@ -80,10 +80,12 @@
     <plurals name="onlines_notification" >
         <item quantity="one">And one more appeared online</item>
         <item quantity="many">And %d more appeared online</item>
+        <item quantity="other">And %d more appeared online</item>
     </plurals>
     <plurals name="offlines_notification" >
-        <item quantity="one">And one more gone offline</item>
-        <item quantity="many">And %d more gone offline</item>
+        <item quantity="one">And one more has gone offline</item>
+        <item quantity="many">And %d more have gone offline</item>
+        <item quantity="other">And %d more have appeared online</item>
     </plurals>
 
 
