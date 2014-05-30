@@ -3,7 +3,9 @@ package com.agcy.vkproject.spy;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -20,6 +22,7 @@ import com.agcy.vkproject.spy.Adapters.CustomItems.Item;
 import com.agcy.vkproject.spy.Adapters.CustomItems.PreferenceItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.ToggleablePreferenceItem;
 import com.agcy.vkproject.spy.Core.Helper;
+import com.agcy.vkproject.spy.Longpoll.LongPollService;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.vk.sdk.VKUIHelper;
 
@@ -110,12 +113,17 @@ public class SettingsActivity extends ActionBarActivity {
         return true;
     }
 
+    public String getHelp() {
+        return getString(R.string.help);
+    }
 
 
     private class SettingsAdapter extends BaseAdapter {
 
 
         ArrayList<Item> items = new ArrayList<Item>(){{
+
+
 
             final SharedPreferences notificationPreferences = getSharedPreferences("notification", Context.MODE_MULTI_PROCESS);
             boolean notificationEnable = notificationPreferences.getBoolean("status", true);
@@ -127,6 +135,18 @@ public class SettingsActivity extends ActionBarActivity {
 
             boolean notificationOffline = notificationPreferences.getBoolean("notificationOffline", true);
             int wayToNotifyOffline = notificationPreferences.getInt("wayToNotifyOffline", 0);
+
+            add(new PreferenceItem(getHelp()) {
+                @Override
+                public void onClick() {
+
+                    Intent browserIntent = new Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse("https://vk.com/topic-58810575_30129274")
+                    );
+                    startActivity(browserIntent);
+                }
+            });
 
             add(new HeaderItem(getNotifications()));
             add(new ToggleablePreferenceItem(getEnabled(), notificationEnable) {
@@ -296,4 +316,6 @@ public class SettingsActivity extends ActionBarActivity {
     private String getNotificationText(){
         return getResources().getString(R.string.notification);
     }
+
+
 }

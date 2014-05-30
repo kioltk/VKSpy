@@ -65,8 +65,9 @@ public class UpdatesWithOwnerAdapter extends UpdatesAdapter {
             rootView =  inflater.inflate(R.layout.list_item_timeline_left_template,null);
         }
 
+
         Item item= getItem(position);
-        if(item.isDeleted()){
+        if(item == null || item.isDeleted()){
             rootView.setVisibility(View.GONE);
             return rootView;
         }
@@ -75,7 +76,7 @@ public class UpdatesWithOwnerAdapter extends UpdatesAdapter {
 
         contentContainer = (ViewGroup) rootView.findViewById(R.id.contentContainer);
         TimelineView timelineView = (TimelineView) rootView.findViewById(R.id.timelineView);
-
+        timelineView.setTimelineNormal();
         if(item instanceof UpdateItem) {
             final UpdateItem updateItem = ((UpdateItem) item);
             if(reconvert){

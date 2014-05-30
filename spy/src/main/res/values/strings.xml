@@ -7,11 +7,16 @@
     <string name="friends">Friends</string>
     <string name="settings">Settings</string>
     <string name="welcome">Welcome</string>
+    <string name="title_activity_filter">Who to spy</string>
+    <string name="welcome_text">Welcome to the new era of privacy and social networking</string>
     <string name="user">User</string>
     <string name="onlines">Onlines</string>
     <string name="typings">Typings</string>
     <string name="logout">Log out</string>
-    <string name="desc"><![CDATA[<b>VK Spy</b> invisibly monitors your friends and VK users activity.]]></string>
+
+    <string name="app_description"><![CDATA[<b>VK Spy</b> invisibly monitors your friends and VK users activity.]]></string>
+    <string name="app_about_description">Some description</string>
+
     <string name="logout_message">Are you sure you want stop spying and log out</string>
     <string name="logout_title">Log out</string>
     <string name="logout_accept">Log out</string>
@@ -19,7 +24,6 @@
     <string name="online">online</string>
     <string name="offline">offline</string>
     <string name="signin">Sign In</string>
-    <string name="start_text">Welcome to the new era of privacy and social networking</string>
     <string name="come_online_m">Come online</string>
     <string name="come_online_f">Come online</string>
     <string name="gone_offline_m">Gone offline</string>
@@ -40,9 +44,8 @@
     <string name="undefined">undefined</string>
     <string name="day">d</string>
     <string name="sec">sec</string>
-    <string name="title_activity_filter">Who to spy</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+
+
     <string name="apply">Apply</string>
     <string name="no_tracks">None is tracked</string>
     <string name="no_events">No events yet</string>
@@ -56,22 +59,43 @@
     <string name="sound">Sound</string>
     <string name="vibrate">Vibrate</string>
     <string name="notifications">Notifications</string>
-    <string name="about">About application</string>
-    <string name="uberfunction">Überfunktion</string>
-    <string name="uberfunction_description">Spying upon Durov!</string>
-    <string name="got_it">Okay</string>
-    <string name="about_desc">Some description</string>
+
+    <string name="app_about">About application</string>
+    <string name="durov_function_title">Überfunktion</string>
+    <string name="durov_function_decription">Spying upon Durov!</string>
+    <string name="app_about_button">Okay</string>
     <string name="important">Important</string>
     <string name="select_all">Select all</string>
     <string name="deselect_all">Deselect all</string>
     <string name="moment_ago">right now</string>
     <string name="enable_spy">Enable spy</string>
-    <string name="durov_description">Do you want to spy upon Durov?</string>
-    <string name="exclusive">Exclusive feature</string>
-    <string name="sure">Sure!</string>
-    <string name="nope">Who is it?</string>
-    <string name="uberfunction_init_title">Uberfeature</string>
-    <string name="uberfunction_init_message">Fetching</string>
+
+    <string name="durov_start_title">Exclusive feature</string>
+    <string name="durov_start_message">Do you want to spy upon Durov?</string>
+    <string name="durov_start_ok">Sure!</string>
+    <string name="durov_start_update">Обновить</string>
+    <string name="durov_start_cancel">Who is it?</string>
+
+    <string name="durov_function_activating_title">Uberfeature</string>
+    <string name="durov_function_activating_message">Fetching</string>
+    <string name="durov_function_updating">Updating</string>
+    <string name="durov_ready">Почти готово</string>
+
+    <string name="durov_function_activated_title">Слежка за Дуровым</string>
+    <string name="durov_function_activated">Функция активирована</string>
+    <string name="durov_function_updated">Обновлено</string>
+
+    <string name="durov_joke">Место для Ваниной шутки</string>
+    <string name="durov_joke_title">Место для Ваниной шутки</string>
+    <string name="durov_joke_message">Ванина шутка</string>
+    <string name="durov_joke_button">Вана молодец</string>
+    <string name="error">Ошибка</string>
+    <string name="server_did_not_respond">Server did not respond</string>
+    <string name="check_connection">Check your internet connection</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="need_access">Access is needed to use application</string>
+    <string name="help">Help</string>
+
     <plurals name="usersSelected">
         <item quantity="zero">None is selected</item>
         <item quantity="one">One user selected</item>
@@ -87,7 +111,7 @@
     <plurals name="offlines_notification" >
         <item quantity="one">And one more has gone offline</item>
         <item quantity="many">And %d more have gone offline</item>
-        <item quantity="other">And %d more have appeared online</item>
+        <item quantity="other">And %d more have gone offline</item>
     </plurals>
 
 

@@ -13,10 +13,13 @@ import com.agcy.vkproject.spy.Core.Memory;
 import com.agcy.vkproject.spy.R;
 import com.agcy.vkproject.spy.Receivers.NetworkStateReceiver;
 import com.bugsense.trace.BugSenseHandler;
+import com.vk.sdk.api.VKApi;
 import com.vk.sdk.api.VKError;
+import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
 import com.vk.sdk.api.model.VKApiUserFull;
+import com.vk.sdk.api.model.VKUsersArray;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,6 +46,7 @@ public class LongPollService extends Service {
 
     private LongPollConnection connection;
     private static NetworkStateReceiver.NetworkStateChangeListener networkStateChangeListener;
+    private int lastUpdate = Helper.getUnixNow();
 
 
     @Override
@@ -58,7 +62,7 @@ public class LongPollService extends Service {
             networkStateChangeListener = new NetworkStateReceiver.NetworkStateChangeListener(LONGPOLL_CONNECTION_ID) {
                 @Override
                 public void onConnected() {
-                    startLongpoll();
+                    updateStatusesAndStartLongpoll(0);
                 }
 
                 @Override
@@ -129,6 +133,15 @@ public class LongPollService extends Service {
 
     }
 
+    private void updateStatusesAndStartLongpoll(final int timeout) {
+        Helper.updateStatuses(timeout,new Runnable(){
+            @Override
+            public void run() {
+                startLongpoll();
+            }
+        });
+    }
+
     private void startSafe() {
 
         Helper.initialize(getApplicationContext());
@@ -156,7 +169,7 @@ public class LongPollService extends Service {
     }
     @Override
     public void onDestroy() {
-        Log.w("AGCY SPY LONGPOLLSERVICE","destroyed"+" key: " + key );
+        Log.w("AGCY SPY LONGPOLLSERVICE", "destroyed" + " key: " + key);
         connection.cancel(true);
         saveSettings();
     }
@@ -230,11 +243,11 @@ public class LongPollService extends Service {
             refreshSettings();
             return;
         }
-        Log.w("AGCY SPY LONGPOLLSERVICE","refreshing executed ");
+        Log.w("AGCY SPY LONGPOLLSERVICE", "refreshing executed ");
     }
     private void restoreSettings(){
 
-        SharedPreferences preferences = getApplicationContext().getSharedPreferences("longpoll",MODE_MULTI_PROCESS);
+        SharedPreferences preferences = getApplicationContext().getSharedPreferences("longpoll", MODE_MULTI_PROCESS);
         server = preferences.getString("server","");
         ts = preferences.getString("ts","");
         key = preferences.getString("key","");
@@ -270,28 +283,56 @@ public class LongPollService extends Service {
             @Override
             public void onSuccess(JSONArray updatesJson, String ts) {
 
-                LongPollService.this.ts = ts;
-                saveSettings();
-                ArrayList<Update> updates = new ArrayList<Update>();
-                for (int i = 0; i < updatesJson.length(); i++) {
-                    try {
-                        String[] updateJson = updatesJson.getString(i)
-                                .replace("[", "")
-                                .replace("]", "")
-                                .split(",");
-                        if (shouldHandle(updateJson))
-                            updates.add(new Update(updateJson));
+                if(lastUpdate + 300 < Helper.getUnixNow()) {
+                    Log.e("AGCY SPY LONGPOLL","Last update was too long ago");
+                    BugSenseHandler.sendEvent("Last update was too long ago");
+                    ArrayList<Update> updates = new ArrayList<Update>();
+                    for (int i = 0; i < updatesJson.length(); i++) {
+                        try {
+                            String[] updateJson = updatesJson.getString(i)
+                                    .replace("[", "")
+                                    .replace("]", "")
+                                    .split(",");
+                            if (isTyping(updateJson))
+                                updates.add(new Update(updateJson));
 
-                    } catch (Exception exp) {
-                        Log.e("AGCY SPY LONGPOLL", "update parsing error: " + exp.toString());
+
+                        } catch (Exception exp) {
+                            Log.e("AGCY SPY LONGPOLL", "update parsing error: " + exp.toString());
+                        }
                     }
-                }
+                    if (!updates.isEmpty())
+                        Helper.newUpdates(updates);
+                    updateStatusesAndStartLongpoll(lastUpdate>60*60?60*60:5*60);
 
-                Log.i("AGCY SPY","longoll updates count: "+ updates.size() );
-                if(!updates.isEmpty())
-                    Helper.newUpdates(updates);
-                startLongpoll();
-                saveLongpollExecuted();
+                    LongPollService.this.ts = ts;
+                    saveSettings();
+                    saveLongpollExecuted();
+                }else {
+                    LongPollService.this.ts = ts;
+                    saveSettings();
+                    ArrayList<Update> updates = new ArrayList<Update>();
+                    for (int i = 0; i < updatesJson.length(); i++) {
+                        try {
+                            String[] updateJson = updatesJson.getString(i)
+                                    .replace("[", "")
+                                    .replace("]", "")
+                                    .split(",");
+                            if (shouldHandle(updateJson))
+                                updates.add(new Update(updateJson));
+
+
+                        } catch (Exception exp) {
+                            Log.e("AGCY SPY LONGPOLL", "update parsing error: " + exp.toString());
+                        }
+                    }
+
+                    Log.i("AGCY SPY", "longoll updates count: " + updates.size());
+                    if (!updates.isEmpty())
+                        Helper.newUpdates(updates);
+                    startLongpoll();
+                    saveLongpollExecuted();
+                }
             }
 
             @Override
@@ -307,7 +348,7 @@ public class LongPollService extends Service {
                 if(exp instanceof ServerException){
                     BugSenseHandler.sendEvent("Server settings error");
                     Log.e("AGCY SPY LONGPOLL","Server settings error",exp);
-                    refreshSettings(false);
+                    refreshSettings(true);
                 }
                 if (exp instanceof JSONException) {
                     Log.e("AGCY SPY LONGPOLL","Response error",exp);
@@ -337,11 +378,17 @@ public class LongPollService extends Service {
         return preferences.getBoolean("status",true);
     }
     private void saveLongpollExecuted(){
+        lastUpdate = Helper.getUnixNow();
         SharedPreferences preferences = getBaseContext().getSharedPreferences("longpoll", Context.MODE_MULTI_PROCESS);
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putInt("lastUpdate", (int) Helper.getUnixNow());
+        editor.putInt("lastUpdate",lastUpdate);
         editor.commit();
 
+    }
+    public static Boolean isTyping(String[] updateArray){
+
+        int updateType = Integer.valueOf(updateArray[0]);
+        return updateType == Update.TYPE_USER_TYPING;
     }
     public static Boolean shouldHandle(String[] updateArray) {
 
@@ -353,10 +400,7 @@ public class LongPollService extends Service {
                 return true;
             case Update.TYPE_MESSAGE:
                 int flags = Integer.valueOf(updateArray[2]);
-                if ((flags & Update.FLAG_MESSAGE_CHAT) == Update.FLAG_MESSAGE_CHAT) {
-                    return false;
-                }
-                return true;
+                return (flags & Update.FLAG_MESSAGE_CHAT) != Update.FLAG_MESSAGE_CHAT;
             case Update.TYPE_CHAT_TYPING:
             default:
                 return false;

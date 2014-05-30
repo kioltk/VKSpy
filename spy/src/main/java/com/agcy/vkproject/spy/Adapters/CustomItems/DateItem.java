@@ -87,7 +87,7 @@ public class DateItem extends Item {
     }
 
     public boolean isNow() {
-        return getContent() == 0;
+        return getContent() == Helper.NOW;
     }
 
     @Override

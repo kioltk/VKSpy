@@ -3,17 +3,11 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
 
-    <item android:right="-1dp" android:left="-1dp" >
+    <item >
         <shape>
 
-            <corners android:radius="4dp"/>
-            <solid android:color="#a8a8a8"/>
-        </shape>
-    </item>
-    <item android:bottom="2dp">
-        <shape>
-            <solid android:color="#f8f8f8"/>
-            <corners android:radius="4dp"/>
+            <corners android:radius="150dp"/>
+            <solid android:color="@color/popup_background"/>
         </shape>
     </item>
 </layer-list>

@@ -167,7 +167,12 @@ public class MainActivity extends ActionBarActivity {
                                                 if(Memory.users.isEmpty()){
                                                     firstLoading = true;
                                                 }
+                                                final VKUsersArray friendsArrayCopy = new VKUsersArray();
+                                                for (VKApiUserFull vkApiUserFull : ((VKUsersArray) response.parsedModel)) {
+                                                    friendsArrayCopy.add(vkApiUserFull);
+                                                }
                                                 Memory.saveFriends((VKUsersArray) response.parsedModel);
+
                                                 final boolean finalFirstLoading = firstLoading;
                                                 handler.post(new Runnable() {
                                                     @Override
@@ -175,6 +180,7 @@ public class MainActivity extends ActionBarActivity {
                                                         if(finalFirstLoading){
                                                             Helper.trackedUpdated();
                                                         }
+                                                        Helper.fetchOnlines(friendsArrayCopy,finalFirstLoading?1:0);
                                                         Helper.downloadingEnded();
                                                         startLongpoll();
                                                     }
@@ -245,6 +251,7 @@ public class MainActivity extends ActionBarActivity {
     private void startLongpoll(){
 
         Intent longPollService = new Intent(getBaseContext(), LongPollService.class);
+
         startService(longPollService);
     }
 

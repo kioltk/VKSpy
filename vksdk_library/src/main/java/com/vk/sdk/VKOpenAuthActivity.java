@@ -33,12 +33,13 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-
 import java.util.Locale;
 
 /**
@@ -67,6 +68,9 @@ public class VKOpenAuthActivity extends Activity {
         hideActionBar();
         findViewById(android.R.id.content).setBackgroundColor(Color.rgb(240, 242, 245));
         loadPage();
+        CookieSyncManager.createInstance(this);
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.removeAllCookie();
     }
 
     private void loadPage() {
@@ -153,15 +157,19 @@ public class VKOpenAuthActivity extends Activity {
         public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
             super.onReceivedError(view, errorCode, description, failingUrl);
             canShowPage = false;
-            AlertDialog.Builder builder = new AlertDialog.Builder(VKOpenAuthActivity.this)
-                    .setMessage(description)
-                    .setPositiveButton(R.string.vk_retry, new DialogInterface.OnClickListener() {
+            AlertDialog.Builder builder = new AlertDialog.Builder(VKOpenAuthActivity.this);
+            switch (errorCode) {
+                case -2:
+                    builder.setMessage(R.string.check_connection);
+                    break;
+            }
+                    builder.setPositiveButton(R.string.retry, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             loadPage();
                         }
                     })
-                    .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             finish();

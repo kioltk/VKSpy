@@ -21,6 +21,7 @@ public abstract class LongPollConnection extends AsyncTask<Void, Void, String> {
     String url = "http://%s?act=a_check&key=%s&ts=%s&wait=25&mode=64";
     private Exception exception;
     private boolean finished = false;
+    public int duration = 0;
 
     public LongPollConnection(String server, String key, String ts){
         this.server = server;
@@ -39,7 +40,7 @@ public abstract class LongPollConnection extends AsyncTask<Void, Void, String> {
             HttpResponse httpResponse = httpClient.execute(get);
             HttpEntity httpEntity = httpResponse.getEntity();
             response = EntityUtils.toString(httpEntity);
-            Log.i("AGCY SPY","longoll responses");
+            Log.i("AGCY SPY","longoll responses: "+response);
             if(!isCancelled())
                 return response;
         }catch (Exception exp){

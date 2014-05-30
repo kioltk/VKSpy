@@ -107,6 +107,7 @@ public class TimelineView extends RelativeLayout {
 
     public void alignCircleToBottom() {
         LayoutParams circleParams = (LayoutParams) circle.getLayoutParams();
+
         circleParams.addRule(ALIGN_PARENT_BOTTOM);
         circleParams.setMargins(0, 0, 0, (int) (dp54/2-circleParams.height/2));
         circle.setLayoutParams(circleParams);
@@ -139,6 +140,7 @@ public class TimelineView extends RelativeLayout {
     public void setTimelineNormal() {
         LayoutParams timelineParams = new LayoutParams(dp2, dp54);
         timelineParams.addRule(CENTER_IN_PARENT);
+        setMinimumHeight(dp54);
         timelineView.setLayoutParams(timelineParams);
     }
 

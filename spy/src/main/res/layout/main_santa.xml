@@ -13,10 +13,52 @@
         <LinearLayout
             android:orientation="horizontal"
             android:id="@+id/line"
+            android:gravity="left"
             android:layout_alignParentBottom="true"
             android:background="@drawable/ground_bg"
             android:layout_width="match_parent"
-            android:layout_height="4dp" />
+            android:layout_height="4dp" >
+            <ImageView
+                android:src="@drawable/underline"
+                android:scaleType="fitXY"
+                android:layout_width="341px"
+                android:layout_height="match_parent" />
+            <ImageView
+                android:src="@drawable/underline"
+                android:scaleType="fitXY"
+                android:layout_width="341px"
+                android:layout_height="match_parent" />
+            <ImageView
+                android:src="@drawable/underline"
+                android:scaleType="fitXY"
+                android:layout_width="341px"
+                android:layout_height="match_parent" />
+            <ImageView
+                android:src="@drawable/underline"
+                android:scaleType="fitXY"
+                android:layout_width="341px"
+                android:layout_height="match_parent" />
+            <ImageView
+                android:src="@drawable/underline"
+                android:scaleType="fitXY"
+                android:layout_width="341px"
+                android:layout_height="match_parent" />
+            <ImageView
+                android:src="@drawable/underline"
+                android:scaleType="fitXY"
+                android:layout_width="341px"
+                android:layout_height="match_parent" />
+            <ImageView
+                android:src="@drawable/underline"
+                android:scaleType="fitXY"
+                android:layout_width="341px"
+                android:layout_height="match_parent" />
+            <ImageView
+                android:src="@drawable/underline"
+                android:scaleType="fitXY"
+                android:layout_width="341px"
+                android:layout_height="match_parent" />
+            </LinearLayout>
         <ImageView
             android:src="@drawable/santa"
             android:layout_width="match_parent"
@@ -37,7 +79,7 @@
         <TextView
             android:gravity="center"
             android:textSize="17sp"
-            android:text="@string/desc"
+            android:text="@string/app_description"
             android:lineSpacingExtra="6dp"
             android:id="@+id/happySantaText"
             android:layout_width="match_parent"

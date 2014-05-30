@@ -26,9 +26,6 @@ import com.nineoldandroids.animation.ValueAnimator;
 
 import java.util.ArrayList;
 
-/**
- * Created by kiolt_000 on 26-Apr-14.
- */
 public class UpdatesAdapter extends BaseAdapter {
 
     protected final Context context;

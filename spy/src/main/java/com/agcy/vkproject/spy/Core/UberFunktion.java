@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.agcy.vkproject.spy.Models.DurovOnline;
+import com.agcy.vkproject.spy.R;
 import com.agcy.vkproject.spy.UserActivity;
 import com.bugsense.trace.BugSenseHandler;
 import com.vk.sdk.api.VKApi;
@@ -30,6 +31,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 
@@ -48,25 +50,28 @@ public class UberFunktion {
 
         dialog = uberfunctionDialog;
 
+
         context = uberfunctionDialog.getContext();
         SharedPreferences durovPreferences = context.getSharedPreferences("durov", Context.MODE_MULTI_PROCESS);
         lastId =  durovPreferences.getInt("lastId",0);
         updateOnly = durovPreferences.getBoolean("loaded", false);
 
+        if(updateOnly){
+            dialog.setMessage(context.getString(R.string.durov_function_updating));
+        }
 
         new Loader() {
             @Override
             public void onComplete(String finalResponse) {
                 Log.i("AGCY SPY FEATURE",finalResponse);
                 final Handler handler = new Handler();
-                uberfunctionDialog.setTitle("We are almost ready");
-                uberfunctionDialog.setMessage("Saving");
+                uberfunctionDialog.setMessage(context.getString(R.string.durov_ready));
                 new Saver(finalResponse) {
                     @Override
                     protected void onSuccess() {
                         VKParameters parameters = new VKParameters();
                         parameters.put(VKApiConst.USER_IDS, 1);
-                        parameters.put("fields", "sex,photo_200,photo_200_orig,photo_50,photo_100,online,last_seen");
+                        parameters.put("fields", "sex,photo_200,photo_200_orig,photo_50,photo_100");
 
                         VKRequest donwloadUserRequest = VKApi.users().get(parameters);
                         donwloadUserRequest.executeWithListener(
@@ -93,8 +98,9 @@ public class UberFunktion {
 
                                                         AlertDialog.Builder successDialog = new AlertDialog.Builder(uberfunctionDialog.getContext());
                                                         successDialog.setCancelable(true);
-                                                        successDialog.setTitle("Слежка за Дуровым");
-                                                        successDialog.setMessage(updateOnly ? "Данные обновлены" : "Функция активирована");
+
+                                                        successDialog.setTitle((R.string.durov_function_activated_title));
+                                                        successDialog.setMessage(updateOnly ? (R.string.durov_function_updated) : (R.string.durov_function_activated));
                                                         successDialog.setPositiveButton("Хочу посмотреть!", new DialogInterface.OnClickListener() {
                                                             @Override
                                                             public void onClick(DialogInterface dialog, int which) {
@@ -145,8 +151,18 @@ public class UberFunktion {
             @Override
             public void onError(Exception exp) {
 
-                uberfunctionDialog.setTitle("Error");
-                uberfunctionDialog.setMessage(exp!=null?exp.toString():"Server did not response");
+                uberfunctionDialog.setTitle(R.string.error);
+                if(exp==null){
+                    uberfunctionDialog.setMessage(context.getString(R.string.server_did_not_respond));
+                }else{
+                    if(exp instanceof UnknownHostException){
+                        uberfunctionDialog.setMessage(context.getString(R.string.check_connection));
+                    }else{
+
+                        uberfunctionDialog.setMessage(context.getString(R.string.unknown_error));
+                    }
+                }
+                uberfunctionDialog.setIndeterminate(false);
                 uberfunctionDialog.setCancelable(true);
 
             }
@@ -228,34 +244,52 @@ public class UberFunktion {
             this.response = response;
         }
         public void execute(){
-            try{
+            final Handler handler = new Handler();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try{
+                        Thread.sleep(500);
+                        ArrayList<DurovOnline> onlines = new ArrayList<DurovOnline>();
+                        JSONObject jsonResponse = new JSONObject(response);
+                        JSONArray jsonArray = jsonResponse.getJSONArray("response");
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject object = (JSONObject) jsonArray.get(i);
+                            DurovOnline online = new DurovOnline(object.getInt("id"),object.getInt("from"),object.getInt("to"));
+                            if(i==0){
 
-                ArrayList<DurovOnline> onlines = new ArrayList<DurovOnline>();
-                JSONObject jsonResponse = new JSONObject(response);
-                JSONArray jsonArray = jsonResponse.getJSONArray("response");
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject object = (JSONObject) jsonArray.get(i);
-                    DurovOnline online = new DurovOnline(object.getInt("id"),object.getInt("from"),object.getInt("to"));
-                    if(i==0){
+                                int lastIdTemp = online.to == 0 ? online.id - 1 : online.id;
+                                SharedPreferences.Editor durovPreferences = context.getSharedPreferences("durov", Context.MODE_MULTI_PROCESS).edit();
+                                durovPreferences.putInt("lastId", lastIdTemp).commit();
+                            }
+                            if(online.id<=lastId)
+                                break;
+                            onlines.add(0,online);
 
-                        if(online.id<=lastId)
+                        }
+                        Memory.saveDurovOnlines(onlines);
+                    }catch (final Exception exp){
+                        Log.e("AGCY SPY FEATURE", "", exp);
+                        BugSenseHandler.sendException(exp);
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
 
-                            break;
-                        int lastIdTemp = online.to == 0 ? online.id - 1 : online.id;
-                        SharedPreferences.Editor durovPreferences = context.getSharedPreferences("durov", Context.MODE_MULTI_PROCESS).edit();
-                        durovPreferences.putInt("lastId", lastIdTemp).commit();
+                                onError(exp);
+                            }
+                        });
+                        return;
                     }
-                    onlines.add(0,online);
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
 
+                            onSuccess();
+                        }
+                    });
                 }
-                Memory.saveDurovOnlines(onlines);
-            }catch (Exception exp){
-                Log.e("AGCY SPY FEATURE","", exp);
-                BugSenseHandler.sendException(exp);
-                onError(exp);
-                return;
-            }
-            onSuccess();
+            }).start();
+
         }
 
         protected abstract void onSuccess();

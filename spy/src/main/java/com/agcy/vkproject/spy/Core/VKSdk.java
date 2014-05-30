@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.agcy.vkproject.spy.Longpoll.LongPollService;
 import com.agcy.vkproject.spy.MainActivity;
+import com.agcy.vkproject.spy.R;
 import com.agcy.vkproject.spy.WelcomeActivity;
 import com.bugsense.trace.BugSenseHandler;
 import com.vk.sdk.VKAccessToken;
@@ -60,9 +61,13 @@ public class VKSdk {
                     @Override
                     public void onAccessDenied(VKError authorizationError) {
 
-                        new AlertDialog.Builder(context)
-                                .setMessage(authorizationError.errorMessage)
-                                .show();
+                        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                        switch (authorizationError.errorCode){
+                            case VKError.VK_API_ERROR:
+                                builder.setMessage(R.string.need_access);
+                                break;
+                        }
+                                //builder.show();
                         //com.vk.sdk.VKSdk.authorize(sMyScope);
                         BugSenseHandler.sendEvent("Access denied");
                     }
@@ -152,6 +157,8 @@ public class VKSdk {
             context.startService(stopLongpoll);
 
             Helper.stopMainActivity();
+            Helper.clearAllPreferences();
+
         }
     };
     private static void startMainActivity() {

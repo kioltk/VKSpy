@@ -70,6 +70,8 @@ public class UserItem extends Item implements LoadableImage,Reconvertable {
             status.setVisibility(View.VISIBLE);
             if (user.online_mobile)
                 status.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_online_mobile));
+        }else{
+            status.setVisibility(View.GONE);
         }
         if(imageLoaded)
             loadImage(rootView);

@@ -357,9 +357,6 @@ public class VKSdk {
     }
 
     public static void logout() {
-        CookieSyncManager.createInstance(VKUIHelper.getTopActivity());
-        CookieManager cookieManager = CookieManager.getInstance();
-        cookieManager.removeAllCookie();
 
         sInstance.mAccessToken = null;
         VKAccessToken.removeTokenAtKey(VKUIHelper.getTopActivity(), VK_SDK_ACCESS_TOKEN_PREF_KEY);

@@ -1,37 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout
+<LinearLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    android:background="@drawable/popup_message"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
     android:layout_width="wrap_content"
-    android:layout_height="80dp">
-    <ImageView
+    android:layout_height="wrap_content">
+    <com.roundedimage.RoundedImageView
+        app:is_oval="true"
         android:id="@+id/photo"
         android:layout_margin="5dp"
-        android:layout_width="70dp"
-        android:layout_height="70dp" />
+        android:layout_width="43dp"
+        android:layout_height="43dp" />
     <LinearLayout
         android:orientation="vertical"
-        android:padding="10dp"
+        android:layout_marginRight="10dp"
         android:gravity="center_vertical"
-        android:layout_marginLeft="10dp"
-        android:layout_toRightOf="@id/photo"
-        android:layout_width="180dp"
-        android:layout_height="80dp">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
         <TextView
+
             android:text="Василий Петрович"
-            android:textSize="16dp"
-            android:textColor="#5e5e5e"
-            android:textStyle="bold"
-            android:id="@+id/header"
+            android:textSize="17dp"
+            android:textColor="@color/popup_title"
+            android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <TextView
-            android:id="@+id/message"
+            android:id="@+id/description"
             android:text="Зашёл в онлайн"
-            android:textStyle="italic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#a5a5a5" />
+            android:textColor="@color/popup_description" />
         </LinearLayout>
-</RelativeLayout>
+</LinearLayout>

@@ -29,6 +29,7 @@ import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
 import com.vk.sdk.api.model.VKApiUserFull;
 import com.vk.sdk.api.model.VKList;
+import com.vk.sdk.api.model.VKUsersArray;
 
 import java.io.File;
 import java.net.SocketException;
@@ -38,11 +39,17 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.TimerTask;
 
 public class Helper {
 
     public static final int START_LOADER_ID = 150;
     public static final int START_DOWNLOADER_ID = 151;
+    private static final int TIMEOUT_5MINS = 5 * 60;
+    private static final int TIMEOUT_1HOUR = 60 * 60;
+    private static final int ONLINE = -1;
+    public static final int NOW = -2;
+    private static final int UNDEFINED = -3;
     private static Context context;
     private static MainActivity mainActivity;
 
@@ -69,6 +76,28 @@ public class Helper {
         VKSdk.initialize(context);
         BugSenseHandler.initAndStartSession(context,"07310e3f");
     }
+    static Handler minuteTimerHandler;
+    static TimerTask minuteTimer = new TimerTask() {
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(60*1000);
+                for (Runnable timerListener : timerListeners) {
+                    minuteTimerHandler.post(timerListener);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        }
+    } ;
+    static ArrayList<Runnable> timerListeners = new ArrayList<Runnable>();
+    public static void addMinuteTimer(Runnable timerListener){
+        if(minuteTimerHandler==null) {
+            minuteTimerHandler = new Handler();
+        }
+        timerListeners.add(timerListener);
+    }
 
     public static void logout() {
 
@@ -84,7 +113,7 @@ public class Helper {
         editor.clear();
         editor.commit();
 
-        clearLongpollPreferences();
+        clearAllPreferences();
 
         clearStartPreferences();
 
@@ -106,7 +135,17 @@ public class Helper {
         editor.commit();
     }
 
-    public static void clearLongpollPreferences() {
+    public static void clearAllPreferences() {
+        SharedPreferences preferences;
+        SharedPreferences.Editor editor;
+        preferences = context.getSharedPreferences("longpoll", Context.MODE_MULTI_PROCESS);
+        editor = preferences.edit();
+        editor.clear();
+        editor.commit();
+        preferences = context.getSharedPreferences("durov", Context.MODE_MULTI_PROCESS);
+        editor = preferences.edit();
+        editor.clear();
+        editor.commit();
     }
 
     public static void stopLongpoll() {
@@ -253,14 +292,14 @@ public class Helper {
 
     //endregion
     //region Helpers
-    private static Integer dpValue = null;
+    private static Float dpValue = null;
     public static int convertToDp(int value) {
         if(dpValue==null) {
             Resources r = context.getResources();
             DisplayMetrics metrics = r.getDisplayMetrics();
-            dpValue = (int) (metrics.density);
+            dpValue =  (metrics.density);
         }
-        int px = value * dpValue;
+        int px = (int) (value * dpValue);
         return px;
     }
 
@@ -279,6 +318,13 @@ public class Helper {
 
     public static String getTime(int unix) {
 
+        switch (unix){
+            case NOW:
+                return context.getString(R.string.now);
+            case UNDEFINED:
+                return context.getString(R.string.undefined);
+        }
+
         Date date = new Date(unix * 1000L);
 
 
@@ -288,9 +334,11 @@ public class Helper {
 
     public static String getSmartDate(int time) {
         Resources res = context.getResources();
-        if (time == 0)
+        if (time == NOW)
             return res.getString(R.string.now);
-
+        if(time==UNDEFINED){
+            return res.getString(R.string.undefined);
+        }
         if (isToday(time))
             return res.getString(R.string.today);
         if (getDate( getUnixNow() - 24 * 3600).equals(getDate(time)))
@@ -356,7 +404,7 @@ public class Helper {
             return res.getString(R.string.moment);
         }
         if (streak / (24 * 3600) > 0) {
-            convertedStreak += streak / 24 * 3600 + " "+ res.getString(R.string.day)+" ";
+            convertedStreak += streak / (24 * 3600) + " "+ res.getString(R.string.day)+" ";
             streak = streak % (24 * 3600);
         }
         if (streak / (3600) > 0) {
@@ -388,7 +436,12 @@ public class Helper {
         String lastSeen = res.getString(isFemale ? R.string.last_seen_f : R.string.last_seen) + " ";
         if(getUnixNow()-time<10)
             return lastSeen+res.getString(R.string.moment_ago);
-                    Boolean today = checkOneDay( getUnixNow(), time);
+        Boolean today = checkOneDay( getUnixNow(), time);
+        if(getUnixNow()-time>12*60*60){
+
+            lastSeen += getSmartDate(time) + " " + res.getString(R.string.at) + " " + getSmartTime(time);
+            return lastSeen;
+        }
         if (!today) {
             lastSeen += getSmartDate(time) + " " + res.getString(R.string.at) + " ";
         }
@@ -431,6 +484,87 @@ public class Helper {
     public static String getUberFunctionUrl() {
         return "http://happysanta.org/durov.php?count=%d&offset=%d";
     }
+    static boolean fetching = false;
+    public static void fetchOnlines(final VKUsersArray fetchingUsers, final int timeout) {
+        // Смотрим по таймауту как мы обновляем юзеров
+        // Если таймаута нету или он меньше пяти минут, то мы обновляем всех буд-то это обычный тс
+        if(fetching)
+            return;
+        fetching = true;
+        final Handler handler = new Handler();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Memory.open();
+                final ArrayList<Status> statuses = new ArrayList<Status>();
+                for (final VKApiUserFull user : fetchingUsers) {
+                    if(user.is_deleted || user.id==1)
+                        continue;
+                    VKApiUserFull storedUser = Memory.getUserById(user.id);
+                    switch (timeout) {
+                        case 0:
+                        case TIMEOUT_5MINS:
+                            if (!(storedUser.online && user.online)) {
+                                // Если с юзером ничего не случилось, и он как был в онлайне, так и остался
+                                // тогда ничего не делаем.
+                                if(Memory.forceSetStatus(user, user.online, user.last_seen)){
+                                    if(storedUser.tracked)
+                                    handler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                            Memory.notifyStatusListeners(new Status(user.id, user.last_seen, user.online));
+
+                                    }
+                                });
+                                }
+                            }
+
+                            break;
+                        case 1:
+                        case TIMEOUT_1HOUR:
+                            if(Memory.forceSetStatus(user, user.online, user.last_seen)) {
+
+                                if (storedUser.tracked)
+                                    handler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Memory.notifyStatusListeners(new Status(user.id, user.last_seen, user.online));
+
+                                        }
+                                    });
+                            }
+                            break;
+
+                    }
+                }
+                Memory.close();
+                fetching = false;
+            }
+        }).start();
+
+    }
+
+    public static void updateStatuses(final int timeout, final Runnable runnable) {
+
+        VKParameters friendsParameters = new VKParameters();
+        friendsParameters.put("order", "hints");
+        friendsParameters.put("fields", "online,last_seen");
+
+        final VKRequest friendsRequest = VKApi.friends().get(friendsParameters);
+        friendsRequest.executeWithListener(
+
+                new VKRequest.VKRequestListener() {
+                    @Override
+                    public void onComplete(final VKResponse response) {
+                        VKUsersArray users = (VKUsersArray) response.parsedModel;
+
+                        Helper.fetchOnlines(users, timeout);
+
+                        runnable.run();
+                    }
+                }
+        );
+    }
 
 
     static class TypingTimer extends Thread {
@@ -447,7 +581,7 @@ public class Helper {
             do {
                 try {
                     // Ждем три минуты
-                    Thread.sleep(15 * 1000);
+                    Thread.sleep(60 * 3 * 1000);
                     // если дождались, тогда постим, что споймали новый тайпинг
                     typingHandler.post(new Runnable() {
                         @Override
@@ -546,7 +680,7 @@ public class Helper {
 
         Online online = onlines.get(0);
         if (online.getTill() == 0 && online.getOwner().online) {
-            online.setTill(-1);
+            online.setTill(ONLINE);
         }
 
 
@@ -562,6 +696,7 @@ public class Helper {
 
     // listeners сюда вообще не смотреть
     public static void trackedUpdated() {
+
         if(trackUpdatedListener!=null)
             trackUpdatedListener.onUpdate();
     }

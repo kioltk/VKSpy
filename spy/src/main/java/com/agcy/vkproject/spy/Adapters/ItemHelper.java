@@ -10,6 +10,7 @@ import com.agcy.vkproject.spy.Adapters.CustomItems.OnlineItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.StatusItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.TypingItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.UserItem;
+import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Models.Online;
 import com.agcy.vkproject.spy.Models.Status;
 import com.agcy.vkproject.spy.Models.Typing;
@@ -138,7 +139,7 @@ public class ItemHelper {
                 if (unix < newUpdate.getUnix()) {
                     if (i == 1)
                         if (!addedNew) {
-                            Item nowDivider = new DateItem(0);
+                            Item nowDivider = new DateItem(Helper.NOW);
                             nowDivider.setNew(newEnabled);
                             convertedItems.add(0, nowDivider);
                             addedNew = true;
@@ -160,7 +161,7 @@ public class ItemHelper {
 
                     DateItem nowDateItem = (DateItem) topItem;
 
-                    if (nowDateItem.getContent() == 0) {
+                    if (nowDateItem.getContent() == Helper.NOW) {
                         Update update = items.get(1);
                         nowDateItem.recreate(update.getUnix());
 
@@ -255,6 +256,8 @@ public class ItemHelper {
         public abstract List<Item> convert(List<? extends T> source,boolean first);
 
         public Item get(int position){
+            if(convertedItems.size()<=position)
+                return null;
             return convertedItems.get(position);
         }
         public int size(){

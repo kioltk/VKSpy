@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="vk_enter_captcha_text">Введите текст с картинки</string>
-    <string name="vk_retry">Повторить</string>
+    <string name="retry">Повторить</string>
+    <string name="check_connection">Check your internet connection</string>
+    <string name="cancel">Отмена</string>
 </resources>

@@ -32,7 +32,7 @@ public class LoadImagesOnScrollListener implements AbsListView.OnScrollListener 
         for (int i = firstVisibleItem; i < visibleItemCount + firstVisibleItem; i++) {
             Object item = getAdapter().getItem(i);
 
-            if (item instanceof LoadableImage) {
+            if (item!=null && item instanceof LoadableImage) {
                 LoadableImage updateItem = (LoadableImage) item;
                 updateItem.loadImage(listView.getChildAt(i - firstVisibleItem+offset));
             }

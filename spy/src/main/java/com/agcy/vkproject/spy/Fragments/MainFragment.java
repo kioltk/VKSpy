@@ -18,12 +18,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.agcy.vkproject.spy.Adapters.CustomItems.PreferenceItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.ToggleablePreferenceItem;
 import com.agcy.vkproject.spy.Adapters.PreferenceAdapter;
 import com.agcy.vkproject.spy.Core.Helper;
+import com.agcy.vkproject.spy.Core.Memory;
 import com.agcy.vkproject.spy.Core.UberFunktion;
 import com.agcy.vkproject.spy.Longpoll.LongPollService;
 import com.agcy.vkproject.spy.R;
@@ -33,9 +33,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.ArrayList;
 
-/**
- * Created by kiolt_000 on 04-May-14.
- */
+
 public class MainFragment extends android.support.v4.app.Fragment {
 
     private Context context;
@@ -44,14 +42,10 @@ public class MainFragment extends android.support.v4.app.Fragment {
         context = getActivity();
         View rootView = inflater.inflate(R.layout.fragment_main,null);
 
-
-        SharedPreferences longpollPreferences = context.getSharedPreferences("longpoll", Context.MODE_MULTI_PROCESS);
-        boolean longpollStatus = longpollPreferences.getBoolean("status", true);
-
         View happySanta = inflater.inflate(R.layout.main_santa, null);
 
         TextView happySantaText = (TextView) happySanta.findViewById(R.id.happySantaText);
-        happySantaText.setText(Html.fromHtml(context.getString(R.string.desc)));
+        happySantaText.setText(Html.fromHtml(context.getString(R.string.app_description)));
         TextView happySantaLink = (TextView) happySanta.findViewById(R.id.happySantaLink);
         happySantaLink.setText(Html.fromHtml("vk.com/<b>happysanta</b>"));
         happySantaLink.setOnClickListener(new View.OnClickListener() {
@@ -64,6 +58,10 @@ public class MainFragment extends android.support.v4.app.Fragment {
                 startActivity(browserIntent);
             }
         });
+
+        SharedPreferences longpollPreferences = context.getSharedPreferences("longpoll", Context.MODE_MULTI_PROCESS);
+        boolean longpollStatus = longpollPreferences.getBoolean("status", true);
+
 
 
         /*Bitmap tile = BitmapFactory.decodeResource(context.getResources(), R.drawable.underline);
@@ -98,37 +96,61 @@ public class MainFragment extends android.support.v4.app.Fragment {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 final AlertDialog selector;
                 View durov = getActivity().getLayoutInflater().inflate(R.layout.durov, null);
-                ImageLoader.getInstance().displayImage("http://cs9591.vk.me/v9591001/70/VPSmUR954fQ.jpg",(ImageView) durov.findViewById(R.id.photo));
+                SharedPreferences durovPreferences = context.getSharedPreferences("durov", Context.MODE_MULTI_PROCESS);
+                boolean updateOnly = durovPreferences.getBoolean("loaded", false);
+                if(updateOnly)
+                    ((TextView)durov.findViewById(R.id.description)).setText(R.string.durov_function_activated);
 
-                builder.setTitle(R.string.exclusive).
-                        setPositiveButton(R.string.sure,new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                BugSenseHandler.sendEvent("Следим за Дуровым");
-                                ProgressDialog uberfunctionDialog = ProgressDialog.show(getActivity(),
-                                        context.getString(R.string.uberfunction_init_title),
-                                        context.getString(R.string.uberfunction_init_message),
-                                        true,
-                                        false);
-                                UberFunktion.initialize(uberfunctionDialog);
 
-                            }
-                        })
-                .setNegativeButton(R.string.nope,new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                if(Memory.users.getById(1)!=null && !updateOnly) {
+                    builder.setTitle(R.string.durov_joke_title);
+                    ((TextView)durov.findViewById(R.id.description)).setText(R.string.durov_joke_message);
+                    ( durov.findViewById(R.id.doge)).setVisibility(View.VISIBLE);
 
-                        BugSenseHandler.sendEvent("Не следим за дуровым");
-                        Toast.makeText(context,"Not implemented",Toast.LENGTH_SHORT).show();
-                    }
-                });
+                    builder.setNegativeButton(R.string.durov_joke_button, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            BugSenseHandler.sendEvent("Не следим за дуровым");
+                        }
+                    });
+                    BugSenseHandler.sendEvent("DUROV FRIEND CATCHED!!1");
+                }else{
+                    builder.setTitle(R.string.durov_start_title);
+
+                    ( durov.findViewById(R.id.photo)).setVisibility(View.VISIBLE);
+                    ImageLoader.getInstance().displayImage("http://cs9591.vk.me/v9591001/70/VPSmUR954fQ.jpg",(ImageView) durov.findViewById(R.id.photo));
+                    builder.
+                            setPositiveButton(updateOnly ? R.string.durov_start_update : R.string.durov_start_ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+
+                                    BugSenseHandler.sendEvent("Следим за Дуровым");
+                                    ProgressDialog uberfunctionDialog = ProgressDialog.show(getActivity(),
+                                            context.getString(R.string.durov_function_activating_title),
+                                            context.getString(R.string.durov_function_activating_message),
+                                            true,
+                                            false);
+                                    UberFunktion.initialize(uberfunctionDialog);
+
+                                }
+                            });
+                    builder.setNegativeButton(R.string.durov_start_cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            BugSenseHandler.sendEvent("Не следим за дуровым");
+                        }
+                    });
+                }
 
                 builder.setView(durov);
                 selector = builder.create();
                 selector.show();
             }
         });
-        preferences.add(new ToggleablePreferenceItem(getEnableSpy(),null,longpollStatus) {
+
+        preferences.add(new ToggleablePreferenceItem(getEnableSpy(), null, longpollStatus) {
 
             @Override
             public void onToggle(Boolean isChecked) {
@@ -148,8 +170,8 @@ public class MainFragment extends android.support.v4.app.Fragment {
             public void onClick() {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 final AlertDialog selector;
-                builder.setTitle(R.string.about).
-                        setPositiveButton(R.string.got_it, new DialogInterface.OnClickListener() {
+                builder.setTitle(R.string.app_about).
+                        setPositiveButton(R.string.app_about_button, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 
@@ -159,19 +181,10 @@ public class MainFragment extends android.support.v4.app.Fragment {
                 View happySanta = getActivity().getLayoutInflater().inflate(R.layout.main_santa, null);
 
                 TextView happySantaText = (TextView) happySanta.findViewById(R.id.happySantaText);
-                happySantaText.setText(Html.fromHtml(getResources().getString(R.string.about_desc)));
+                happySantaText.setText(Html.fromHtml(getResources().getString(R.string.app_about_description)));
                 TextView happySantaLink = (TextView) happySanta.findViewById(R.id.happySantaLink);
                 happySantaLink.setVisibility(View.GONE);
-                LinearLayout layout = (LinearLayout)happySanta.findViewById(R.id.line);
-                Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-                int width = display.getWidth();  // deprecated
 
-                for(int i = 0; width%(341*i + 1) < width;i++ ){
-                    layout.addView(new ImageView(context){{
-                        setBackgroundDrawable(getResources().getDrawable(R.drawable.underline));
-                        setLayoutParams(new ViewGroup.LayoutParams(341, ViewGroup.LayoutParams.MATCH_PARENT));
-                    }});
-                }
 
 
                 builder.setView(happySanta);
@@ -185,6 +198,26 @@ public class MainFragment extends android.support.v4.app.Fragment {
 
 
     }
+
+
+    private String getUberfunction() {
+        return getResources().getString(R.string.durov_function_title);
+    }
+    private String getUberfunctionDescription() {
+        return getResources().getString(R.string.durov_function_decription);
+    }
+
+    private String getAbout(){
+
+        return getResources().getString(R.string.app_about);
+    }
+
+    public String getAdvancedSettings() {
+        return getResources().getString(R.string.settings);
+    }
+
+
+
     public void longpollToggle(Boolean active) {
 
         SharedPreferences preferences = context.getSharedPreferences("longpoll", Context.MODE_MULTI_PROCESS);
@@ -199,23 +232,6 @@ public class MainFragment extends android.support.v4.app.Fragment {
         longPollService.putExtras(bundle);
         context.startService(longPollService);
 
-    }
-
-
-    private String getUberfunction() {
-        return getResources().getString(R.string.uberfunction);
-    }
-    private String getUberfunctionDescription() {
-        return getResources().getString(R.string.uberfunction_description);
-    }
-
-    private String getAbout(){
-
-        return getResources().getString(R.string.about);
-    }
-
-    public String getAdvancedSettings() {
-        return getResources().getString(R.string.settings);
     }
 
     public String getEnableSpy() {

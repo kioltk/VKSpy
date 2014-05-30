@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,9 +48,7 @@ public class Notificator {
     public static void announce(ArrayList<LongPollService.Update> updates) {
         if (updates.size() == 0)
             return;
-        if (applicationIsOpened()) {
-            return;
-        }
+
         ArrayList<Event> popupEvents = new ArrayList<Event>();
         ArrayList<Event> notifyEvents = new ArrayList<Event>();
         for (LongPollService.Update update : updates) {
@@ -79,7 +78,7 @@ public class Notificator {
                 + taskInfo.get(0).topActivity.getClassName());
 
         ComponentName componentInfo = taskInfo.get(0).topActivity;
-        return false;//componentInfo.getPackageName().equals(context.getPackageName());
+        return componentInfo.getPackageName().equals(context.getPackageName());
     }
 
     /**
@@ -166,37 +165,96 @@ public class Notificator {
     */
 
     public static void showPopup(ArrayList<Event> events) {
+        if (events.isEmpty())
+            return;
+        int offlinesPopup = 0;
+        int onlinesPopup = 0;
+        Event lastOnlineEvent = null;
+        Event lastOfflineEvent = null;
+        for (Event popupEvent : events) {
+            switch (popupEvent.getType()) {
+                case LongPollService.Update.TYPE_ONLINE:
+                    lastOnlineEvent = popupEvent;
+                    onlinesPopup++;
+                    break;
 
+                case LongPollService.Update.TYPE_OFFLINE:
+                    lastOfflineEvent = popupEvent;
+                    offlinesPopup++;
+                    break;
 
-        Toast toast = new Toast(context);
-
-
-        LinearLayout rootView = new LinearLayout(context);
-        rootView.setOrientation(LinearLayout.VERTICAL);
-        rootView.setBackgroundResource(R.drawable.popup_message);
-
-        for (Event event : events) {
-            rootView.addView(event.getView(context));
+            }
         }
+        if (lastOnlineEvent != null) {
+            showPopup(lastOnlineEvent,onlinesPopup);
+        }
+        if (lastOfflineEvent != null) {
+            showPopup(lastOfflineEvent,offlinesPopup);
+        }
+    }
 
+    private static void showPopup(Event lastEvent, int countEvents) {
+
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View rootView = inflater.inflate(R.layout.popup, null);
+
+        final Toast toast = new Toast(context);
+
+
+        TextView titleView = (TextView) rootView.findViewById(R.id.title);
+        titleView.setText(lastEvent.headerText);
+        TextView descriptionView = (TextView) rootView.findViewById(R.id.description);
+        if(countEvents==1){
+            descriptionView.setText(lastEvent.messageText);
+        }else{
+            descriptionView.setText(context.getResources().getQuantityString(
+                    lastEvent.getType() == LongPollService.Update.TYPE_OFFLINE ?
+                            R.plurals.offlines_notification : R.plurals.onlines_notification,
+                    countEvents - 1,
+                    countEvents - 1
+            ));
+        }
+        final ImageView photoView = (ImageView) rootView.findViewById(R.id.photo);
         toast.setView(rootView);
         toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 100);
         toast.setDuration(Toast.LENGTH_SHORT);
-        toast.show();
+        ImageLoader.getInstance().loadImage(lastEvent.imageUrl, new ImageLoadingListener() {
+            @Override
+            public void onLoadingStarted(String s, View view) {
+
+            }
+
+            @Override
+            public void onLoadingFailed(String s, View view, FailReason failReason) {
+
+            }
+
+            @Override
+            public void onLoadingComplete(String s, View view, Bitmap bitmap) {
+                photoView.setImageBitmap(bitmap);
+                toast.show();
+            }
+
+            @Override
+            public void onLoadingCancelled(String s, View view) {
+
+            }
+        });
     }
 
     public static void clearNotifications(){
-
-        final NotificationManager mNotificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotificationManager.cancelAll();
+        if(context!=null) {
+            final NotificationManager mNotificationManager =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            mNotificationManager.cancelAll();
+        }
         onlinesNotification.clear();
         offlinesNotification.clear();
         offlinePhotosStack.clear();
         onlinePhotosStack.clear();
     }
-    private static ArrayList<Bitmap> onlinePhotosStack = new ArrayList<Bitmap>();
-    private static ArrayList<Bitmap> offlinePhotosStack = new ArrayList<Bitmap>();
+    private static ArrayList<String> onlinePhotosStack = new ArrayList<String>();
+    private static ArrayList<String> offlinePhotosStack = new ArrayList<String>();
     private static ArrayList<String> onlinesNotification = new ArrayList<String>();
     private static ArrayList<String> offlinesNotification = new ArrayList<String>();
     public static void showNotification(ArrayList<Event> notifyEvents) {
@@ -206,25 +264,38 @@ public class Notificator {
 
         Event lastOnlineEvent = null;
         Event lastOfflineEvent = null;
-        if (onlinesNotification.isEmpty() && offlinesNotification.isEmpty() && notifyEvents.size() == 1) {
-            showSingleNotification(notifyEvents.get(0));
-            return;
-        } else {
-            for (Event notifyEvent : notifyEvents) {
-                if (notifyEvent.getType() == LongPollService.Update.TYPE_ONLINE) {
+        for (Event notifyEvent : notifyEvents) {
+            switch (notifyEvent.getType()) {
+                case LongPollService.Update.TYPE_ONLINE:
                     lastOnlineEvent = notifyEvent;
+                    putImageToStack(notifyEvent.imageUrl, onlinePhotosStack);
                     onlinesNotification.add(0, notifyEvent.getShortMessage());
-                } else {
+                    break;
+
+                case LongPollService.Update.TYPE_OFFLINE:
                     lastOfflineEvent = notifyEvent;
+                    putImageToStack(notifyEvent.imageUrl, offlinePhotosStack);
                     offlinesNotification.add(0, notifyEvent.getShortMessage());
-                }
+                    break;
+                case LongPollService.Update.TYPE_USER_TYPING:
+                    showSingleNotification(notifyEvent);
+                    break;
+
             }
         }
-        if(!onlinesNotification.isEmpty() && lastOnlineEvent!=null) {
+        if ((onlinesNotification.size()>1) && lastOnlineEvent != null) {
             showOnlines(lastOnlineEvent);
+        } else {
+            if (lastOnlineEvent != null) {
+                showSingleNotification(lastOnlineEvent);
+            }
         }
-        if(!offlinesNotification.isEmpty() && lastOfflineEvent!=null){
+        if ((offlinesNotification.size()>1) && lastOfflineEvent != null) {
             showOfflines(lastOfflineEvent);
+        } else {
+            if (lastOfflineEvent != null) {
+                showSingleNotification(lastOfflineEvent);
+            }
         }
 
 
@@ -233,19 +304,21 @@ public class Notificator {
 
         final String offlineHeaderText = lastOnlineEvent.headerText;
         final String offlineMessageText = lastOnlineEvent.messageText;
-        String offlinesSummary = context.getResources().getQuantityString(R.plurals.offlines_notification, offlinesNotification.size(), offlinesNotification.size());
+        String offlinesSummary = context.getResources().getQuantityString(R.plurals.offlines_notification, offlinesNotification.size()-1, offlinesNotification.size()-1);
         String imageUrl = lastOnlineEvent.imageUrl;
         final String finalSummary = offlinesSummary;
 
         final NotificationCompat.Builder notificationBuilder =
-                new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.ic_stat_spy)
+                new NotificationCompat.Builder(context);
+        if(!applicationIsOpened())
+        notificationBuilder
                         .setContentTitle(offlineHeaderText)
                         .setAutoCancel(true)
                         .setContentText(finalSummary)
-                        .setDefaults(Notification.DEFAULT_LIGHTS)
                         .setContentInfo("VK Spy");
-        notificationBuilder.setTicker(lastOnlineEvent.headerText + " " + lastOnlineEvent.messageText.toLowerCase());
+        notificationBuilder.setTicker(offlineHeaderText + " " + offlineMessageText.toLowerCase())
+                .setDefaults(Notification.DEFAULT_LIGHTS)
+                .setSmallIcon(R.drawable.ic_stat_spy);
 
         SharedPreferences prefs = context.getSharedPreferences("notification", Context.MODE_MULTI_PROCESS);
 
@@ -280,63 +353,44 @@ public class Notificator {
         int id = OFFLINES_NOTIFICATION;
 
         final int mId = id;
-        Handler handler = new Handler();
+        final Handler handler = new Handler();
         new Thread(new Runnable() {
             @Override
             public void run() {
+                notificationBuilder.setLargeIcon(getBitmap(offlinePhotosStack));
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
 
+                        Notification notification = notificationBuilder.build();
+                        mNotificationManager.notify(mId, notification);
+                    }
+                });
             }
-        });
-        ImageLoader.getInstance().loadImage(imageUrl, new ImageLoadingListener() {
-            @Override
-            public void onLoadingStarted(String s, View view) {
+        }).start();
 
-            }
-
-            @Override
-            public void onLoadingFailed(String s, View view, FailReason failReason) {
-
-            }
-
-            @Override
-            public void onLoadingComplete(String s, View view, Bitmap bitmap) {
-
-                try {
-                    notificationBuilder.setLargeIcon(getImage(bitmap, offlinePhotosStack));
-                } catch (Exception exp) {
-
-                }
-                Notification notification = notificationBuilder.build();
-                mNotificationManager.notify(mId, notification);
-
-
-            }
-
-            @Override
-            public void onLoadingCancelled(String s, View view) {
-
-            }
-        });
 
     }
     static void showOnlines(final Event lastOnlineEvent) {
         final String onlineHeaderText = lastOnlineEvent.headerText;
         final String onlineMessageText = lastOnlineEvent.messageText;
-        String onlineSummaryText = context.getResources().getQuantityString(R.plurals.onlines_notification, onlinesNotification.size(), onlinesNotification.size());
+        String onlineSummaryText = context.getResources().getQuantityString(R.plurals.onlines_notification, onlinesNotification.size()-1, onlinesNotification.size()-1);
         String imageUrl = lastOnlineEvent.imageUrl;
 
         final String finalSummary = onlineSummaryText;
 
         final NotificationCompat.Builder notificationBuilder =
-                new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.ic_stat_spy)
+                new NotificationCompat.Builder(context);
+
+        if(!applicationIsOpened())
+            notificationBuilder
                         .setContentTitle(onlineHeaderText)
                         .setContentText(finalSummary)
                         .setAutoCancel(true)
-                        .setDefaults(Notification.DEFAULT_LIGHTS)
                         .setContentInfo("VK Spy");
-        notificationBuilder.setTicker(lastOnlineEvent.headerText + " " + lastOnlineEvent.messageText.toLowerCase());
-
+        notificationBuilder.setTicker(lastOnlineEvent.headerText + " " + lastOnlineEvent.messageText.toLowerCase())
+        .setDefaults(Notification.DEFAULT_LIGHTS)
+                .setSmallIcon(R.drawable.ic_stat_spy);
         SharedPreferences prefs = context.getSharedPreferences("notification", Context.MODE_MULTI_PROCESS);
 
         boolean soundEnabled = prefs.getBoolean("sound", true);
@@ -370,51 +424,39 @@ public class Notificator {
         int id = ONLINES_NOTIFICATION;
 
         final int mId = id;
-        ImageLoader.getInstance().loadImage(imageUrl, new ImageLoadingListener() {
+        final Handler handler = new Handler();
+        new Thread(new Runnable() {
             @Override
-            public void onLoadingStarted(String s, View view) {
+            public void run() {
+                notificationBuilder.setLargeIcon(getBitmap(onlinePhotosStack));
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
 
+                        Notification notification = notificationBuilder.build();
+                        mNotificationManager.notify(mId, notification);
+                    }
+                });
             }
-
-            @Override
-            public void onLoadingFailed(String s, View view, FailReason failReason) {
-
-            }
-
-            @Override
-            public void onLoadingComplete(String s, View view, Bitmap bitmap) {
-
-                int height = (int) context.getResources().getDimension(android.R.dimen.notification_large_icon_height);
-                int width = (int) context.getResources().getDimension(android.R.dimen.notification_large_icon_width);
-                try {
-                    notificationBuilder.setLargeIcon(getImage(bitmap,onlinePhotosStack));
-                } catch (Exception exp) {
-
-                }
-                Notification notification = notificationBuilder.build();
-                mNotificationManager.notify(mId, notification);
+        }).start();
 
 
-            }
-
-            @Override
-            public void onLoadingCancelled(String s, View view) {
-
-            }
-        });
 
     }
     public static void showSingleNotification(Event event) {
 
         final NotificationCompat.Builder notificationBuilder =
-                new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.ic_stat_spy)
+                new NotificationCompat.Builder(context);
+
+        if(!applicationIsOpened())
+            notificationBuilder
                         .setContentTitle(event.headerText)
                         .setContentText(event.messageText)
                         .setAutoCancel(true)
-                        .setDefaults(Notification.DEFAULT_LIGHTS)
                         .setContentInfo("VK Spy");
-        notificationBuilder.setTicker(event.headerText + " " + event.messageText);
+        notificationBuilder.setTicker(event.headerText + " " + event.messageText)
+                .setSmallIcon(R.drawable.ic_stat_spy)
+                .setDefaults(Notification.DEFAULT_LIGHTS);
 
         SharedPreferences prefs = context.getSharedPreferences("notification", Context.MODE_MULTI_PROCESS);
 
@@ -430,7 +472,7 @@ public class Notificator {
         int id ;
         Intent resultIntent;
 
-        if (event.getType()== LongPollService.Update.TYPE_USER_TYPING) {
+        if (event.getType() == LongPollService.Update.TYPE_USER_TYPING) {
             id = event.id;
             resultIntent = new Intent(context, MainActivity.class);
         }else{
@@ -439,11 +481,9 @@ public class Notificator {
             bundle.putInt("id", event.id);
             resultIntent.putExtras(bundle);
             if(event.getType()== LongPollService.Update.TYPE_ONLINE) {
-                onlinesNotification.add(0, event.getShortMessage());
                 id = ONLINES_NOTIFICATION;
             }
             else {
-                offlinesNotification.add(0, event.getShortMessage());
                 id = OFFLINES_NOTIFICATION;
             }
         }
@@ -477,11 +517,9 @@ public class Notificator {
 
             @Override
             public void onLoadingComplete(String s, View view, Bitmap bitmap) {
-                try {
-                    notificationBuilder.setLargeIcon(getImage(bitmap,mId==ONLINES_NOTIFICATION? onlinePhotosStack:offlinePhotosStack));
-                } catch (Exception exp) {
 
-                }
+                    notificationBuilder.setLargeIcon(bitmap);
+
                 Notification notification = notificationBuilder.build();
                 mNotificationManager.notify(mId, notification);
 
@@ -494,60 +532,69 @@ public class Notificator {
         });
 
     }
-
-    private static Bitmap getImage(Bitmap newBitmap, ArrayList<Bitmap> imagesStack) {
-
-
-        int height = (int) context.getResources().getDimension(android.R.dimen.notification_large_icon_height);
-        int width = (int) context.getResources().getDimension(android.R.dimen.notification_large_icon_width);
-
-        imagesStack.add(0,newBitmap);
+    private static void putImageToStack(String url, ArrayList<String> imagesStack){
+        imagesStack.add(0,url);
         if(imagesStack.size()>3)
             imagesStack.remove(3);
+    }
+    private static Bitmap getBitmap(ArrayList<String> urlStack) {
+        try {
 
 
-        if(imagesStack.size()==1){
-            newBitmap = Bitmap.createScaledBitmap(newBitmap, width, height, true);
-            return newBitmap;
+            int height = (int) context.getResources().getDimension(android.R.dimen.notification_large_icon_height);
+            int width = (int) context.getResources().getDimension(android.R.dimen.notification_large_icon_width);
+
+            ArrayList<Bitmap> imagesStack = new ArrayList<Bitmap>();
+            for (String url : urlStack) {
+                imagesStack.add(ImageLoader.getInstance().loadImageSync(url));
+            }
+            ;
+
+            Bitmap lastImage = imagesStack.get(0);
+
+            if (imagesStack.size() == 1) {
+                lastImage = Bitmap.createScaledBitmap(lastImage, width, height, true);
+                return lastImage;
+            }
+            if (imagesStack.size() == 2) {
+
+                lastImage = Bitmap.createScaledBitmap(lastImage, width, height, true);
+                lastImage = Bitmap.createBitmap(lastImage, width / 4, 0, width / 2, height);
+
+                Bitmap anotherBitmap = Bitmap.createScaledBitmap(imagesStack.get(1), width, height, true);
+                anotherBitmap = Bitmap.createBitmap(anotherBitmap, width / 4, 0, width / 2, height);
+
+
+                Canvas comboImage = new Canvas();
+                Bitmap tempBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                comboImage.setBitmap(tempBitmap);
+                comboImage.drawBitmap(lastImage, 0, 0, null);
+                comboImage.drawBitmap(anotherBitmap, width / 2, 0, null);
+                comboImage.setBitmap(null);
+                return tempBitmap;
+            }
+            //if(imagesStack.size()==3)
+            {
+
+                lastImage = Bitmap.createScaledBitmap(lastImage, width, height, true);
+                lastImage = Bitmap.createBitmap(lastImage, width / 4, 0, width / 2, height);
+
+                Bitmap anotherBitmap = Bitmap.createScaledBitmap(imagesStack.get(1), width / 2, height / 2, true);
+                Bitmap anotherBitmap2 = Bitmap.createScaledBitmap(imagesStack.get(2), width / 2, height / 2, true);
+
+
+                Canvas comboImage = new Canvas();
+                Bitmap tempBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                comboImage.setBitmap(tempBitmap);
+                comboImage.drawBitmap(lastImage, 0, 0, null);
+                comboImage.drawBitmap(anotherBitmap, width / 2, 0, null);
+                comboImage.drawBitmap(anotherBitmap2, width / 2, height / 2, null);
+                return tempBitmap;
+            }
+        } catch (Exception exp) {
+            return BitmapFactory.decodeResource(context.getResources(),
+                    R.drawable.user_placeholder);
         }
-        if(imagesStack.size()==2)
-        {
-
-            newBitmap = Bitmap.createScaledBitmap(newBitmap, width, height, true);
-            newBitmap = Bitmap.createBitmap(newBitmap,width/4,0,width/2,height);
-
-            Bitmap anotherBitmap = Bitmap.createScaledBitmap(imagesStack.get(1),width,height,true);
-            anotherBitmap = Bitmap.createBitmap(anotherBitmap,width/4,0,width/2,height);
-
-
-
-            Canvas comboImage = new Canvas();
-            Bitmap tempBitmap = Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);
-            comboImage.setBitmap(tempBitmap);
-            comboImage.drawBitmap(newBitmap,0,0,null);
-            comboImage.drawBitmap(anotherBitmap,width/2,0,null);
-            comboImage.setBitmap(null);
-            return tempBitmap;
-        }
-        //if(imagesStack.size()==3)
-        {
-
-            newBitmap = Bitmap.createScaledBitmap(newBitmap, width, height, true);
-            newBitmap = Bitmap.createBitmap(newBitmap,width/4,0,width/2,height);
-
-            Bitmap anotherBitmap = Bitmap.createScaledBitmap(imagesStack.get(1),width/2,height/2,true);
-            Bitmap anotherBitmap2 = Bitmap.createScaledBitmap(imagesStack.get(2), width/2, height/2, true);
-
-
-            Canvas comboImage = new Canvas();
-            Bitmap tempBitmap = Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);
-            comboImage.setBitmap(tempBitmap);
-            comboImage.drawBitmap(newBitmap,0,0,null);
-            comboImage.drawBitmap(anotherBitmap,width/2,0,null);
-            comboImage.drawBitmap(anotherBitmap2,width/2,height/2,null);
-            return tempBitmap;
-        }
-
 
     }
 
@@ -601,18 +648,7 @@ public static class Event {
         }
 
 
-        private View getView(Context context) {
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View rootView = inflater.inflate(R.layout.popup, null);
 
-            ImageView photo = (ImageView) rootView.findViewById(R.id.photo);
-            TextView header = (TextView) rootView.findViewById(R.id.header);
-            TextView message = (TextView) rootView.findViewById(R.id.message);
-            header.setText(headerText);
-            message.setText(messageText);
-            ImageLoader.getInstance().displayImage(imageUrl, photo);
-            return rootView;
-        }
 
         public String getShortMessage() {
             return shortMessage;

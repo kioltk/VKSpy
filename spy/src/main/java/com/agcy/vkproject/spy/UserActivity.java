@@ -24,6 +24,7 @@ import com.agcy.vkproject.spy.Adapters.UpdatesAdapter;
 import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
 import com.agcy.vkproject.spy.Fragments.ListFragment;
+import com.agcy.vkproject.spy.Models.Online;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.tabcarousel.BackScrollManager;
 import com.tabcarousel.CarouselContainer;
@@ -31,19 +32,22 @@ import com.viewpagerindicator.ContentPagerAdapter;
 import com.viewpagerindicator.TabPageIndicator;
 import com.vk.sdk.api.model.VKApiUserFull;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 
 public class UserActivity extends ActionBarActivity {
 
+    public final static int ONLINE_TRUE = -1;
+    public final static int ONLINE_FALSE = -2;
+    public final static int ONLINE_MOBILE = -3;
     SectionsPagerAdapter mSectionsPagerAdapter;
 
     CarouselContainer carouselHeader;
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
     ViewPager mViewPager;
     VKApiUserFull user;
+    private TextView status;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(null);
@@ -54,13 +58,14 @@ public class UserActivity extends ActionBarActivity {
         user = Memory.getUserById(userid);
 
         ImageView photo = (ImageView) findViewById(R.id.photo);
-        TextView status = (TextView) findViewById(R.id.status_text);
+        status = (TextView) findViewById(R.id.status_text);
         if (user.online) {
-            status.setText(R.string.online);
             if (user.online_mobile)
-                status.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.online_mobile_grey, 0);
+                setOnline(ONLINE_MOBILE);
+            else
+                setOnline(ONLINE_TRUE);
         } else {
-            status.setText(Helper.getLastSeen(user));
+            setOnline((int) user.last_seen);
         }
         ImageLoader.getInstance().displayImage(user.getBiggestPhoto(), photo);
 
@@ -107,7 +112,20 @@ public class UserActivity extends ActionBarActivity {
         });
     }
 
+    protected void setOnline(int online) {
+        switch (online) {
+            case ONLINE_MOBILE:
+                status.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.online_mobile_grey, 0);
+            case ONLINE_TRUE:
+                status.setText(R.string.online);
+                break;
+            default:
 
+                status.setText(Helper.getLastSeen(user));
+                break;
+
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -266,8 +284,10 @@ public class UserActivity extends ActionBarActivity {
             return 1;
         }
     }
-    public static class OnlinesListFragment extends UpdatesListFragment {
+    public class OnlinesListFragment extends UpdatesListFragment {
 
+
+        private ArrayList<Online> items;
 
         @Override
         public AbsListView.OnScrollListener getScrollListener() {
@@ -276,7 +296,26 @@ public class UserActivity extends ActionBarActivity {
         }
         @Override
         public BaseAdapter adapter() {
-            return new UpdatesAdapter(Helper.convertLastUndefinedToOnline(Memory.getOnlines(user.id)),context);
+            items = Memory.getOnlines(user.id);
+            return new UpdatesAdapter(Helper.convertLastUndefinedToOnline(items),context);
+        }
+
+        @Override
+        protected void onContentBinded() {
+            super.onContentBinded();
+            if(items!=null && !items.isEmpty()){
+                Online last = items.get(0);
+                if(last.getTill()==0) {
+                    //last.setTill();
+                    setOnline(ONLINE_TRUE);
+                }else{
+                    if(user.last_seen<last.getTill()){
+                        user.last_seen = last.getTill();
+                        setOnline((int) user.last_seen);
+                    }
+                }
+            }
+
         }
 
         @Override

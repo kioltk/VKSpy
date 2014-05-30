@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Handler;
 import android.util.Log;
 
 import com.agcy.vkproject.spy.Fragments.UsersListFragment;
@@ -15,6 +16,7 @@ import com.agcy.vkproject.spy.Models.Online;
 import com.agcy.vkproject.spy.Models.Status;
 import com.agcy.vkproject.spy.Models.Typing;
 import com.bugsense.trace.BugSenseHandler;
+import com.vk.sdk.api.model.VKApiUser;
 import com.vk.sdk.api.model.VKApiUserFull;
 import com.vk.sdk.api.model.VKUsersArray;
 
@@ -281,11 +283,6 @@ public class Memory {
     //endregion
     //region Setters
 
-    public static Boolean setTracked(int id) {
-        VKApiUserFull user = getUserById(id);
-        return setTracked(user);
-
-    }
     public static Boolean setTracked(VKApiUserFull user) {
         user.tracked = updateTrack(user.id);
         Helper.trackedUpdated();
@@ -294,12 +291,12 @@ public class Memory {
     }
     public static void setTracked(ArrayList<VKApiUserFull> tracked) {
         Log.i("AGCY SPY SQL","Saving tracks: " + tracked.size());
+        open();
         database.execSQL("update " + DatabaseConnector.USER_DATABASE + " set tracked = 0");
         for (VKApiUserFull user : users) {
             user.tracked= false;
 
         };
-        open();
         for (VKApiUserFull user : tracked) {
             int id = user.id;
             user.tracked = true;
@@ -313,20 +310,12 @@ public class Memory {
     }
 
 
-    public static void setStatus(VKApiUserFull user, Boolean online, boolean timeout) {
-
-        user.online = online;
-        long time = Helper.getUnixNow() - (timeout ? 15 * 60 : 0);
-        if (online) {
-            saveStatus(user, true, (int) time);
-        } else {
-            updateStatus(user, online, time);
-            user.last_seen = Helper.getUnixNow();
-        }
-
-        if (!user.isTracked())
-            return;
-        Status status = new Status(user.id, (int) time, online);
+    /**
+     * Уведомляет слушалки
+     * !!! Используется только в главном потоке.
+     * @param status
+     */
+    public static void notifyStatusListeners(Status status){
         for (NewUpdateListener onlineListener : onlineListeners) {
             onlineListener.newItem(status);
         }
@@ -334,7 +323,55 @@ public class Memory {
             onlineListener.newItem(status);
         }
         onlineOnceListeners.clear();
+    }
+    /**
+     * Метод сохраняет\обновляет запись в бд, но и уведомляет все listeners, которым нужен этот статус
+     * !!! Не забываем главный поток
+     * @param user
+     * @param online
+     *
+     */
+    public static void setStatus(VKApiUserFull user, Boolean online, boolean timeout) {
+        setStatus(user,online,Helper.getUnixNow() - (timeout ? 15 * 60 : 0));
 
+    }
+    public static void setStatus(final VKApiUserFull user, final Boolean online, final int time){
+        final Handler handler = new Handler();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                if(!forceSetStatus(user,online,time)){return;}
+
+
+                if (user.isTracked())
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {Status status = new Status(user.id,  time, online);
+                            notifyStatusListeners(status);
+                        }
+                    });
+            }
+        }).start();
+    }
+    public static boolean forceSetStatus(VKApiUserFull user, Boolean online, int time){
+        user.online = online;
+        if (online) {
+            setOnline(user, time);
+        } else {
+            return setOffline(user, time);
+        }
+        return true;
+    }
+    public static Boolean setOnline(VKApiUserFull user, int time){
+        user.online = true;
+        saveStatus(user, true, time);
+        return true;
+    }
+    public static Boolean setOffline(VKApiUserFull user, int time){
+
+        user.last_seen = time;
+        return (updateStatus(user, false, time));
     }
 
     //endregion
@@ -373,47 +410,63 @@ public class Memory {
         return tracked;
 
     }
-    public static void updateStatus(VKApiUserFull user, Boolean online, long time){
 
+    /**
+     *  Находит последнюю запись по пользователю, и, если это не повторка (+-120секунд), то обновляет запись
+     * @param user
+     * @param online
+     * @param time
+     * @return true, если обновление прошло успешно, и данные были занесены. Если это повторка,
+     * то занесено не будет.
+     */
+    public static Boolean updateStatus(VKApiUserFull user, Boolean online, long time) {
 
-        Log.i("AGCY SPY SQL","Updating status.");
-        SharedPreferences preferences = context.getSharedPreferences("longpoll", Context.MODE_MULTI_PROCESS);
+        if (user.id == 1)
+            return false;
 
-        int lastUpdate = preferences.getInt("lastUpdate",0);
-        if(Helper.getUnixNow() - lastUpdate > 30*60){
-            saveStatus(user,online, (int) time);
-        }else{
-            Cursor cursor = getCursor(DatabaseConnector.ONLINE_DATABASE,
-                    DatabaseConnector.ONLINE_DATABASE_FIELDS,
-                    "userid = " + user.id,
-                    "id desc");
-            int idColumnIndex = cursor.getColumnIndex("id");
-            int useridColumnIndex = cursor.getColumnIndex("userid");
-            int sinceColumnIndex = cursor.getColumnIndex("since");
-            int tillColumnIndex = cursor.getColumnIndex("till");
+        Log.i("AGCY SPY SQL", "Updating status.");
 
-            if (cursor.moveToFirst()) {
-                int lastOnline = cursor.getInt(sinceColumnIndex);
-                int lastOffline = cursor.getInt(tillColumnIndex);
+        Cursor cursor = getCursor(DatabaseConnector.ONLINE_DATABASE,
+                DatabaseConnector.ONLINE_DATABASE_FIELDS,
+                "userid = " + user.id,
+                "id desc");
+        int idColumnIndex = cursor.getColumnIndex("id");
+        int useridColumnIndex = cursor.getColumnIndex("userid");
+        int sinceColumnIndex = cursor.getColumnIndex("since");
+        int tillColumnIndex = cursor.getColumnIndex("till");
 
-                if (lastOffline != 0) {
-                    saveStatus(user, online, (int) time);
-                }else {
+        if (cursor.moveToFirst()) {
+            int lastOnline = cursor.getInt(sinceColumnIndex);
+            int lastOffline = cursor.getInt(tillColumnIndex);
+
+            if (online) {
+                saveStatus(user, true, (int) time);
+            } else {
+                if (lastOffline == 0) {
+                    // Если в конце открытый онлайн
                     int id = cursor.getInt(idColumnIndex);
                     ContentValues updateValues = new ContentValues();
                     updateValues.put("userid", cursor.getInt(useridColumnIndex));
                     updateValues.put("since", lastOnline);
                     updateValues.put("till", time);
                     update(DatabaseConnector.ONLINE_DATABASE, updateValues, "id", String.valueOf(id));
+                } else {
+                    // Но если это "повторка" оффлайна, скажем, мы по ошибке пытаемся сохранить
+                    // уже схваченный оффлайн
+                    if (lastOffline - 120 < time && lastOffline + 120 > time) {
+                        close();
+                        return false;
+                    }
+                    saveStatus(user, online, (int) time);
+
                 }
-
-            }else{
-                saveStatus(user,online, (int) time);
             }
-            close();
+        } else {
+            saveStatus(user, online, (int) time);
         }
-        // did we lost connection half hour ago?
 
+        close();
+        return true;
     }
     //endregion
     //region Savers
@@ -480,7 +533,7 @@ public class Memory {
         }
         Memory.users = newUsers;
 
-        Log.i("AGCY SPY SQL","Saving new users. Count: "+newUsers.size());
+        Log.i("AGCY SPY SQL", "Saving new users. Count: " + newUsers.size());
         ArrayList<ContentValues> valuesList = new ArrayList<ContentValues>();
         for (int i = 0; i < Memory.users.size(); i++) {
             VKApiUserFull user = Memory.users.get(i);
@@ -526,7 +579,7 @@ public class Memory {
     }
 
     private static void removeOnline(int id) {
-
+        database.delete(DatabaseConnector.ONLINE_DATABASE, "id = " + id, null);
     }
 
     private static void saveOnline(VKApiUserFull user, int since, int till){
@@ -534,23 +587,51 @@ public class Memory {
         ContentValues values = new ContentValues();
         values.put("userid", user.id);
         values.put("since", since);
-        values.put("till",till);
+        values.put("till", till);
         forceSave(DatabaseConnector.ONLINE_DATABASE, values);
     }
-    public static void saveStatus(VKApiUserFull user, boolean status, int time) {
 
+    /**
+     * Создаёт новую запись  ONLINES_DATABASE, где один из двух ( till или sine ) будет 0.
+     * @param user под кем сохранить
+     * @param online online = true, offline = false
+     * @param time точное время, когда зашёл
+     */
+    public static void saveStatus(VKApiUserFull user, boolean online, int time) {
+        if(user.id==1){
+            return;
+        }
+        Cursor cursor = getCursor(DatabaseConnector.ONLINE_DATABASE,
+                DatabaseConnector.ONLINE_DATABASE_FIELDS,
+                "userid = " + user.id,
+                "id desc");
+        int idColumnIndex = cursor.getColumnIndex("id");
+        int useridColumnIndex = cursor.getColumnIndex("userid");
+        int sinceColumnIndex = cursor.getColumnIndex("since");
+        int tillColumnIndex = cursor.getColumnIndex("till");
 
+        if (cursor.moveToFirst()) {
+            int lastOnline = cursor.getInt(sinceColumnIndex);
+
+            if (online) {
+               if(lastOnline-120<time&&lastOnline+120>time) {
+                   close();
+                   return;
+               }
+            }
+        }
         Log.i("AGCY SPY SQL", "Saving online.");
         ContentValues values = new ContentValues();
         values.put("userid", user.id);
-        values.put(status ? "since" : "till", time);
+        values.put(online ? "since" : "till", time);
         save(DatabaseConnector.ONLINE_DATABASE, values);
+        close();
     }
 
 
     public static void saveTyping(VKApiUserFull user) {
 
-        Log.i("AGCY SPY SQL","Saving typing.");
+        Log.i("AGCY SPY SQL", "Saving typing.");
         ContentValues values = new ContentValues();
         values.put("userid", user.id);
         values.put("time", Helper.getUnixNow() - 3 * 60);
@@ -607,7 +688,7 @@ public class Memory {
         Log.i("AGCY SPY SQL", "New operation. Count of operation: " + dbOperations);
     }
 
-    private static void close() {
+    public static void close() {
         if (dbOperations == 0) {
             if (database != null) {
                 database.close();
@@ -647,7 +728,8 @@ public class Memory {
         Memory.usersListener = usersListener;
     }
     public static void reloadFriends() {
-        usersListener.reload();
+        if(usersListener!=null)
+            usersListener.reload();
     }
 
 

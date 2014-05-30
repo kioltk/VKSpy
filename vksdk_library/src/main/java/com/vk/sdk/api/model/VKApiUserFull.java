@@ -212,7 +212,7 @@ public class VKApiUserFull extends VKApiUser implements android.os.Parcelable {
     /**
      * Last visit date(in Unix time).
      */
-    public long last_seen;
+    public int last_seen;
 
     /**
      * List of user's universities
@@ -435,7 +435,7 @@ public class VKApiUserFull extends VKApiUser implements android.os.Parcelable {
         super.parse(user);
 
         // general
-        last_seen = parseLong(user.optJSONObject(LAST_SEEN), "time");
+        last_seen = (int) parseLong(user.optJSONObject(LAST_SEEN), "time");
         bdate = user.optString(BDATE);
 
         JSONObject city = user.optJSONObject(CITY);
@@ -811,7 +811,7 @@ public class VKApiUserFull extends VKApiUser implements android.os.Parcelable {
         this.bdate = in.readString();
         this.city = in.readParcelable(VKApiCity.class.getClassLoader());
         this.country = in.readParcelable(VKApiCountry.class.getClassLoader());
-        this.last_seen = in.readLong();
+        this.last_seen = (int) in.readLong();
         this.universities = in.readParcelable(VKList.class.getClassLoader());
         this.schools = in.readParcelable(VKList.class.getClassLoader());
         this.smoking = in.readInt();
