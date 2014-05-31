@@ -65,8 +65,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.agcy.vkproject.spy.UserActivity"
+            android:parentActivityName=".MainActivity"
+            android:name=".UserActivity"
             android:label="@string/user" >
+
         </activity>
         <activity
             android:name="com.agcy.vkproject.spy.SettingsActivity"

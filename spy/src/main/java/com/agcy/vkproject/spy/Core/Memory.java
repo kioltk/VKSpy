@@ -357,16 +357,14 @@ public class Memory {
     public static boolean forceSetStatus(VKApiUserFull user, Boolean online, int time){
         user.online = online;
         if (online) {
-            setOnline(user, time);
+            return setOnline(user, time);
         } else {
             return setOffline(user, time);
         }
-        return true;
     }
     public static Boolean setOnline(VKApiUserFull user, int time){
         user.online = true;
-        saveStatus(user, true, time);
-        return true;
+        return  saveStatus(user, true, time);
     }
     public static Boolean setOffline(VKApiUserFull user, int time){
 
@@ -434,13 +432,13 @@ public class Memory {
         int useridColumnIndex = cursor.getColumnIndex("userid");
         int sinceColumnIndex = cursor.getColumnIndex("since");
         int tillColumnIndex = cursor.getColumnIndex("till");
-
+        Boolean value = false;
         if (cursor.moveToFirst()) {
             int lastOnline = cursor.getInt(sinceColumnIndex);
             int lastOffline = cursor.getInt(tillColumnIndex);
 
             if (online) {
-                saveStatus(user, true, (int) time);
+               value= saveStatus(user, true, (int) time);
             } else {
                 if (lastOffline == 0) {
                     // Если в конце открытый онлайн
@@ -450,6 +448,7 @@ public class Memory {
                     updateValues.put("since", lastOnline);
                     updateValues.put("till", time);
                     update(DatabaseConnector.ONLINE_DATABASE, updateValues, "id", String.valueOf(id));
+                    value = true;
                 } else {
                     // Но если это "повторка" оффлайна, скажем, мы по ошибке пытаемся сохранить
                     // уже схваченный оффлайн
@@ -457,16 +456,16 @@ public class Memory {
                         close();
                         return false;
                     }
-                    saveStatus(user, online, (int) time);
+                    value = saveStatus(user, online, (int) time);
 
                 }
             }
         } else {
-            saveStatus(user, online, (int) time);
+          value  = saveStatus(user, online, (int) time);
         }
 
         close();
-        return true;
+        return value;
     }
     //endregion
     //region Savers
@@ -597,9 +596,9 @@ public class Memory {
      * @param online online = true, offline = false
      * @param time точное время, когда зашёл
      */
-    public static void saveStatus(VKApiUserFull user, boolean online, int time) {
+    public static Boolean saveStatus(VKApiUserFull user, boolean online, int time) {
         if(user.id==1){
-            return;
+            return false;
         }
         Cursor cursor = getCursor(DatabaseConnector.ONLINE_DATABASE,
                 DatabaseConnector.ONLINE_DATABASE_FIELDS,
@@ -616,7 +615,7 @@ public class Memory {
             if (online) {
                if(lastOnline-120<time&&lastOnline+120>time) {
                    close();
-                   return;
+                   return false;
                }
             }
         }
@@ -626,6 +625,7 @@ public class Memory {
         values.put(online ? "since" : "till", time);
         save(DatabaseConnector.ONLINE_DATABASE, values);
         close();
+        return true;
     }
 
 

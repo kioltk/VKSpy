@@ -14,6 +14,8 @@
     <string name="typings">Typings</string>
     <string name="logout">Log out</string>
 
+
+
     <string name="app_description"><![CDATA[<b>VK Spy</b> invisibly monitors your friends and VK users activity.]]></string>
     <string name="app_about_description">Some description</string>
 
@@ -47,6 +49,7 @@
 
 
     <string name="apply">Apply</string>
+    <string name="no_typings">No typings yet</string>
     <string name="no_tracks">None is tracked</string>
     <string name="no_events">No events yet</string>
     <string name="filter_tip">Click here to select who to spy</string>
@@ -95,6 +98,7 @@
     <string name="unknown_error">Unknown error</string>
     <string name="need_access">Access is needed to use application</string>
     <string name="help">Help</string>
+    <string name="no_friends">You have no friends</string>
 
     <plurals name="usersSelected">
         <item quantity="zero">None is selected</item>

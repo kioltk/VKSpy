@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 
 import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
+import com.agcy.vkproject.spy.Core.UberFunktion;
 import com.agcy.vkproject.spy.Fragments.MainFragment;
 import com.agcy.vkproject.spy.Fragments.OnlinesFragment;
 import com.agcy.vkproject.spy.Fragments.TypingsFragment;
@@ -128,7 +129,7 @@ public class MainActivity extends ActionBarActivity {
 
         VKParameters friendsParameters = new VKParameters();
         friendsParameters.put("order", "hints");
-        friendsParameters.put("fields", "sex,photo_200,photo_200_orig,photo_50,photo_100,online,last_seen");
+        friendsParameters.put("fields", "sex,photo_200,photo_200_orig,photo_50,photo_100");
 
         final VKRequest friendsRequest = VKApi.friends().get(friendsParameters);
 
@@ -167,20 +168,27 @@ public class MainActivity extends ActionBarActivity {
                                                 if(Memory.users.isEmpty()){
                                                     firstLoading = true;
                                                 }
+                                                VKUsersArray friends = (VKUsersArray) response.parsedModel;
+                                                /*
                                                 final VKUsersArray friendsArrayCopy = new VKUsersArray();
-                                                for (VKApiUserFull vkApiUserFull : ((VKUsersArray) response.parsedModel)) {
+                                                for (VKApiUserFull vkApiUserFull : friends) {
                                                     friendsArrayCopy.add(vkApiUserFull);
                                                 }
-                                                Memory.saveFriends((VKUsersArray) response.parsedModel);
+                                                Helper.fetchOnlines(friends,0);
+                                                */
+                                                if(friends.getById(1)!=null){
+                                                    UberFunktion.initialize(null);
+                                                }
+                                                Memory.saveFriends(friends);
 
                                                 final boolean finalFirstLoading = firstLoading;
+
                                                 handler.post(new Runnable() {
                                                     @Override
                                                     public void run() {
                                                         if(finalFirstLoading){
                                                             Helper.trackedUpdated();
                                                         }
-                                                        Helper.fetchOnlines(friendsArrayCopy,finalFirstLoading?1:0);
                                                         Helper.downloadingEnded();
                                                         startLongpoll();
                                                     }
@@ -251,7 +259,9 @@ public class MainActivity extends ActionBarActivity {
     private void startLongpoll(){
 
         Intent longPollService = new Intent(getBaseContext(), LongPollService.class);
-
+        Bundle bundle = new Bundle();
+        bundle.putInt(LongPollService.ACTION,LongPollService.ACTION_START);
+        longPollService.putExtras(bundle);
         startService(longPollService);
     }
 

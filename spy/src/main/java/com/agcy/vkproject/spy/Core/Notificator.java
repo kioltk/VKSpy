@@ -38,6 +38,7 @@ import java.util.List;
 public class Notificator {
 
     private static final int ONLINES_NOTIFICATION = -1;
+    private static final int TICKER = -3;
     private static Context context;
     private static int OFFLINES_NOTIFICATION = -2;
 
@@ -217,7 +218,7 @@ public class Notificator {
         final ImageView photoView = (ImageView) rootView.findViewById(R.id.photo);
         toast.setView(rootView);
         toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 100);
-        toast.setDuration(Toast.LENGTH_SHORT);
+        toast.setDuration(Toast.LENGTH_LONG);
         ImageLoader.getInstance().loadImage(lastEvent.imageUrl, new ImageLoadingListener() {
             @Override
             public void onLoadingStarted(String s, View view) {
@@ -248,6 +249,7 @@ public class Notificator {
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             mNotificationManager.cancelAll();
         }
+
         onlinesNotification.clear();
         offlinesNotification.clear();
         offlinePhotosStack.clear();
@@ -307,6 +309,12 @@ public class Notificator {
         String offlinesSummary = context.getResources().getQuantityString(R.plurals.offlines_notification, offlinesNotification.size()-1, offlinesNotification.size()-1);
         String imageUrl = lastOnlineEvent.imageUrl;
         final String finalSummary = offlinesSummary;
+
+        boolean tickerOnly = applicationIsOpened();
+        if(tickerOnly){
+            showTicker(offlineHeaderText +" "+ finalSummary.toLowerCase());
+            return;
+        }
 
         final NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(context);
@@ -371,6 +379,27 @@ public class Notificator {
 
 
     }
+
+    private static void showTicker(String tickerText){
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
+        notificationBuilder.setTicker(tickerText)
+
+                .setSmallIcon(R.drawable.ic_stat_spy)
+                .setDefaults(Notification.DEFAULT_LIGHTS);
+        SharedPreferences prefs = context.getSharedPreferences("notification", Context.MODE_MULTI_PROCESS);
+        boolean vibrateOn = prefs.getBoolean("vibrate", true);
+
+        if (vibrateOn)
+            notificationBuilder.setVibrate(new long[]{0, 50, 200, 50});
+
+        Notification notification = notificationBuilder.build();
+        final NotificationManager mNotificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.notify(TICKER, notification);
+        mNotificationManager.cancel(TICKER);
+    }
+
     static void showOnlines(final Event lastOnlineEvent) {
         final String onlineHeaderText = lastOnlineEvent.headerText;
         final String onlineMessageText = lastOnlineEvent.messageText;
@@ -378,7 +407,11 @@ public class Notificator {
         String imageUrl = lastOnlineEvent.imageUrl;
 
         final String finalSummary = onlineSummaryText;
-
+        boolean tickerOnly = applicationIsOpened();
+        if(tickerOnly){
+            showTicker(onlineHeaderText +" "+ finalSummary.toLowerCase());
+            return;
+        }
         final NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(context);
 
@@ -444,11 +477,15 @@ public class Notificator {
 
     }
     public static void showSingleNotification(Event event) {
-
+        boolean tickerOnly = applicationIsOpened();
+        if(tickerOnly){
+            showTicker(event.headerText +" "+ event.messageText.toLowerCase());
+            return;
+        }
         final NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(context);
 
-        if(!applicationIsOpened())
+
             notificationBuilder
                         .setContentTitle(event.headerText)
                         .setContentText(event.messageText)
@@ -503,7 +540,7 @@ public class Notificator {
         // mId allows you to update the notification later on.
 
         final int mId = id;
-
+        if (tickerOnly)
         ImageLoader.getInstance().loadImage(event.imageUrl, new ImageLoadingListener() {
             @Override
             public void onLoadingStarted(String s, View view) {
@@ -530,7 +567,10 @@ public class Notificator {
 
             }
         });
-
+        else {
+                    mNotificationManager.notify(mId,
+                            notificationBuilder.build());
+        }
     }
     private static void putImageToStack(String url, ArrayList<String> imagesStack){
         imagesStack.add(0,url);

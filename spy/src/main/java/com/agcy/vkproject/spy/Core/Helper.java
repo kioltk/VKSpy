@@ -50,6 +50,7 @@ public class Helper {
     private static final int ONLINE = -1;
     public static final int NOW = -2;
     private static final int UNDEFINED = -3;
+    private static final int FIRST_LOADING = -1;
     private static Context context;
     private static MainActivity mainActivity;
 
@@ -152,6 +153,7 @@ public class Helper {
         Intent stopLongpoll = new Intent(context, LongPollService.class);
         Bundle bundle = new Bundle();
         bundle.putInt(LongPollService.ACTION, LongPollService.ACTION_STOP);
+        stopLongpoll.putExtras(bundle);
         context.startService(stopLongpoll);
     }
 
@@ -502,12 +504,24 @@ public class Helper {
                         continue;
                     VKApiUserFull storedUser = Memory.getUserById(user.id);
                     switch (timeout) {
+                        case FIRST_LOADING:
+                            if(Memory.forceSetStatus(storedUser, user.online, user.last_seen)) {
+                                if (storedUser.tracked)
+                                    handler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Memory.notifyStatusListeners(new Status(user.id, user.last_seen, user.online));
+
+                                        }
+                                    });
+                            }
+                            break;
                         case 0:
                         case TIMEOUT_5MINS:
                             if (!(storedUser.online && user.online)) {
                                 // Если с юзером ничего не случилось, и он как был в онлайне, так и остался
                                 // тогда ничего не делаем.
-                                if(Memory.forceSetStatus(user, user.online, user.last_seen)){
+                                if(Memory.forceSetStatus(storedUser, user.online, user.last_seen)){
                                     if(storedUser.tracked)
                                     handler.post(new Runnable() {
                                     @Override

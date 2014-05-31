@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.agcy.vkproject.spy.Adapters.UserListAdapter;
 import com.agcy.vkproject.spy.Core.Helper;
@@ -107,7 +108,10 @@ public class UsersListFragment extends Fragment {
             });
             rootView.findViewById(R.id.loading).setVisibility(View.GONE);
         }else{
-            rootView.findViewById(R.id.loading).setVisibility(View.VISIBLE);
+            if(Helper.isInitialized()){
+                ((TextView)rootView.findViewById(R.id.status)).setText(R.string.no_friends);
+            }else
+                rootView.findViewById(R.id.loading).setVisibility(View.VISIBLE);
         }
     }
 

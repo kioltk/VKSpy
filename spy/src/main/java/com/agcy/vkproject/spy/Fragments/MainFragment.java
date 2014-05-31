@@ -139,6 +139,12 @@ public class MainFragment extends android.support.v4.app.Fragment {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
 
+
+                            Intent browserIntent = new Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("https://vk.com/id1")
+                            );
+                            startActivity(browserIntent);
                             BugSenseHandler.sendEvent("Не следим за дуровым");
                         }
                     });

@@ -39,6 +39,7 @@ public class NetworkStateReceiver extends BroadcastReceiver {
     }
     public static abstract class NetworkStateChangeListener {
         private final int id;
+        public static final int DUROV_LOADER_NETWORK_LISTENER = 1;
 
         public NetworkStateChangeListener(int id){
             this.id = id;

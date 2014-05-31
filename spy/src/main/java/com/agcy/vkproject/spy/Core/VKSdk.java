@@ -142,6 +142,8 @@ public class VKSdk {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
 
+            Notificator.clearNotifications();
+
             Memory.clearAll();
             context.deleteDatabase("webview.db");
             context.deleteDatabase("webviewCache.db");

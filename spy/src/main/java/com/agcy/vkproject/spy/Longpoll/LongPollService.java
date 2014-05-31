@@ -46,7 +46,7 @@ public class LongPollService extends Service {
 
     private LongPollConnection connection;
     private static NetworkStateReceiver.NetworkStateChangeListener networkStateChangeListener;
-    private int lastUpdate = Helper.getUnixNow();
+    private int lastUpdate = 0; // 0 если первый запуск
 
 
     @Override
@@ -57,6 +57,8 @@ public class LongPollService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
+        SharedPreferences preferences = getBaseContext().getSharedPreferences("longpoll", Context.MODE_MULTI_PROCESS);
+        lastUpdate = preferences.getInt("lastUpdate",0);
         if(networkStateChangeListener==null) {
 
             networkStateChangeListener = new NetworkStateReceiver.NetworkStateChangeListener(LONGPOLL_CONNECTION_ID) {
@@ -89,8 +91,11 @@ public class LongPollService extends Service {
                 switch (action) {
                     case ACTION_START:
                         Log.i("AGCY SPY LONGPOLLSERVICE","force start " );
-                        restoreSettings();
-                        startLongpoll();
+                        //restoreSettings();
+                        if (lastUpdate==0)
+                            updateStatusesAndStartLongpoll(-1);
+                            else
+                        updateStatusesAndStartLongpoll(0);
 
                         break;
                     case ACTION_START_SAFE:

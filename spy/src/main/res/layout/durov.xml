@@ -15,10 +15,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <com.roundedimage.RoundedImageView
-        android:padding="20dp"
+        android:layout_margin="20dp"
         android:id="@+id/photo"
-        app:is_oval="true"
         android:visibility="gone"
+        app:is_oval="true"
         android:scaleType="centerCrop"
         android:layout_width="100dp"
         android:layout_height="100dp" />

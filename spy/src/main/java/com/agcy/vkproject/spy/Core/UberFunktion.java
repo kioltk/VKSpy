@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.agcy.vkproject.spy.Models.DurovOnline;
 import com.agcy.vkproject.spy.R;
+import com.agcy.vkproject.spy.Receivers.NetworkStateReceiver;
 import com.agcy.vkproject.spy.UserActivity;
 import com.bugsense.trace.BugSenseHandler;
 import com.vk.sdk.api.VKApi;
@@ -44,6 +45,7 @@ public class UberFunktion {
 
     /**
      * Прежде чем смотреть на этот ужас, возьмите попкорн - это надолго.
+     *
      * @param uberfunctionDialog
      */
     public static void initialize(final ProgressDialog uberfunctionDialog) {
@@ -57,7 +59,8 @@ public class UberFunktion {
         updateOnly = durovPreferences.getBoolean("loaded", false);
 
         if(updateOnly){
-            dialog.setMessage(context.getString(R.string.durov_function_updating));
+            if(dialog!=null)
+                dialog.setMessage(context.getString(R.string.durov_function_updating));
         }
 
         new Loader() {
@@ -65,6 +68,7 @@ public class UberFunktion {
             public void onComplete(String finalResponse) {
                 Log.i("AGCY SPY FEATURE",finalResponse);
                 final Handler handler = new Handler();
+                if(uberfunctionDialog!=null)
                 uberfunctionDialog.setMessage(context.getString(R.string.durov_ready));
                 new Saver(finalResponse) {
                     @Override
@@ -96,30 +100,32 @@ public class UberFunktion {
                                                     @Override
                                                     public void run() {
 
-                                                        AlertDialog.Builder successDialog = new AlertDialog.Builder(uberfunctionDialog.getContext());
-                                                        successDialog.setCancelable(true);
+                                                        if(uberfunctionDialog!=null) {
+                                                            AlertDialog.Builder successDialog = new AlertDialog.Builder(uberfunctionDialog.getContext());
+                                                            successDialog.setCancelable(true);
 
-                                                        successDialog.setTitle((R.string.durov_function_activated_title));
-                                                        successDialog.setMessage(updateOnly ? (R.string.durov_function_updated) : (R.string.durov_function_activated));
-                                                        successDialog.setPositiveButton("Хочу посмотреть!", new DialogInterface.OnClickListener() {
-                                                            @Override
-                                                            public void onClick(DialogInterface dialog, int which) {
-                                                                Intent showDurov = new Intent(context, UserActivity.class);
-                                                                Bundle bundle = new Bundle();
-                                                                bundle.putInt("id", 1);
-                                                                showDurov.putExtras(bundle);
-                                                                context.startActivity(showDurov);
-                                                            }
-                                                        });
-                                                        successDialog.setNegativeButton("Закрыть", new DialogInterface.OnClickListener() {
-                                                            @Override
-                                                            public void onClick(DialogInterface dialog, int which) {
+                                                            successDialog.setTitle((R.string.durov_function_activated_title));
+                                                            successDialog.setMessage(updateOnly ? (R.string.durov_function_updated) : (R.string.durov_function_activated));
+                                                            successDialog.setPositiveButton("Хочу посмотреть!", new DialogInterface.OnClickListener() {
+                                                                @Override
+                                                                public void onClick(DialogInterface dialog, int which) {
+                                                                    Intent showDurov = new Intent(context, UserActivity.class);
+                                                                    Bundle bundle = new Bundle();
+                                                                    bundle.putInt("id", 1);
+                                                                    showDurov.putExtras(bundle);
+                                                                    context.startActivity(showDurov);
+                                                                }
+                                                            });
+                                                            successDialog.setNegativeButton("Закрыть", new DialogInterface.OnClickListener() {
+                                                                @Override
+                                                                public void onClick(DialogInterface dialog, int which) {
 
-                                                            }
-                                                        });
+                                                                }
+                                                            });
+                                                            successDialog.show();
+                                                            uberfunctionDialog.dismiss();
+                                                        }
                                                         Memory.reloadFriends();
-                                                        successDialog.show();
-                                                        uberfunctionDialog.dismiss();
                                                     }
                                                 });
 
@@ -129,10 +135,13 @@ public class UberFunktion {
 
                                     @Override
                                     public void onError(VKError error) {
-                                        uberfunctionDialog.setTitle("Error");
-                                        uberfunctionDialog.setMessage("Нет соединения с вк");
-                                        uberfunctionDialog.setIndeterminate(false);
-                                        uberfunctionDialog.setCancelable(true);
+
+                                        if(uberfunctionDialog!=null) {
+                                            uberfunctionDialog.setTitle("Error");
+                                            uberfunctionDialog.setMessage("Нет соединения с вк");
+                                            uberfunctionDialog.setIndeterminate(false);
+                                            uberfunctionDialog.setCancelable(true);
+                                        }
 
                                     }
                                 }
@@ -142,8 +151,11 @@ public class UberFunktion {
 
                     @Override
                     protected void onError(Exception exp) {
-                        uberfunctionDialog.setTitle("Error");
-                        uberfunctionDialog.setMessage("Не получилось сохранить");
+
+                        if(uberfunctionDialog!=null) {
+                            uberfunctionDialog.setTitle("Error");
+                            uberfunctionDialog.setMessage("Не получилось сохранить");
+                        }
                     }
                 }.execute();
             }
@@ -151,19 +163,33 @@ public class UberFunktion {
             @Override
             public void onError(Exception exp) {
 
-                uberfunctionDialog.setTitle(R.string.error);
-                if(exp==null){
-                    uberfunctionDialog.setMessage(context.getString(R.string.server_did_not_respond));
-                }else{
-                    if(exp instanceof UnknownHostException){
-                        uberfunctionDialog.setMessage(context.getString(R.string.check_connection));
-                    }else{
+                if(uberfunctionDialog!=null) {
+                    uberfunctionDialog.setTitle(R.string.error);
+                    if (exp == null) {
+                        uberfunctionDialog.setMessage(context.getString(R.string.server_did_not_respond));
+                    } else {
+                        if (exp instanceof UnknownHostException) {
+                            uberfunctionDialog.setMessage(context.getString(R.string.check_connection));
+                        } else {
 
-                        uberfunctionDialog.setMessage(context.getString(R.string.unknown_error));
+                            uberfunctionDialog.setMessage(context.getString(R.string.unknown_error));
+                        }
                     }
+                    uberfunctionDialog.setIndeterminate(false);
+                    uberfunctionDialog.setCancelable(true);
+                }else{
+                    new NetworkStateReceiver.NetworkStateChangeListener(NetworkStateReceiver.NetworkStateChangeListener.DUROV_LOADER_NETWORK_LISTENER) {
+                        @Override
+                        public void onConnected() {
+                            reexecute();
+                        }
+
+                        @Override
+                        public void onLost() {
+
+                        }
+                    };
                 }
-                uberfunctionDialog.setIndeterminate(false);
-                uberfunctionDialog.setCancelable(true);
 
             }
         }.execute();
@@ -232,6 +258,11 @@ public class UberFunktion {
                     });
                 }
             }).start();
+        }
+        public void reexecute(){
+            if(executed)
+                executed = false;
+            execute();
         }
         public abstract void onComplete(String finalResponse);
         public abstract void onError(Exception exp);

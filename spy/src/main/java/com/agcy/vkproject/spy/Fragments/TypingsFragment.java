@@ -7,6 +7,7 @@ import com.agcy.vkproject.spy.Adapters.UpdatesWithOwnerAdapter;
 import com.agcy.vkproject.spy.Core.Memory;
 import com.agcy.vkproject.spy.Listeners.NewUpdateListener;
 import com.agcy.vkproject.spy.Models.Update;
+import com.agcy.vkproject.spy.R;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -22,6 +23,12 @@ public class TypingsFragment extends UpdatesFragment {
     @Override
     public BaseAdapter adapter() {
         return new UpdatesWithOwnerAdapter(Memory.getTyping(),context);
+    }
+
+
+    @Override
+    public int getAdapterEmptyText() {
+        return R.string.no_typings;
     }
 
     @Override

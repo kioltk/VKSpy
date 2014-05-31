@@ -64,9 +64,9 @@
     <string name="moment_ago">только что</string>
     <string name="enable_spy">Включить слежку</string>
     <string name="onlines_notification" />
-    <string name="durov_start_message">Следить тоже за Дуровым?</string>
+    <string name="durov_start_message">Включить слежку за Павлом Дуровым?</string>
     <string name="durov_start_title">Эксклюзивная фича</string>
-    <string name="durov_start_ok">Канешна!</string>
+    <string name="durov_start_ok">Конечно!</string>
     <string name="durov_start_cancel">Кто это?</string>
     <string name="durov_function_activating_title">Суперфича</string>
     <string name="durov_function_activating_message">Загрузка</string>
@@ -85,6 +85,8 @@
     <string name="unknown_error">Неизвестная ошибка</string>
     <string name="need_access">Access is needed to use application</string>
     <string name="help">Помощь</string>
+    <string name="no_typings">Тайпингов пока нет</string>
+    <string name="no_friends">You have no friends</string>
 
     <plurals name="usersSelected">
         <item quantity="zero">Никого не выбрано</item>

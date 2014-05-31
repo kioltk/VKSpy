@@ -55,6 +55,7 @@ public class OnlinesFragment extends UpdatesFragment {
     public void recreateContent() {
 
         rootView.findViewById(R.id.filter_tip).setVisibility(View.GONE);
+
         super.recreateContent();
     }
 
@@ -63,6 +64,11 @@ public class OnlinesFragment extends UpdatesFragment {
 
         if(rootView==null)
             return;
+        if (Memory.users.isEmpty() && !Helper.isInitialized()){
+            rootView.findViewById(R.id.filter_tip).setVisibility(View.GONE);
+            rootView.findViewById(R.id.loading).setVisibility(View.VISIBLE);
+            return;
+        }
         if (adapter == null || adapter.isEmpty()) {
             if (Memory.getCountOfTracked() == 0) {
                 rootView.findViewById(R.id.filter_tip).setVisibility(View.VISIBLE);

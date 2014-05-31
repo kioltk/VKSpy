@@ -65,8 +65,10 @@ public abstract class LongPollConnection extends AsyncTask<Void, Void, String> {
             } catch (Exception e) {
                 this.exception = e;
             }
-        else
-            this.exception = new ConnectionLostException();
+        else {
+            if(exception==null)
+                this.exception = new ConnectionLostException();
+        }
         onError(exception);
     }
 
