@@ -21,6 +21,7 @@ import com.bugsense.trace.BugSenseHandler;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.seppius.i18n.plurals.PluralResources;
 import com.vk.sdk.api.VKApi;
 import com.vk.sdk.api.VKApiConst;
 import com.vk.sdk.api.VKError;
@@ -45,14 +46,15 @@ public class Helper {
 
     public static final int START_LOADER_ID = 150;
     public static final int START_DOWNLOADER_ID = 151;
-    private static final int TIMEOUT_5MINS = 5 * 60;
-    private static final int TIMEOUT_1HOUR = 60 * 60;
-    private static final int ONLINE = -1;
+    public static final int FIRST_LOADING = -1;
+    public static final int TIMEOUT_5MINS = 5 * 60;
+    public static final int TIMEOUT_1HOUR = 60 * 60;
+    public static final int ONLINE = -1;
     public static final int NOW = -2;
-    private static final int UNDEFINED = -3;
-    private static final int FIRST_LOADING = -1;
+    public static final int UNDEFINED = -3;
     private static Context context;
     private static MainActivity mainActivity;
+    public static PluralResources pluralResources;
 
     public static void initialize(Context context) {
         Helper.context = context;
@@ -518,7 +520,7 @@ public class Helper {
                             break;
                         case 0:
                         case TIMEOUT_5MINS:
-                            if (!(storedUser.online && user.online)) {
+                            if (!(Memory.getLastOnline(user.id) && user.online)) {
                                 // Если с юзером ничего не случилось, и он как был в онлайне, так и остался
                                 // тогда ничего не делаем.
                                 if(Memory.forceSetStatus(storedUser, user.online, user.last_seen)){
@@ -578,6 +580,10 @@ public class Helper {
                     }
                 }
         );
+    }
+
+    public static String getQuantityString(int resId, int quantityIndicator, int quantityDecimal) {
+        return pluralResources.getQuantityString(resId,quantityIndicator,quantityDecimal);
     }
 
 

@@ -2,6 +2,7 @@ package com.agcy.vkproject.spy;
 
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,6 +13,7 @@ import android.widget.ListView;
 import com.agcy.vkproject.spy.Adapters.CustomItems.FilterUserItem;
 import com.agcy.vkproject.spy.Adapters.ItemHelper;
 import com.agcy.vkproject.spy.Adapters.UserListAdapter;
+import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
 import com.agcy.vkproject.spy.Fragments.Interfaces.LoadImagesOnScrollListener;
 import com.agcy.vkproject.spy.Fragments.UsersListFragment;
@@ -28,11 +30,13 @@ public class FilterActivity extends ActionBarActivity {
     private Menu menu;
     private MenuItem deselectItem;
     private MenuItem selectItem;
+    private boolean loading = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_filter);
+        closeOptionsMenu();
         if (savedInstanceState == null) {
 
             fragment = new FilterUsersFragment();
@@ -66,15 +70,14 @@ public class FilterActivity extends ActionBarActivity {
                 onOptionsItemSelected(applyButton);
             }
         });
-
-        updateActionBarInfo();
         this.menu = menu;
+        updateActionBarInfo();
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
+        if(loading)
+            return true;
         int id = item.getItemId();
 
         switch (id) {
@@ -84,27 +87,45 @@ public class FilterActivity extends ActionBarActivity {
                 break;
 
             case R.id.select:
+
                 ids.clear();
                 for (VKApiUserFull user : fragment.users) {
                     trackClicked(user);
                 }
-
-                updateActionBarInfo();
                 fragment.selectAll();
-                selectItem = item;
+                updateActionBarInfo();
                 break;
             case R.id.deselect:
                 ids.clear();
-                updateActionBarInfo();
                 fragment.deselectAll();
-                deselectItem = item;
+                updateActionBarInfo();
                 break;
 
             case R.id.apply:
-                Memory.setTracked(ids);
-                finish();
-                break;
 
+                loading = true;
+
+                View applyView = applyButton.getActionView();
+                applyView.findViewById(R.id.image).setVisibility(View.GONE);
+                applyView.findViewById(R.id.loading).setVisibility(View.VISIBLE);
+                findViewById(R.id.block).setVisibility(View.VISIBLE);
+                final Handler handler = new Handler();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+
+
+                        Memory.setTracked(ids);
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Helper.trackedUpdated();
+                                finish();
+                            }
+                        });
+                    }
+                }).start();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -151,7 +172,6 @@ public class FilterActivity extends ActionBarActivity {
                 rootView.findViewById(R.id.loading).setVisibility(View.VISIBLE);
             }
         }
-
         public void selectAll() {
             //adapter.
             int arrayPosition = listView.getFirstVisiblePosition();
@@ -192,9 +212,28 @@ public class FilterActivity extends ActionBarActivity {
     }
     private void updateActionBarInfo() {
         if (applyButton != null) {
-            Resources res = getBaseContext().getResources();
-            getSupportActionBar().setTitle((res.getQuantityString(R.plurals.usersSelected, ids.size(),ids.size())));
+            getSupportActionBar().setTitle((Helper.getQuantityString(R.plurals.usersSelected, ids.size(), ids.size())));
 
         }
+        if(menu!=null)
+            if(ids.size() == fragment.users.size()) {
+                menu.removeItem(R.id.select);
+                if(menu.findItem(R.id.deselect)==null) {
+                    menu.add(0, R.id.deselect, 2, R.string.deselect_all);
+                }
+            }else{
+                if(menu.findItem(R.id.select)==null) {
+                    menu.add(0, R.id.select, 1, R.string.select_all);
+                }
+                if(ids.size()==0){
+                    menu.removeItem(R.id.deselect);
+                }else{
+
+                    if(menu.findItem(R.id.deselect)==null) {
+                        menu.add(0, R.id.deselect, 2, R.string.deselect_all);
+                    }
+                }
+
+            }
     }
 }

@@ -27,10 +27,12 @@ import android.widget.Toast;
 import com.agcy.vkproject.spy.Longpoll.LongPollService;
 import com.agcy.vkproject.spy.MainActivity;
 import com.agcy.vkproject.spy.R;
+import com.agcy.vkproject.spy.SpyApplication;
 import com.agcy.vkproject.spy.UserActivity;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.assist.ImageLoadingListener;
+import com.vk.sdk.api.model.VKApiUserFull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -208,7 +210,7 @@ public class Notificator {
         if(countEvents==1){
             descriptionView.setText(lastEvent.messageText);
         }else{
-            descriptionView.setText(context.getResources().getQuantityString(
+            descriptionView.setText(Helper.getQuantityString(
                     lastEvent.getType() == LongPollService.Update.TYPE_OFFLINE ?
                             R.plurals.offlines_notification : R.plurals.onlines_notification,
                     countEvents - 1,
@@ -271,12 +273,14 @@ public class Notificator {
                 case LongPollService.Update.TYPE_ONLINE:
                     lastOnlineEvent = notifyEvent;
                     putImageToStack(notifyEvent.imageUrl, onlinePhotosStack);
+                    onlinesNotification.remove(notifyEvent.getShortMessage());
                     onlinesNotification.add(0, notifyEvent.getShortMessage());
                     break;
 
                 case LongPollService.Update.TYPE_OFFLINE:
                     lastOfflineEvent = notifyEvent;
                     putImageToStack(notifyEvent.imageUrl, offlinePhotosStack);
+                    offlinePhotosStack.remove(notifyEvent.getShortMessage());
                     offlinesNotification.add(0, notifyEvent.getShortMessage());
                     break;
                 case LongPollService.Update.TYPE_USER_TYPING:
@@ -306,7 +310,7 @@ public class Notificator {
 
         final String offlineHeaderText = lastOnlineEvent.headerText;
         final String offlineMessageText = lastOnlineEvent.messageText;
-        String offlinesSummary = context.getResources().getQuantityString(R.plurals.offlines_notification, offlinesNotification.size()-1, offlinesNotification.size()-1);
+        String offlinesSummary = Helper.getQuantityString(R.plurals.offlines_notification, offlinesNotification.size() - 1, offlinesNotification.size() - 1);
         String imageUrl = lastOnlineEvent.imageUrl;
         final String finalSummary = offlinesSummary;
 
@@ -384,7 +388,6 @@ public class Notificator {
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
         notificationBuilder.setTicker(tickerText)
-
                 .setSmallIcon(R.drawable.ic_stat_spy)
                 .setDefaults(Notification.DEFAULT_LIGHTS);
         SharedPreferences prefs = context.getSharedPreferences("notification", Context.MODE_MULTI_PROCESS);
@@ -397,13 +400,13 @@ public class Notificator {
         final NotificationManager mNotificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.notify(TICKER, notification);
-        mNotificationManager.cancel(TICKER);
+        clearNotifications();
     }
 
     static void showOnlines(final Event lastOnlineEvent) {
         final String onlineHeaderText = lastOnlineEvent.headerText;
         final String onlineMessageText = lastOnlineEvent.messageText;
-        String onlineSummaryText = context.getResources().getQuantityString(R.plurals.onlines_notification, onlinesNotification.size()-1, onlinesNotification.size()-1);
+        String onlineSummaryText = Helper.getQuantityString(R.plurals.onlines_notification, onlinesNotification.size() - 1, onlinesNotification.size() - 1);
         String imageUrl = lastOnlineEvent.imageUrl;
 
         final String finalSummary = onlineSummaryText;
@@ -540,7 +543,6 @@ public class Notificator {
         // mId allows you to update the notification later on.
 
         final int mId = id;
-        if (tickerOnly)
         ImageLoader.getInstance().loadImage(event.imageUrl, new ImageLoadingListener() {
             @Override
             public void onLoadingStarted(String s, View view) {
@@ -555,7 +557,16 @@ public class Notificator {
             @Override
             public void onLoadingComplete(String s, View view, Bitmap bitmap) {
 
-                    notificationBuilder.setLargeIcon(bitmap);
+
+                int height = (int) context.getResources().getDimension(android.R.dimen.notification_large_icon_height);
+                int width = (int) context.getResources().getDimension(android.R.dimen.notification_large_icon_width);
+
+
+
+                Bitmap convertedBitmap = bitmap;
+
+                convertedBitmap = Bitmap.createScaledBitmap(convertedBitmap, width, height, true);
+                notificationBuilder.setLargeIcon(convertedBitmap);
 
                 Notification notification = notificationBuilder.build();
                 mNotificationManager.notify(mId, notification);
@@ -567,15 +578,16 @@ public class Notificator {
 
             }
         });
-        else {
-                    mNotificationManager.notify(mId,
-                            notificationBuilder.build());
-        }
     }
-    private static void putImageToStack(String url, ArrayList<String> imagesStack){
-        imagesStack.add(0,url);
-        if(imagesStack.size()>3)
-            imagesStack.remove(3);
+    private static Boolean putImageToStack(String url, ArrayList<String> imagesStack) {
+        Boolean exists = false;
+        if (!imagesStack.remove(url)) {
+            if (imagesStack.size() == 3)
+                imagesStack.remove(2);
+            exists= true;
+        }
+        imagesStack.add(0, url);
+        return exists;
     }
     private static Bitmap getBitmap(ArrayList<String> urlStack) {
         try {
@@ -646,6 +658,13 @@ public class Notificator {
 
     public static void exampleNotify() {
 
+    }
+
+    public static void notifyDurov() {
+        VKApiUserFull durov = Memory.getUserById(1);
+        Event event = new Event(durov.first_name+" "+ durov.last_name, context.getString(R.string.come_online_m) ,
+                durov.getBiggestPhoto(), 1 );
+        showOnlines(event);
     }
 
     public static class ClearNotificationsReceiver extends BroadcastReceiver {

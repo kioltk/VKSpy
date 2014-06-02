@@ -4,7 +4,6 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.TransitionDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -16,10 +15,10 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
+import com.agcy.vkproject.spy.Core.Notificator;
 import com.agcy.vkproject.spy.Core.UberFunktion;
 import com.agcy.vkproject.spy.Fragments.MainFragment;
 import com.agcy.vkproject.spy.Fragments.OnlinesFragment;
@@ -56,6 +55,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        Notificator.clearNotifications();
         VKUIHelper.onResume(this);
     }
     @Override
@@ -97,19 +97,17 @@ public class MainActivity extends ActionBarActivity {
             public void onPageSelected(int position) {
                 Log.i("AGCY SPY", "Page selected: " + position);
                 if (position != 1)
-                    if (onlinesFragment != null)
+                    if (onlinesFragment != null) {
                         onlinesFragment.recreateHeaders();
+                        Notificator.clearNotifications();
+                    }
             }
 
             @Override
             public void onPageScrollStateChanged(int state) {
             }
         });
-        /*
-            View setView = ((ViewGroup)indicator.getChildAt(0)).getChildAt(1);
-            setView.findViewWithTag("icon").setSelected(true);
-            setView.setPressed(true);
-        */
+
         downloadData();
 
         if(savedInstanceState==null) {
@@ -176,9 +174,6 @@ public class MainActivity extends ActionBarActivity {
                                                 }
                                                 Helper.fetchOnlines(friends,0);
                                                 */
-                                                if(friends.getById(1)!=null){
-                                                    UberFunktion.initialize(null);
-                                                }
                                                 Memory.saveFriends(friends);
 
                                                 final boolean finalFirstLoading = firstLoading;
@@ -186,6 +181,9 @@ public class MainActivity extends ActionBarActivity {
                                                 handler.post(new Runnable() {
                                                     @Override
                                                     public void run() {
+                                                        if(Memory.users.getById(1)!=null){
+                                                            UberFunktion.initializeBackground(getBaseContext());
+                                                        }
                                                         if(finalFirstLoading){
                                                             Helper.trackedUpdated();
                                                         }

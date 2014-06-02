@@ -306,7 +306,6 @@ public class Memory {
             forceUpdate(DatabaseConnector.USER_DATABASE, updateValues, "userid", String.valueOf(id));
         }
         close();
-        Helper.trackedUpdated();
     }
 
 
@@ -341,7 +340,9 @@ public class Memory {
             @Override
             public void run() {
 
-                if(!forceSetStatus(user,online,time)){return;}
+                if(!forceSetStatus(user,online,time)){
+                    return;
+                }
 
 
                 if (user.isTracked())
@@ -409,16 +410,20 @@ public class Memory {
 
     }
 
+
+    public static Boolean updateStatus(VKApiUserFull user, Boolean online, long time) {
+        return updateStatus(user,online,time,120);
+    }
     /**
      *  Находит последнюю запись по пользователю, и, если это не повторка (+-120секунд), то обновляет запись
      * @param user
      * @param online
      * @param time
+     * @param inaccuracy допустимая погрешность, в пределах которой можно смотреть
      * @return true, если обновление прошло успешно, и данные были занесены. Если это повторка,
      * то занесено не будет.
      */
-    public static Boolean updateStatus(VKApiUserFull user, Boolean online, long time) {
-
+    public static Boolean updateStatus(VKApiUserFull user, Boolean online, long time,int inaccuracy) {
         if (user.id == 1)
             return false;
 
@@ -441,6 +446,9 @@ public class Memory {
                value= saveStatus(user, true, (int) time);
             } else {
                 if (lastOffline == 0) {
+                    if(lastOnline>time){
+                        time = lastOnline;
+                    }
                     // Если в конце открытый онлайн
                     int id = cursor.getInt(idColumnIndex);
                     ContentValues updateValues = new ContentValues();
@@ -451,8 +459,10 @@ public class Memory {
                     value = true;
                 } else {
                     // Но если это "повторка" оффлайна, скажем, мы по ошибке пытаемся сохранить
-                    // уже схваченный оффлайн
-                    if (lastOffline - 120 < time && lastOffline + 120 > time) {
+                    // уже схваченный оффлайн.
+                    // или, возможно это ошибка лонгпола\апи, и юзер выходит повторно
+                    if ((lastOffline - inaccuracy < time && lastOffline + inaccuracy > time) ||
+                            lastOffline>time) {
                         close();
                         return false;
                     }
@@ -730,6 +740,22 @@ public class Memory {
     public static void reloadFriends() {
         if(usersListener!=null)
             usersListener.reload();
+    }
+
+    public static boolean getLastOnline(int id) {
+        Cursor cursor = getCursor(DatabaseConnector.ONLINE_DATABASE,
+                DatabaseConnector.ONLINE_DATABASE_FIELDS,
+                "userid = " + id,
+                "id desc");
+        int tillColumnIndex = cursor.getColumnIndex("till");
+        if (cursor.moveToFirst()) {
+            int lastOffline = cursor.getInt(tillColumnIndex);
+            close();
+            return (lastOffline<=0);
+
+        }
+        close();
+        return false;
     }
 
 

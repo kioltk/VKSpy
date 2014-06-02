@@ -305,14 +305,15 @@ public class UserActivity extends ActionBarActivity {
             super.onContentBinded();
             if(items!=null && !items.isEmpty()){
                 Online last = items.get(0);
-                if(last.getTill()==0) {
+                if(last.getTill()==Helper.ONLINE) {
                     //last.setTill();
                     setOnline(ONLINE_TRUE);
                 }else{
                     if(user.last_seen<last.getTill()){
                         user.last_seen = last.getTill();
-                        setOnline((int) user.last_seen);
                     }
+                    setOnline( user.last_seen);
+
                 }
             }
 

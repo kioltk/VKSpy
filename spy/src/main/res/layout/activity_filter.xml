@@ -1,7 +1,19 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/container"
-    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.agcy.vkproject.spy.FilterActivity"
-    tools:ignore="MergeRootFrame" />
+    android:layout_width="match_parent">
+
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.agcy.vkproject.spy.FilterActivity"/>
+    <RelativeLayout
+        android:visibility="gone"
+        android:clickable="true"
+        android:background="#6fff"
+        android:id="@+id/block"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</RelativeLayout>

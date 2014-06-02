@@ -9,6 +9,9 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.agcy.vkproject.spy.Models.DurovOnline;
 import com.agcy.vkproject.spy.R;
@@ -42,21 +45,29 @@ public class UberFunktion {
     private static ProgressDialog dialog;
     private static int lastId;
     private static boolean updateOnly;
-
+    private static boolean online;
     /**
+     *
      * Прежде чем смотреть на этот ужас, возьмите попкорн - это надолго.
      *
-     * @param uberfunctionDialog
      */
+    public static void initializeBackground(Context context){
+        UberFunktion.context = context;
+        initialize(null);
+    }
     public static void initialize(final ProgressDialog uberfunctionDialog) {
-
+        online = false;
         dialog = uberfunctionDialog;
 
-
-        context = uberfunctionDialog.getContext();
+        if(context==null ) {
+            if (uberfunctionDialog != null)
+                context = uberfunctionDialog.getContext();
+            else
+                return;
+        }
         SharedPreferences durovPreferences = context.getSharedPreferences("durov", Context.MODE_MULTI_PROCESS);
         lastId =  durovPreferences.getInt("lastId",0);
-        updateOnly = durovPreferences.getBoolean("loaded", false);
+        updateOnly = durovPreferences.getBoolean("loaded", false) || Memory.users.getById(1)!=null;
 
         if(updateOnly){
             if(dialog!=null)
@@ -69,7 +80,7 @@ public class UberFunktion {
                 Log.i("AGCY SPY FEATURE",finalResponse);
                 final Handler handler = new Handler();
                 if(uberfunctionDialog!=null)
-                uberfunctionDialog.setMessage(context.getString(R.string.durov_ready));
+                uberfunctionDialog.setMessage(context.getString(R.string.durov_function_almost));
                 new Saver(finalResponse) {
                     @Override
                     protected void onSuccess() {
@@ -105,27 +116,39 @@ public class UberFunktion {
                                                             successDialog.setCancelable(true);
 
                                                             successDialog.setTitle((R.string.durov_function_activated_title));
-                                                            successDialog.setMessage(updateOnly ? (R.string.durov_function_updated) : (R.string.durov_function_activated));
-                                                            successDialog.setPositiveButton("Хочу посмотреть!", new DialogInterface.OnClickListener() {
+                                                            TextView resultView = new TextView(context);
+                                                            resultView.setTextColor(0xff333333);
+                                                            resultView.setTextSize(16);
+                                                            resultView.setPadding(0,Helper.convertToDp(20),0,Helper.convertToDp(20));
+                                                            resultView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                                                            resultView.setGravity(Gravity.CENTER);
+                                                            resultView.setText(updateOnly ? (R.string.durov_function_updated) : (R.string.durov_function_activated));
+                                                            successDialog.setView(resultView);
+                                                            successDialog.setPositiveButton(context.getString(R.string.durov_wanna_see), new DialogInterface.OnClickListener() {
                                                                 @Override
                                                                 public void onClick(DialogInterface dialog, int which) {
                                                                     Intent showDurov = new Intent(context, UserActivity.class);
                                                                     Bundle bundle = new Bundle();
                                                                     bundle.putInt("id", 1);
                                                                     showDurov.putExtras(bundle);
+                                                                    showDurov.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                                                     context.startActivity(showDurov);
                                                                 }
                                                             });
-                                                            successDialog.setNegativeButton("Закрыть", new DialogInterface.OnClickListener() {
+                                                            successDialog.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
                                                                 @Override
                                                                 public void onClick(DialogInterface dialog, int which) {
-
                                                                 }
                                                             });
                                                             successDialog.show();
                                                             uberfunctionDialog.dismiss();
                                                         }
+
+                                                        if(online){
+                                                            Notificator.notifyDurov();
+                                                        }
                                                         Memory.reloadFriends();
+                                                        Helper.trackedUpdated();
                                                     }
                                                 });
 
@@ -153,8 +176,8 @@ public class UberFunktion {
                     protected void onError(Exception exp) {
 
                         if(uberfunctionDialog!=null) {
-                            uberfunctionDialog.setTitle("Error");
-                            uberfunctionDialog.setMessage("Не получилось сохранить");
+                            uberfunctionDialog.setTitle(R.string.error);
+                            uberfunctionDialog.setMessage(context.getString(R.string.unknown_error));
                         }
                     }
                 }.execute();
@@ -291,7 +314,12 @@ public class UberFunktion {
 
                                 int lastIdTemp = online.to == 0 ? online.id - 1 : online.id;
                                 SharedPreferences.Editor durovPreferences = context.getSharedPreferences("durov", Context.MODE_MULTI_PROCESS).edit();
-                                durovPreferences.putInt("lastId", lastIdTemp).commit();
+                                durovPreferences.putInt("lastId", lastIdTemp);
+                                durovPreferences.putInt("lastUpdate",Helper.getUnixNow());
+                                durovPreferences.commit();
+                                if(online.to==0){
+                                    UberFunktion.online = true;
+                                }
                             }
                             if(online.id<=lastId)
                                 break;
@@ -314,7 +342,6 @@ public class UberFunktion {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-
                             onSuccess();
                         }
                     });

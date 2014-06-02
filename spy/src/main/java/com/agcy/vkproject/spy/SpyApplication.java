@@ -5,9 +5,11 @@ import android.app.Application;
 import android.os.Build;
 import android.util.Log;
 
+import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Notificator;
 import com.bugsense.trace.BugSenseHandler;
 import com.bugsense.trace.ExceptionCallback;
+import com.seppius.i18n.plurals.PluralResources;
 
 /**
  * Created by kiolt_000 on 02-May-14.
@@ -16,7 +18,18 @@ public class SpyApplication extends Application implements ExceptionCallback {
 
     @Override
     public void onCreate() {
+
         super.onCreate();
+
+        try {
+            Helper.pluralResources = new PluralResources( getResources() );
+        } catch (SecurityException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        } catch (NoSuchMethodException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
         BugSenseHandler.initAndStartSession(this,"07310e3f");
         BugSenseHandler.setExceptionCallback(this);
         /*

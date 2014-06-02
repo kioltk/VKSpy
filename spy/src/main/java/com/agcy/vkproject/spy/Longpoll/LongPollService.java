@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
+import com.agcy.vkproject.spy.Core.UberFunktion;
 import com.agcy.vkproject.spy.R;
 import com.agcy.vkproject.spy.Receivers.NetworkStateReceiver;
 import com.bugsense.trace.BugSenseHandler;
@@ -93,10 +94,11 @@ public class LongPollService extends Service {
                         Log.i("AGCY SPY LONGPOLLSERVICE","force start " );
                         //restoreSettings();
                         if (lastUpdate==0)
-                            updateStatusesAndStartLongpoll(-1);
-                            else
-                        updateStatusesAndStartLongpoll(0);
-
+                            updateStatusesAndStartLongpoll(Helper.FIRST_LOADING);
+                        else {
+                            restoreSettings();
+                            updateStatusesAndStartLongpoll(0);
+                        }
                         break;
                     case ACTION_START_SAFE:
 
@@ -142,6 +144,7 @@ public class LongPollService extends Service {
         Helper.updateStatuses(timeout,new Runnable(){
             @Override
             public void run() {
+                saveLongpollExecuted();
                 startLongpoll();
             }
         });
@@ -308,7 +311,7 @@ public class LongPollService extends Service {
                     }
                     if (!updates.isEmpty())
                         Helper.newUpdates(updates);
-                    updateStatusesAndStartLongpoll(lastUpdate>60*60?60*60:5*60);
+                    updateStatusesAndStartLongpoll(lastUpdate>60*60?Helper.TIMEOUT_1HOUR:Helper.TIMEOUT_5MINS);
 
                     LongPollService.this.ts = ts;
                     saveSettings();
@@ -335,6 +338,13 @@ public class LongPollService extends Service {
                     Log.i("AGCY SPY", "longoll updates count: " + updates.size());
                     if (!updates.isEmpty())
                         Helper.newUpdates(updates);
+                    SharedPreferences durovPrefs = getBaseContext().getSharedPreferences("durov", MODE_MULTI_PROCESS);
+                    if(Memory.users.getById(1)!=null) {
+                        durovPrefs.getInt("lastUpdate", 0);
+                        if (Helper.getUnixNow()-lastUpdate>10*60){
+                            UberFunktion.initializeBackground(getBaseContext());
+                        }
+                    }
                     startLongpoll();
                     saveLongpollExecuted();
                 }

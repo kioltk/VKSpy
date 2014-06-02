@@ -22,7 +22,6 @@ import com.agcy.vkproject.spy.Adapters.CustomItems.Item;
 import com.agcy.vkproject.spy.Adapters.CustomItems.PreferenceItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.ToggleablePreferenceItem;
 import com.agcy.vkproject.spy.Core.Helper;
-import com.agcy.vkproject.spy.Longpoll.LongPollService;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.vk.sdk.VKUIHelper;
 
@@ -196,7 +195,7 @@ public class SettingsActivity extends ActionBarActivity {
                 public void onClick() {
                     AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
                     final AlertDialog selector;
-                    builder.setTitle(R.string.select_way_to_notify)
+                    builder.setTitle(R.string.way_to_notify)
                             .setItems(R.array.ways_to_notify, new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     SharedPreferences.Editor editor = notificationPreferences.edit();
@@ -230,7 +229,7 @@ public class SettingsActivity extends ActionBarActivity {
                 public void onClick() {
                     AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
                     final AlertDialog selector;
-                    builder.setTitle(R.string.select_way_to_notify)
+                    builder.setTitle(R.string.way_to_notify)
                             .setItems(R.array.ways_to_notify, new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     SharedPreferences.Editor editor = notificationPreferences.edit();
@@ -308,7 +307,7 @@ public class SettingsActivity extends ActionBarActivity {
         return getResources().getString(R.string.enabled);
     }
     private String getWayToNotify(){
-        return getResources().getString(R.string.select_way_to_notify);
+        return getResources().getString(R.string.way_to_notify);
     }
     private String getPopupText(){
         return getResources().getString(R.string.popup);

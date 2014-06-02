@@ -7,8 +7,8 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 19
-        versionCode 14
-        versionName "0.9.4"
+        versionCode 16
+        versionName "0.9.6"
     }
     buildTypes {
         release {
@@ -27,4 +27,5 @@ dependencies {
     compile 'com.android.support:support-v4:19.1.0'
     compile 'com.android.support:appcompat-v7:19.1.0'
     compile 'com.android.support:gridlayout-v7:19.1.0'
+    compile files('libs/android-i18n-plurals-1.1.jar')
 }

@@ -40,11 +40,11 @@
     <string name="day">д</string>
     <string name="sec">сек</string>
     <string name="title_activity_filter">За кем следить</string>
-    <string name="apply">Apply</string>
+    <string name="apply">Применить</string>
     <string name="no_tracks">Не за кем следить</string>
     <string name="no_events">Событий пока нет</string>
     <string name="filter_tip">Выберите за кем следить</string>
-    <string name="select_way_to_notify">Способ уведомления</string>
+    <string name="way_to_notify">Способ уведомления</string>
     <string name="popup">Всплывающее уведомление</string>
     <string name="notification">Уведомление в шторке</string>
     <string name="enabled">Включено</string>
@@ -75,7 +75,7 @@
     <string name="durov_joke_title">Место для Ваниной шутки</string>
     <string name="durov_joke_message">Ванина шутка</string>
     <string name="durov_joke_button">Вана молодец</string>
-    <string name="durov_ready">Почти готово</string>
+    <string name="durov_function_almost">Почти готово</string>
     <string name="durov_function_activated_title">Слежка за Дуровым</string>
     <string name="durov_function_updated">Обновлено</string>
     <string name="durov_function_updating">Обновление</string>
@@ -86,7 +86,9 @@
     <string name="need_access">Access is needed to use application</string>
     <string name="help">Помощь</string>
     <string name="no_typings">Тайпингов пока нет</string>
-    <string name="no_friends">You have no friends</string>
+    <string name="no_friends">У вас нет друзей =(</string>
+    <string name="close">Закрыть</string>
+    <string name="durov_wanna_see">Хочу посмотреть!</string>
 
     <plurals name="usersSelected">
         <item quantity="zero">Никого не выбрано</item>
