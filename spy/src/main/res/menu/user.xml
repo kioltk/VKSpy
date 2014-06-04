@@ -6,13 +6,13 @@
     <item
         android:id="@+id/track"
         android:icon="@drawable/ic_tab_onlines"
-        android:title="track"
+        android:title="@string/enable_spy"
         app:showAsAction="always"
 
         />
     <item
         android:id="@+id/profile"
-        android:title="Open profile"
+        android:title="@string/open_profile"
         app:showAsAction="never"
         />
 </menu>

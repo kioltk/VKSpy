@@ -7,6 +7,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.ListPreference;
+import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
@@ -22,6 +26,7 @@ import com.agcy.vkproject.spy.Adapters.CustomItems.Item;
 import com.agcy.vkproject.spy.Adapters.CustomItems.PreferenceItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.ToggleablePreferenceItem;
 import com.agcy.vkproject.spy.Core.Helper;
+import com.agcy.vkproject.spy.Core.UberFunktion;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.vk.sdk.VKUIHelper;
 
@@ -42,9 +47,9 @@ public class SettingsActivity extends ActionBarActivity {
 
         String title = getResources().getString(R.string.settings);
 
-            ActionBar bar = getSupportActionBar();
-            bar.setTitle(title);
-            bar.setDisplayHomeAsUpEnabled(true);
+        ActionBar bar = getSupportActionBar();
+        bar.setTitle(title);
+        bar.setDisplayHomeAsUpEnabled(true);
 
 
         ListView listView = (ListView) findViewById(R.id.list);
@@ -158,39 +163,36 @@ public class SettingsActivity extends ActionBarActivity {
 
                 }
             });
-            add(new ToggleablePreferenceItem(getVibrate(),notificationVibrate) {
+            add(new ToggleablePreferenceItem(getVibrate(), notificationVibrate) {
                 @Override
                 public void onToggle(Boolean isChecked) {
 
                     SharedPreferences.Editor editor = notificationPreferences.edit();
-                    editor.putBoolean("vibrate",isChecked);
+                    editor.putBoolean("vibrate", isChecked);
                     editor.commit();
                 }
             });
-            add(new ToggleablePreferenceItem(getSound(),notificationSound) {
+            add(new ToggleablePreferenceItem(getSound(), notificationSound) {
                 @Override
                 public void onToggle(Boolean isChecked) {
 
                     SharedPreferences.Editor editor = notificationPreferences.edit();
-                    editor.putBoolean("sound",isChecked);
+                    editor.putBoolean("sound", isChecked);
                     editor.commit();
                 }
             });
 
             add(new HeaderItem(getOnlineNotifications()));
-            add(new ToggleablePreferenceItem(getEnabled(),notificationOnline) {
+            add(new ToggleablePreferenceItem(getEnabled(), notificationOnline) {
                 @Override
                 public void onToggle(Boolean isChecked) {
 
                     SharedPreferences.Editor editor = notificationPreferences.edit();
                     editor.putBoolean("notificationOnline", isChecked);
                     editor.commit();
-                    if(isChecked){
-
-                    }
                 }
             });
-            add(new PreferenceItem(getWayToNotify(),wayToNotifyOnline>0?getPopupText():getNotificationText()) {
+            add(new PreferenceItem(getWayToNotify(), wayToNotifyOnline > 0 ? getPopupText() : getNotificationText()) {
                 @Override
                 public void onClick() {
                     AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
@@ -202,7 +204,7 @@ public class SettingsActivity extends ActionBarActivity {
                                     editor.putInt("wayToNotifyOnline", which);
                                     editor.commit();
 
-                                    String text = which> 0 ? getPopupText() : getNotificationText();
+                                    String text = which > 0 ? getPopupText() : getNotificationText();
                                     setDescription(text);
 
 
@@ -215,16 +217,17 @@ public class SettingsActivity extends ActionBarActivity {
             });
 
             add(new HeaderItem(getOfflineNotifications()));
-            add(new ToggleablePreferenceItem(getEnabled(),notificationOffline) {
+            add(new ToggleablePreferenceItem(getEnabled(), notificationOffline) {
                 @Override
                 public void onToggle(Boolean isChecked) {
 
                     SharedPreferences.Editor editor = notificationPreferences.edit();
                     editor.putBoolean("notificationOffline", isChecked);
                     editor.commit();
+                    //get(indexOf(this)+1).setEnabled(isChecked);
                 }
             });
-            add(new PreferenceItem(getWayToNotify(),wayToNotifyOffline>0?getPopupText():getNotificationText()) {
+            add(new PreferenceItem(getWayToNotify(), wayToNotifyOffline > 0 ? getPopupText() : getNotificationText()) {
                 @Override
                 public void onClick() {
                     AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
@@ -236,7 +239,7 @@ public class SettingsActivity extends ActionBarActivity {
                                     editor.putInt("wayToNotifyOffline", which);
                                     editor.commit();
 
-                                    String text = which> 0 ? getPopupText() : getNotificationText();
+                                    String text = which > 0 ? getPopupText() : getNotificationText();
                                     setDescription(text);
 
 

@@ -55,6 +55,7 @@ public class Helper {
     private static Context context;
     private static MainActivity mainActivity;
     public static PluralResources pluralResources;
+    private static int timeFormat = 0;
 
     public static void initialize(Context context) {
         Helper.context = context;
@@ -331,9 +332,17 @@ public class Helper {
 
         Date date = new Date(unix * 1000L);
 
+            if (Helper.getTimeFormat() == 24) {
 
-        return String.format("%tT",
+                return String.format("%tT",
+                        date);
+
+            }
+        int hrs = date.getHours();
+        Boolean isPM = hrs > 12;
+        return String.format("%1$tl:%1$tM:%1$tS " + (isPM ? "pm" : "am"),
                 date);
+
     }
 
     public static String getSmartDate(int time) {
@@ -373,19 +382,12 @@ public class Helper {
 
         Date date = new Date(unix * 1000L);
 
-        try {
-            int time_format = Settings.System.getInt(context.getContentResolver(), Settings.System.TIME_12_24);
-
-            Log.i("AGCY SPY","Time format detected: "+ time_format);
-            if (time_format == 24) {
+            if (getTimeFormat() == 24) {
 
                 return String.format("%tR",
                         date);
 
             }
-        } catch (Settings.SettingNotFoundException e) {
-            e.printStackTrace();
-        }
         int hrs = date.getHours();
         Boolean isPM = hrs > 12;
         return String.format("%1$tl:%1$tM " + (isPM ? "pm" : "am"),
@@ -499,6 +501,7 @@ public class Helper {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                Log.i("AGCY SPY HELPER","Fetching onlines from "+fetchingUsers.size()+" users");
                 Memory.open();
                 final ArrayList<Status> statuses = new ArrayList<Status>();
                 for (final VKApiUserFull user : fetchingUsers) {
@@ -584,6 +587,20 @@ public class Helper {
 
     public static String getQuantityString(int resId, int quantityIndicator, int quantityDecimal) {
         return pluralResources.getQuantityString(resId,quantityIndicator,quantityDecimal);
+    }
+
+    public static int getTimeFormat() {
+        if(timeFormat != 0)
+            return timeFormat;
+        try {
+            int time_format = Settings.System.getInt(context.getContentResolver(), Settings.System.TIME_12_24);
+            timeFormat = time_format;
+            Log.i("AGCY SPY", "Time format detected: " + time_format);
+        } catch (Settings.SettingNotFoundException e) {
+            e.printStackTrace();
+            timeFormat = 24;
+        }
+        return timeFormat;
     }
 
 
@@ -716,7 +733,6 @@ public class Helper {
 
     // listeners сюда вообще не смотреть
     public static void trackedUpdated() {
-
         if(trackUpdatedListener!=null)
             trackUpdatedListener.onUpdate();
     }

@@ -46,32 +46,47 @@ public class UberFunktion {
     private static int lastId;
     private static boolean updateOnly;
     private static boolean online;
+    public static boolean loading = false;
+
     /**
      *
      * Прежде чем смотреть на этот ужас, возьмите попкорн - это надолго.
      *
      */
-    public static void initializeBackground(Context context){
-        UberFunktion.context = context;
-        initialize(null);
-    }
-    public static void initialize(final ProgressDialog uberfunctionDialog) {
-        online = false;
+    public static boolean putNewDialogWindow(final ProgressDialog uberfunctionDialog){
+
         dialog = uberfunctionDialog;
 
         if(context==null ) {
             if (uberfunctionDialog != null)
                 context = uberfunctionDialog.getContext();
             else
-                return;
+                return false;
         }
+        return true;
+    }
+    public static void initializeBackground(Context context){
+        UberFunktion.context = context;
+        initialize(null);
+    }
+    public static void initialize(ProgressDialog uberfunctionDialog) {
+        Log.i("AGCY SPY FEATURE","New feature request");
+        if(!putNewDialogWindow(uberfunctionDialog))
+            return;
+
+        if(loading)
+            return;
+        loading = true;
+
+        online = false;
+        Log.i("AGCY SPY FEATURE","Start");
         SharedPreferences durovPreferences = context.getSharedPreferences("durov", Context.MODE_MULTI_PROCESS);
         lastId =  durovPreferences.getInt("lastId",0);
         updateOnly = durovPreferences.getBoolean("loaded", false) || Memory.users.getById(1)!=null;
 
         if(updateOnly){
-            if(dialog!=null)
-                dialog.setMessage(context.getString(R.string.durov_function_updating));
+            if(UberFunktion.dialog !=null)
+                UberFunktion.dialog.setMessage(context.getString(R.string.durov_function_updating));
         }
 
         new Loader() {
@@ -79,8 +94,8 @@ public class UberFunktion {
             public void onComplete(String finalResponse) {
                 Log.i("AGCY SPY FEATURE",finalResponse);
                 final Handler handler = new Handler();
-                if(uberfunctionDialog!=null)
-                uberfunctionDialog.setMessage(context.getString(R.string.durov_function_almost));
+                if(dialog!=null)
+                    dialog.setMessage(context.getString(R.string.durov_function_almost));
                 new Saver(finalResponse) {
                     @Override
                     protected void onSuccess() {
@@ -110,16 +125,16 @@ public class UberFunktion {
                                                 handler.post(new Runnable() {
                                                     @Override
                                                     public void run() {
-
-                                                        if(uberfunctionDialog!=null) {
-                                                            AlertDialog.Builder successDialog = new AlertDialog.Builder(uberfunctionDialog.getContext());
+                                                        loading = false;
+                                                        if(dialog!=null) {
+                                                            AlertDialog.Builder successDialog = new AlertDialog.Builder(dialog.getContext());
                                                             successDialog.setCancelable(true);
 
                                                             successDialog.setTitle((R.string.durov_function_activated_title));
                                                             TextView resultView = new TextView(context);
                                                             resultView.setTextColor(0xff333333);
                                                             resultView.setTextSize(16);
-                                                            resultView.setPadding(0,Helper.convertToDp(20),0,Helper.convertToDp(20));
+                                                            resultView.setPadding(0, Helper.convertToDp(20), 0, Helper.convertToDp(20));
                                                             resultView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                                                             resultView.setGravity(Gravity.CENTER);
                                                             resultView.setText(updateOnly ? (R.string.durov_function_updated) : (R.string.durov_function_activated));
@@ -141,7 +156,11 @@ public class UberFunktion {
                                                                 }
                                                             });
                                                             successDialog.show();
-                                                            uberfunctionDialog.dismiss();
+                                                            try {
+                                                                dialog.dismiss();
+                                                            }catch (Exception exp){
+
+                                                            }
                                                         }
 
                                                         if(online){
@@ -158,12 +177,12 @@ public class UberFunktion {
 
                                     @Override
                                     public void onError(VKError error) {
-
-                                        if(uberfunctionDialog!=null) {
-                                            uberfunctionDialog.setTitle("Error");
-                                            uberfunctionDialog.setMessage("Нет соединения с вк");
-                                            uberfunctionDialog.setIndeterminate(false);
-                                            uberfunctionDialog.setCancelable(true);
+loading = false;
+                                        if(dialog!=null) {
+                                            dialog.setTitle("Error");
+                                            dialog.setMessage("Нет соединения с вк");
+                                            dialog.setIndeterminate(false);
+                                            dialog.setCancelable(true);
                                         }
 
                                     }
@@ -174,10 +193,10 @@ public class UberFunktion {
 
                     @Override
                     protected void onError(Exception exp) {
-
-                        if(uberfunctionDialog!=null) {
-                            uberfunctionDialog.setTitle(R.string.error);
-                            uberfunctionDialog.setMessage(context.getString(R.string.unknown_error));
+                        loading = false;
+                        if(dialog!=null) {
+                            dialog.setTitle(R.string.error);
+                            dialog.setMessage(context.getString(R.string.unknown_error));
                         }
                     }
                 }.execute();
@@ -186,20 +205,20 @@ public class UberFunktion {
             @Override
             public void onError(Exception exp) {
 
-                if(uberfunctionDialog!=null) {
-                    uberfunctionDialog.setTitle(R.string.error);
+                if(dialog!=null) {
+                    dialog.setTitle(R.string.error);
                     if (exp == null) {
-                        uberfunctionDialog.setMessage(context.getString(R.string.server_did_not_respond));
+                        dialog.setMessage(context.getString(R.string.server_did_not_respond));
                     } else {
                         if (exp instanceof UnknownHostException) {
-                            uberfunctionDialog.setMessage(context.getString(R.string.check_connection));
+                            dialog.setMessage(context.getString(R.string.check_connection));
                         } else {
 
-                            uberfunctionDialog.setMessage(context.getString(R.string.unknown_error));
+                            dialog.setMessage(context.getString(R.string.unknown_error));
                         }
                     }
-                    uberfunctionDialog.setIndeterminate(false);
-                    uberfunctionDialog.setCancelable(true);
+                    dialog.setIndeterminate(false);
+                    dialog.setCancelable(true);
                 }else{
                     new NetworkStateReceiver.NetworkStateChangeListener(NetworkStateReceiver.NetworkStateChangeListener.DUROV_LOADER_NETWORK_LISTENER) {
                         @Override
@@ -218,7 +237,6 @@ public class UberFunktion {
         }.execute();
 
     }
-
     private abstract static class Loader{
         private final int count;
         private final int offset;
@@ -333,7 +351,6 @@ public class UberFunktion {
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-
                                 onError(exp);
                             }
                         });

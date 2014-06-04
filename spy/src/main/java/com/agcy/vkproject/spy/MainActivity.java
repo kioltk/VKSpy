@@ -1,6 +1,7 @@
 package com.agcy.vkproject.spy;
 
 import android.app.ActivityManager;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -100,6 +101,7 @@ public class MainActivity extends ActionBarActivity {
                     if (onlinesFragment != null) {
                         onlinesFragment.recreateHeaders();
                         Notificator.clearNotifications();
+                    }else{
                     }
             }
 
@@ -108,9 +110,8 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        downloadData();
-
         if(savedInstanceState==null) {
+            downloadData();
             Bundle bundle = getIntent().getExtras();
             if (bundle != null) {
                 int page = bundle.getInt("page", 0);
@@ -141,9 +142,7 @@ public class MainActivity extends ActionBarActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if(Memory.loadUsers()){
-                    startLongpoll();
-                }
+                Memory.loadUsers();
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -333,4 +332,6 @@ public class MainActivity extends ActionBarActivity {
         }
 
     }
+
+
 }

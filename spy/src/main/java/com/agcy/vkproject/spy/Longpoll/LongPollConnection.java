@@ -41,8 +41,7 @@ public abstract class LongPollConnection extends AsyncTask<Void, Void, String> {
             HttpEntity httpEntity = httpResponse.getEntity();
             response = EntityUtils.toString(httpEntity);
             Log.i("AGCY SPY","longoll responses: "+response);
-            if(!isCancelled())
-                return response;
+            return response;
         }catch (Exception exp){
             this.exception = exp;
         }
@@ -51,6 +50,8 @@ public abstract class LongPollConnection extends AsyncTask<Void, Void, String> {
 
     @Override
     protected void onPostExecute(String jsonResponse) {
+        if (isCancelled())
+            return;
         finished= true;
         if(jsonResponse!=null)
             try {

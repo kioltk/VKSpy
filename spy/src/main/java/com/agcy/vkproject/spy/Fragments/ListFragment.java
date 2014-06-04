@@ -183,8 +183,10 @@ public abstract class ListFragment extends Fragment {
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                        UpdateItem updateItem = (UpdateItem) parent.getItemAtPosition(position);
+                        Object item = parent.getItemAtPosition(position);
+                        if(!(item instanceof UpdateItem))
+                            return;
+                        UpdateItem updateItem = (UpdateItem) item;
 
                         Intent showUserIntent = new Intent(context, UserActivity.class);
                         showUserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

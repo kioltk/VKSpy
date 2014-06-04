@@ -48,6 +48,7 @@ public abstract class PreferenceItem extends Item {
             }
         });
 
+        setEnabled(isEnabled());
         return rootView;
     }
 
@@ -65,6 +66,10 @@ public abstract class PreferenceItem extends Item {
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
-        rootView.setEnabled(false);
+        if (rootView != null) {
+            rootView.setEnabled(enabled);
+            rootView.setClickable(enabled);
+            rootView.setFocusable(enabled);
+        }
     }
 }

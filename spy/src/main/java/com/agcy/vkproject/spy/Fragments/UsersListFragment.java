@@ -98,6 +98,9 @@ public class UsersListFragment extends Fragment {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
+                    if(id==0)
+                        return;
+
                     Intent intent = new Intent(context, UserActivity.class);
                     Bundle bundle = new Bundle();
                     bundle.putInt("id", (int) id);

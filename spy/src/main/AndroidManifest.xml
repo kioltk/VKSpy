@@ -11,30 +11,30 @@
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
-        android:name="com.agcy.vkproject.spy.SpyApplication"
+        android:name=".SpyApplication"
         android:allowBackup="true"
         android:icon="@drawable/icon"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.agcy.vkproject.spy.MainActivity"
+            android:name=".MainActivity"
             android:configChanges="orientation"
             android:label="@string/main"
             android:theme="@style/AppTheme.NoTitle" >
         </activity>
         <activity
-            android:name="com.agcy.vkproject.spy.FriendsActivity"
+            android:name=".FriendsActivity"
             android:label="@string/friends" >
         </activity>
 
         <service
-            android:name="com.agcy.vkproject.spy.Longpoll.LongPollService"
+            android:name=".Longpoll.LongPollService"
             android:enabled="true"
             android:exported="true" >
         </service>
 
         <receiver
-            android:name="com.agcy.vkproject.spy.Receivers.NetworkStateReceiver"
+            android:name=".Receivers.NetworkStateReceiver"
             android:enabled="true"
             android:exported="true" >
             <intent-filter>
@@ -42,7 +42,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name="com.agcy.vkproject.spy.Receivers.BootCompleteReceiver"
+            android:name=".Receivers.BootCompleteReceiver"
             android:enabled="true"
             android:exported="true" >
             <intent-filter>
@@ -52,10 +52,10 @@
         <receiver
             android:name=".Core.Notificator$ClearNotificationsReceiver"
             android:enabled="true"
-            android:exported="true"/>
+            android:exported="true" />
 
         <activity
-            android:name="com.agcy.vkproject.spy.WelcomeActivity"
+            android:name=".WelcomeActivity"
             android:label="VK Spy"
             android:theme="@style/AppTheme.NoTitle" >
             <intent-filter>
@@ -65,21 +65,29 @@
             </intent-filter>
         </activity>
         <activity
-            android:parentActivityName=".MainActivity"
             android:name=".UserActivity"
-            android:label="@string/user" >
+            android:label="@string/user"
+            android:parentActivityName=".MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.myfirstapp.MainActivity" />
-
         </activity>
         <activity
-            android:name="com.agcy.vkproject.spy.SettingsActivity"
+            android:name=".SettingsActivity"
             android:label="@string/settings" >
         </activity>
         <activity
-            android:name="com.agcy.vkproject.spy.FilterActivity"
+            android:screenOrientation="portrait"
+            android:name=".FilterActivity"
             android:label="@string/title_activity_filter" />
+        <activity
+            android:name=".SettingsActivity2"
+            android:label="@string/title_activity_settings_activity2"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="MainActivity" />
+        </activity>
     </application>
 
 </manifest>

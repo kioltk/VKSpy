@@ -113,6 +113,8 @@
     <string name="durov_joke_message">Ванина шутка</string>
     <string name="durov_joke_button">Вана молодец</string>
 
+    <string name="open_profile">Open profile</string>
+
 
     <!-- Числительные -->
     <plurals name="usersSelected">

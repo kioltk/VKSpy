@@ -91,39 +91,41 @@ public class LongPollService extends Service {
                 int action = bundle.getInt(ACTION, 0);
                 switch (action) {
                     case ACTION_START:
-                        Log.i("AGCY SPY LONGPOLLSERVICE","force start " );
+                        Log.i("AGCY SPY LONGPOLLSERVICE", "force start");
                         //restoreSettings();
-                        if (lastUpdate==0)
+                        if (lastUpdate == 0)
                             updateStatusesAndStartLongpoll(Helper.FIRST_LOADING);
                         else {
                             restoreSettings();
-                            updateStatusesAndStartLongpoll(0);
+                            if(connection==null || (!connection.isCancelled() && connection.isFinished()))
+                                updateStatusesAndStartLongpoll(0);
+                            else
+                                startLongpoll();
                         }
                         break;
                     case ACTION_START_SAFE:
 
-                        Log.i("AGCY SPY LONGPOLLSERVICE","safe start " );
+                        Log.i("AGCY SPY LONGPOLLSERVICE", "safe start ");
                         startSafe();
                         break;
                     case ACTION_STOP:
                         if (connection != null) {
 
-                            Log.i("AGCY SPY LONGPOLLSERVICE","stop " );
+                            Log.i("AGCY SPY LONGPOLLSERVICE", "stop ");
                             connection.cancel(true);
-                            connection = null;
+                            //connection = null;
                             saveSettings();
                             //stopSelf();
                             return Service.START_NOT_STICKY;
                         }
                         break;
                     case ACTION_LOGOUT:
-                        if(connection!=null){
+                        if (connection != null) {
                             connection.cancel(true);
                             connection = null;
                             clearSettings();
                             return START_NOT_STICKY;
                         }
-
                 }
             }else{
                 Log.i("AGCY SPY LONGPOLLSERVICE","simple call" );
@@ -277,8 +279,13 @@ public class LongPollService extends Service {
     }
     private void startLongpoll() {
 
-        if(connection!=null){
+        if(!checkLongpollEnabled()) {
+            Log.i("AGCY SPY LONGPOLL","Request to startlongpoll, but it is disabled");
+            return;
+        }
 
+
+        if(connection!=null){
             Log.w("AGCY SPY LONPOLL", "startLongpoll called, but there is another longpoll");
             if(!connection.isFinished()){
                 connection.cancel(true);

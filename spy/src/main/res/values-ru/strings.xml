@@ -40,7 +40,7 @@
     <string name="day">д</string>
     <string name="sec">сек</string>
     <string name="title_activity_filter">За кем следить</string>
-    <string name="apply">Применить</string>
+    <string name="apply">ОК</string>
     <string name="no_tracks">Не за кем следить</string>
     <string name="no_events">Событий пока нет</string>
     <string name="filter_tip">Выберите за кем следить</string>
@@ -57,7 +57,7 @@
     <string name="durov_function_title">Суперфункция</string>
     <string name="durov_function_decription">Слежка за Павлом Дуровым!</string>
     <string name="app_about_button">Ясно</string>
-    <string name="app_about_description">Какая-то инфа</string>
+    <string name="app_about_description">2014</string>
     <string name="important">Важные</string>
     <string name="select_all">Выбрать всех</string>
     <string name="deselect_all">Снять выделение</string>
@@ -67,6 +67,7 @@
     <string name="durov_start_message">Включить слежку за Павлом Дуровым?</string>
     <string name="durov_start_title">Эксклюзивная фича</string>
     <string name="durov_start_ok">Конечно!</string>
+    <string name="durov_start_update">Обновить</string>
     <string name="durov_start_cancel">Кто это?</string>
     <string name="durov_function_activating_title">Суперфича</string>
     <string name="durov_function_activating_message">Загрузка</string>
@@ -83,7 +84,7 @@
     <string name="server_did_not_respond">Сервер не отвечает</string>
     <string name="check_connection">Проверьте ваше интернет соединение</string>
     <string name="unknown_error">Неизвестная ошибка</string>
-    <string name="need_access">Access is needed to use application</string>
+    <string name="need_access">Для использования приложения нужен доступ</string>
     <string name="help">Помощь</string>
     <string name="no_typings">Тайпингов пока нет</string>
     <string name="no_friends">У вас нет друзей =(</string>

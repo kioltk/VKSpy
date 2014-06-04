@@ -46,7 +46,7 @@ public class UserListAdapter extends BaseAdapter {
     public long getItemId(int position) {
         Item item = getItem(position);
         if(item instanceof UserItem)
-            return ((VKApiUserFull)item.getContent()).id;
+            return ((UserItem)item).getId();
         return 0;
     }
 

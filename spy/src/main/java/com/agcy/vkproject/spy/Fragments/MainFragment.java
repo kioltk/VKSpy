@@ -40,6 +40,15 @@ public class MainFragment extends android.support.v4.app.Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         context = getActivity();
+
+
+        if(savedInstanceState!=null && UberFunktion.loading){
+            ProgressDialog dialog = new ProgressDialog(context);
+            dialog.setMessage(context.getString(R.string.durov_function_activating_message));
+            UberFunktion.putNewDialogWindow(dialog);
+            dialog.show();
+        }
+
         View rootView = inflater.inflate(R.layout.fragment_main,null);
 
         View happySanta = inflater.inflate(R.layout.main_santa, null);
@@ -93,6 +102,15 @@ public class MainFragment extends android.support.v4.app.Fragment {
         preferences.add(new PreferenceItem(getUberfunction(), getUberfunctionDescription()) {
             @Override
             public void onClick() {
+
+                if(UberFunktion.loading) {
+                    ProgressDialog dialog = new ProgressDialog(context);
+                    dialog.setMessage(context.getString(R.string.durov_function_activating_message));
+                    UberFunktion.putNewDialogWindow(dialog);
+                    dialog.show();
+                    return;
+                }
+
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 final AlertDialog selector;
                 View durov = getActivity().getLayoutInflater().inflate(R.layout.durov, null);
@@ -206,6 +224,7 @@ public class MainFragment extends android.support.v4.app.Fragment {
     }
 
 
+
     private String getUberfunction() {
         return getResources().getString(R.string.durov_function_title);
     }
@@ -228,7 +247,7 @@ public class MainFragment extends android.support.v4.app.Fragment {
 
         SharedPreferences preferences = context.getSharedPreferences("longpoll", Context.MODE_MULTI_PROCESS);
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean("status",active);
+        editor.putBoolean("status", active);
         editor.commit();
 
 

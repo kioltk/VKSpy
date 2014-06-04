@@ -1,5 +1,6 @@
 package com.agcy.vkproject.spy.Fragments;
 
+import android.os.Bundle;
 import android.util.Log;
 import android.widget.AbsListView;
 
@@ -10,6 +11,13 @@ import com.agcy.vkproject.spy.Fragments.Interfaces.LoadImagesOnScrollListener;
  * Created by kiolt_000 on 24-May-14.
  */
 public abstract class UpdatesFragment extends ListFragment {
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        bindGlobalListener();
+    }
 
     @Override
     public void onPause() {
@@ -49,7 +57,7 @@ public abstract class UpdatesFragment extends ListFragment {
         }else{
             bindNewItemListener();
         }
-        bindGlobalListener();
+        //bindGlobalListener();
     }
 
     @Override

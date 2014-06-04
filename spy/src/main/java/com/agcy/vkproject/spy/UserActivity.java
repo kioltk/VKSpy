@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -47,6 +48,7 @@ public class UserActivity extends ActionBarActivity {
     ViewPager mViewPager;
     VKApiUserFull user;
     private TextView status;
+    private boolean enablingTrack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,27 +133,63 @@ public class UserActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.user, menu);
 
-        MenuItem trackedButton = menu.getItem(0);
+        final MenuItem trackedButton = menu.getItem(0);
+        trackedButton.setActionView(R.layout.action_bar_track);
+        trackedButton.getActionView().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onOptionsItemSelected(trackedButton);
+            }
+        });
         updateTrackMenuItem(trackedButton);
         return true;
     }
 
     void updateTrackMenuItem(MenuItem item){
+        View view = item.getActionView();
 
+        if(enablingTrack) {
+            view.findViewById(R.id.loading).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.icon).setVisibility(View.GONE);
+        }
+        else {
+            view.findViewById(R.id.icon).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.loading).setVisibility(View.GONE);
+        }
         if(user.tracked)
-            item.setIcon(R.drawable.ic_tab_onlines_selected);
+            ((ImageView)view.findViewById(R.id.icon)).setImageResource(R.drawable.ic_tab_onlines_selected);
         else
-            item.setIcon(R.drawable.ic_tab_onlines);
+            ((ImageView)view.findViewById(R.id.icon)).setImageResource(R.drawable.ic_tab_onlines);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
+    public boolean onOptionsItemSelected(final MenuItem item)
     {
         switch (item.getItemId())
         {
             case R.id.track:
-                Memory.setTracked(user);
+                enablingTrack = true;
                 updateTrackMenuItem(item);
+                final Handler handler = new Handler();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(200);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        user.tracked = Memory.updateTrack(user.id);
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                enablingTrack = false;
+                                Helper.trackedUpdated();
+                                updateTrackMenuItem(item);
+                            }
+                        });
+                    }
+                }).start();
                 break;
             case R.id.profile:
                 Intent profile = new Intent(Intent.ACTION_VIEW, Uri.parse("http://vk.com/id"+user.id));
@@ -306,7 +344,6 @@ public class UserActivity extends ActionBarActivity {
             if(items!=null && !items.isEmpty()){
                 Online last = items.get(0);
                 if(last.getTill()==Helper.ONLINE) {
-                    //last.setTill();
                     setOnline(ONLINE_TRUE);
                 }else{
                     if(user.last_seen<last.getTill()){

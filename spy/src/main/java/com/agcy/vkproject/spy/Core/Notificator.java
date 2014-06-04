@@ -43,6 +43,7 @@ public class Notificator {
     private static final int TICKER = -3;
     private static Context context;
     private static int OFFLINES_NOTIFICATION = -2;
+    public static boolean onlinesOpened = false;
 
     public static void initialize(Context context) {
         Notificator.context = context;
@@ -97,7 +98,7 @@ public class Notificator {
             return null;
         switch (update.getType()) {
             case LongPollService.Update.TYPE_OFFLINE:
-                if (!Memory.isTracked(update.getUser()))
+                if (!Memory.isTracked(update.getUser()) || onlinesOpened)
                     return null;
 
                 boolean enabledOffline = notificationPreferences.getBoolean("notificationOffline", true);
@@ -107,7 +108,7 @@ public class Notificator {
                 return notificationPreferences.getInt("wayToNotifyOffline", 0) > 0;
 
             case LongPollService.Update.TYPE_ONLINE:
-                if (!Memory.isTracked(update.getUser()))
+                if (!Memory.isTracked(update.getUser()) || onlinesOpened)
                     return null;
 
                 boolean enabledOnline = notificationPreferences.getBoolean("notificationOffline", true);

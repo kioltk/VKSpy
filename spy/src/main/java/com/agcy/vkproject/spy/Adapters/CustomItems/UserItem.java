@@ -84,4 +84,8 @@ public class UserItem extends Item implements LoadableImage,Reconvertable {
         View divider = rootView.findViewById(R.id.divider);
         divider.setVisibility(View.VISIBLE);
     }
+
+    public long getId() {
+        return user.id;
+    }
 }

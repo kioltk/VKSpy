@@ -44,7 +44,8 @@ public class OnlineItem extends UpdateItem {
     }
 
     @Override
-    public View reconvert(Context context, View rootView) {Online item = getContent();
+    public View reconvert(Context context, View rootView) {
+        Online item = getContent();
 
 
         TextView tillView = ((TextView) rootView.findViewById(R.id.till));

@@ -34,7 +34,7 @@ public abstract class ToggleablePreferenceItem extends PreferenceItem {
     @Override
     public View getView(Context context) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View rootView = inflater.inflate(R.layout.list_item_preference_toggleable, null);
+        rootView = inflater.inflate(R.layout.list_item_preference_toggleable, null);
 
         TextView titleView = (TextView) rootView.findViewById(R.id.title);
         titleView.setText(title);
@@ -63,7 +63,14 @@ public abstract class ToggleablePreferenceItem extends PreferenceItem {
                 ToggleablePreferenceItem.this.onToggle(isChecked);
             }
         });
+        setEnabled(isEnabled());
 
         return rootView;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+
     }
 }

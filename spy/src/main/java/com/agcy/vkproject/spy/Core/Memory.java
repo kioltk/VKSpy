@@ -447,7 +447,7 @@ public class Memory {
             } else {
                 if (lastOffline == 0) {
                     if(lastOnline>time){
-                        time = lastOnline;
+                        time = lastOnline+1;
                     }
                     // Если в конце открытый онлайн
                     int id = cursor.getInt(idColumnIndex);
@@ -563,7 +563,7 @@ public class Memory {
 
     }
     public static void saveDurovOnlines(ArrayList<DurovOnline> onlines){
-        open();
+
         Cursor cursor = getCursor(DatabaseConnector.ONLINE_DATABASE,
                 DatabaseConnector.ONLINE_DATABASE_FIELDS,
                 "userid = 1",
@@ -670,13 +670,11 @@ public class Memory {
     private static void clearDatabase(String databaseName, String createDatabase) {
         open();
 
-        Log.i("AGCY SPY SQL","Clearing database "+ databaseName);
-        database.execSQL("DROP TABLE IF EXISTS " + databaseName);
-        database.execSQL(createDatabase);
+        Log.i("AGCY SPY SQL", "Clearing database " + databaseName);
+        database.delete(databaseName, null, null);
 
         close();
     }
-
     //endregion
 
     public static int dbOperations = 0;
@@ -834,9 +832,6 @@ public class Memory {
         @Override
         public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
 
-            database.execSQL("DROP TABLE IF EXISTS " + "track_database");
-            database.execSQL("DROP TABLE IF EXISTS " + USER_DATABASE);
-            database.execSQL(USER_DATABASE_CREATE);
         }
 
     }

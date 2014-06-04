@@ -11,6 +11,7 @@ import com.agcy.vkproject.spy.Adapters.UpdatesAdapter;
 import com.agcy.vkproject.spy.Adapters.UpdatesWithOwnerAdapter;
 import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
+import com.agcy.vkproject.spy.Core.Notificator;
 import com.agcy.vkproject.spy.Listeners.NewUpdateListener;
 import com.agcy.vkproject.spy.Models.Update;
 import com.agcy.vkproject.spy.R;
@@ -33,6 +34,18 @@ public class OnlinesFragment extends UpdatesFragment {
 
 
     @Override
+    public void onPause() {
+        super.onPause();
+        Notificator.onlinesOpened = false;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Notificator.onlinesOpened = true;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         inflater.inflate(R.layout.filter_button, (ViewGroup) rootView, true);
@@ -53,8 +66,8 @@ public class OnlinesFragment extends UpdatesFragment {
 
     @Override
     public void recreateContent() {
-
-        rootView.findViewById(R.id.filter_tip).setVisibility(View.GONE);
+        if(rootView!=null)
+            rootView.findViewById(R.id.filter_tip).setVisibility(View.GONE);
 
         super.recreateContent();
     }

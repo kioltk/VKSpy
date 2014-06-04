@@ -1,8 +1,8 @@
 package com.agcy.vkproject.spy;
 
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.agcy.vkproject.spy.Adapters.CustomItems.FilterUserItem;
+import com.agcy.vkproject.spy.Adapters.CustomItems.Item;
 import com.agcy.vkproject.spy.Adapters.ItemHelper;
 import com.agcy.vkproject.spy.Adapters.UserListAdapter;
 import com.agcy.vkproject.spy.Core.Helper;
@@ -20,6 +21,7 @@ import com.agcy.vkproject.spy.Fragments.UsersListFragment;
 import com.vk.sdk.api.model.VKApiUserFull;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class FilterActivity extends ActionBarActivity {
@@ -31,12 +33,13 @@ public class FilterActivity extends ActionBarActivity {
     private MenuItem deselectItem;
     private MenuItem selectItem;
     private boolean loading = false;
-
+    private boolean changed = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_filter);
-        closeOptionsMenu();
+
+        //closeOptionsMenu();
         if (savedInstanceState == null) {
 
             fragment = new FilterUsersFragment();
@@ -44,9 +47,14 @@ public class FilterActivity extends ActionBarActivity {
                     .add(R.id.container, fragment)
                     .commit();
         }else{
-
+            //savedInstanceState.getIntArray("ids");
+            List<Fragment> fragments = getSupportFragmentManager().getFragments();
+            if(fragments.size()>0){
+                fragment = (FilterUsersFragment) fragments.get(0);
+            }
         }
     }
+
 
     public boolean trackClicked(VKApiUserFull user){
         Boolean tracked = false;
@@ -63,7 +71,7 @@ public class FilterActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.filter, menu);
         applyButton = menu.getItem(0);
-        applyButton.setActionView(R.layout.apply);
+        applyButton.setActionView(R.layout.action_bar_apply);
         applyButton.getActionView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -72,7 +80,7 @@ public class FilterActivity extends ActionBarActivity {
         });
         this.menu = menu;
         updateActionBarInfo();
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -87,7 +95,7 @@ public class FilterActivity extends ActionBarActivity {
                 break;
 
             case R.id.select:
-
+                changed = true;
                 ids.clear();
                 for (VKApiUserFull user : fragment.users) {
                     trackClicked(user);
@@ -96,6 +104,7 @@ public class FilterActivity extends ActionBarActivity {
                 updateActionBarInfo();
                 break;
             case R.id.deselect:
+                changed = true;
                 ids.clear();
                 fragment.deselectAll();
                 updateActionBarInfo();
@@ -104,7 +113,10 @@ public class FilterActivity extends ActionBarActivity {
             case R.id.apply:
 
                 loading = true;
-
+                if(!changed) {
+                    finish();
+                    break;
+                }
                 View applyView = applyButton.getActionView();
                 applyView.findViewById(R.id.image).setVisibility(View.GONE);
                 applyView.findViewById(R.id.loading).setVisibility(View.VISIBLE);
@@ -152,16 +164,30 @@ public class FilterActivity extends ActionBarActivity {
                         activity.ids.add(user);
                 }
 
-                activity.updateActionBarInfo();
                 listView = (ListView) rootView.findViewById(R.id.list);
                 adapter = new UserListAdapter(new ItemHelper.ObservableFilterUsersArray(users), getActivity());
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        if (id == 0)
+                            return;
+                        VKApiUserFull user = Memory.getUserById((int) id);
+                        if(user==null)
+                            return;
+                        activity.changed = true;
+                        boolean tracked = activity.trackClicked(user);
+                        for (Item item : adapter.getItems()) {
+                            if (item instanceof FilterUserItem) {
 
-                        FilterUserItem item = (FilterUserItem) parent.getItemAtPosition(position);
-                        item.setTracked(activity.trackClicked(item.getContent()), view);
-                        activity.updateActionBarInfo();
+
+                                FilterUserItem filterItem = (FilterUserItem) item;
+                                if (filterItem.getId() == id) {
+                                    filterItem.setTracked(tracked, view);
+                                    activity.updateActionBarInfo();
+                                }
+                            }
+                        }
+
 
                     }
                 });
