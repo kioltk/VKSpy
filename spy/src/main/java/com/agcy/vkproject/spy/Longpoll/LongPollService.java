@@ -14,13 +14,10 @@ import com.agcy.vkproject.spy.Core.UberFunktion;
 import com.agcy.vkproject.spy.R;
 import com.agcy.vkproject.spy.Receivers.NetworkStateReceiver;
 import com.bugsense.trace.BugSenseHandler;
-import com.vk.sdk.api.VKApi;
 import com.vk.sdk.api.VKError;
-import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
 import com.vk.sdk.api.model.VKApiUserFull;
-import com.vk.sdk.api.model.VKUsersArray;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,7 +44,7 @@ public class LongPollService extends Service {
 
     private LongPollConnection connection;
     private static NetworkStateReceiver.NetworkStateChangeListener networkStateChangeListener;
-    private int lastUpdate = 0; // 0 если первый запуск
+    private int lastUpdate = 0;
 
 
     @Override
@@ -65,7 +62,7 @@ public class LongPollService extends Service {
             networkStateChangeListener = new NetworkStateReceiver.NetworkStateChangeListener(LONGPOLL_CONNECTION_ID) {
                 @Override
                 public void onConnected() {
-                    updateStatusesAndStartLongpoll(0);
+                    restoreStatusesAndStartLongpoll();
                 }
 
                 @Override
@@ -98,7 +95,7 @@ public class LongPollService extends Service {
                         else {
                             restoreSettings();
                             if(connection==null || (!connection.isCancelled() && connection.isFinished()))
-                                updateStatusesAndStartLongpoll(0);
+                                restoreStatusesAndStartLongpoll();
                             else
                                 startLongpoll();
                         }
@@ -142,12 +139,19 @@ public class LongPollService extends Service {
 
     }
 
+    private void restoreStatusesAndStartLongpoll() {
+        if(Helper.getUnixNow() - lastUpdate>60*60)
+            updateStatusesAndStartLongpoll(Helper.TIMEOUT_1HOUR);
+        else
+            updateStatusesAndStartLongpoll(Helper.TIMEOUT_5MINS);
+    }
+
     private void updateStatusesAndStartLongpoll(final int timeout) {
         Helper.updateStatuses(timeout,new Runnable(){
             @Override
             public void run() {
                 saveLongpollExecuted();
-                startLongpoll();
+                refreshSettings();
             }
         });
     }
@@ -158,9 +162,8 @@ public class LongPollService extends Service {
 
         com.agcy.vkproject.spy.Core.VKSdk.initialize(getApplicationContext());
 
-        //refreshSettings();
-        restoreSettings();
-        startLongpoll();
+        restoreStatusesAndStartLongpoll();
+
         Log.i("AGCY SPY LONGPOLLSERVICE", "Started safe" + " key: " + key);
     }
 
@@ -279,12 +282,6 @@ public class LongPollService extends Service {
     }
     private void startLongpoll() {
 
-        if(!checkLongpollEnabled()) {
-            Log.i("AGCY SPY LONGPOLL","Request to startlongpoll, but it is disabled");
-            return;
-        }
-
-
         if(connection!=null){
             Log.w("AGCY SPY LONPOLL", "startLongpoll called, but there is another longpoll");
             if(!connection.isFinished()){
@@ -318,7 +315,7 @@ public class LongPollService extends Service {
                     }
                     if (!updates.isEmpty())
                         Helper.newUpdates(updates);
-                    updateStatusesAndStartLongpoll(lastUpdate>60*60?Helper.TIMEOUT_1HOUR:Helper.TIMEOUT_5MINS);
+                    restoreStatusesAndStartLongpoll();
 
                     LongPollService.this.ts = ts;
                     saveSettings();
@@ -347,8 +344,8 @@ public class LongPollService extends Service {
                         Helper.newUpdates(updates);
                     SharedPreferences durovPrefs = getBaseContext().getSharedPreferences("durov", MODE_MULTI_PROCESS);
                     if(Memory.users.getById(1)!=null) {
-                        durovPrefs.getInt("lastUpdate", 0);
-                        if (Helper.getUnixNow()-lastUpdate>10*60){
+                        int lastDurovUpdate = durovPrefs.getInt("lastUpdate", 0);
+                        if (Helper.getUnixNow()-lastDurovUpdate>10*60){
                             UberFunktion.initializeBackground(getBaseContext());
                         }
                     }
@@ -361,6 +358,9 @@ public class LongPollService extends Service {
             public void onError(Exception exp) {
                     Log.e("AGCY SPY LONGPOLL","", exp);
                     //BugSenseHandler.sendExceptionMessage("Longpoll","Execution error",exp);
+                if(exp instanceof SocketException){
+                    // ничего не делаем, при переподключении вай-фай всё востановится через NetworkStateChangeListener
+                }
                 if(exp instanceof UnknownHostException){
                     refreshSettings(false);
                 }
@@ -379,15 +379,14 @@ public class LongPollService extends Service {
                 }
             }
 
-
         };
         if (checkLongpollEnabled()) {
             connection.execute();
             Log.i("AGCY SPY", "Longpoll executed");
         }else{
-
             Log.i("AGCY SPY", "Longpoll disabled");
         }
+
     }
 
     private void refreshSettings() {

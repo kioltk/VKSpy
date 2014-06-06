@@ -1,7 +1,6 @@
 package com.agcy.vkproject.spy;
 
 import android.app.ActivityManager;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;

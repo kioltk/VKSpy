@@ -12,9 +12,12 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -44,9 +47,11 @@ public class Notificator {
     private static Context context;
     private static int OFFLINES_NOTIFICATION = -2;
     public static boolean onlinesOpened = false;
+    private static SharedPreferences notificationsPreferences;
 
     public static void initialize(Context context) {
         Notificator.context = context;
+        notificationsPreferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     public static void announce(ArrayList<LongPollService.Update> updates) {
@@ -91,9 +96,7 @@ public class Notificator {
     public static Boolean checkShowPopup(LongPollService.Update update) {
 
 
-        SharedPreferences notificationPreferences = context.getSharedPreferences("notification", Context.MODE_MULTI_PROCESS);
-
-        boolean enabled = notificationPreferences.getBoolean("status", true);
+        boolean enabled = notificationsPreferences.getBoolean("notifications_enabled", true);
         if (!enabled)
             return null;
         switch (update.getType()) {
@@ -101,21 +104,20 @@ public class Notificator {
                 if (!Memory.isTracked(update.getUser()) || onlinesOpened)
                     return null;
 
-                boolean enabledOffline = notificationPreferences.getBoolean("notificationOffline", true);
+                boolean enabledOffline = notificationsPreferences.getBoolean("notifications_offline_enabled", true);
                 if (!enabledOffline)
                     return null;
 
-                return notificationPreferences.getInt("wayToNotifyOffline", 0) > 0;
+                return notificationsPreferences.getString("notifications_offline_type", "1").equals("1");
 
             case LongPollService.Update.TYPE_ONLINE:
                 if (!Memory.isTracked(update.getUser()) || onlinesOpened)
                     return null;
 
-                boolean enabledOnline = notificationPreferences.getBoolean("notificationOffline", true);
+                boolean enabledOnline = notificationsPreferences.getBoolean("notifications_online_enabled", true);
                 if (!enabledOnline)
                     return null;
-
-                return notificationPreferences.getInt("wayToNotifyOnline", 0) > 0;
+                return notificationsPreferences.getString("notifications_offline_type", "1").equals("1");
 
             case LongPollService.Update.TYPE_USER_TYPING:
                 return false;
@@ -333,13 +335,12 @@ public class Notificator {
                 .setDefaults(Notification.DEFAULT_LIGHTS)
                 .setSmallIcon(R.drawable.ic_stat_spy);
 
-        SharedPreferences prefs = context.getSharedPreferences("notification", Context.MODE_MULTI_PROCESS);
-
-        boolean soundEnabled = prefs.getBoolean("sound", true);
-        if (soundEnabled)
-            notificationBuilder.setDefaults(Notification.DEFAULT_LIGHTS | Notification.DEFAULT_SOUND);
-
-        boolean vibrateOn = prefs.getBoolean("vibrate", true);
+        notificationBuilder.setDefaults(Notification.DEFAULT_LIGHTS);
+        String soundUri = notificationsPreferences.getString("notifications_ringtone", "content://settings/system/notification_sound");
+        if(!TextUtils.isEmpty(soundUri)) {
+            notificationBuilder.setSound(Uri.parse(soundUri));
+        }
+        boolean vibrateOn = notificationsPreferences.getBoolean("notifications_vibrate", true);
         if (vibrateOn)
             notificationBuilder.setVibrate(new long[]{0, 50, 200, 50});
 
@@ -377,6 +378,7 @@ public class Notificator {
 
                         Notification notification = notificationBuilder.build();
                         mNotificationManager.notify(mId, notification);
+
                     }
                 });
             }
@@ -391,8 +393,7 @@ public class Notificator {
         notificationBuilder.setTicker(tickerText)
                 .setSmallIcon(R.drawable.ic_stat_spy)
                 .setDefaults(Notification.DEFAULT_LIGHTS);
-        SharedPreferences prefs = context.getSharedPreferences("notification", Context.MODE_MULTI_PROCESS);
-        boolean vibrateOn = prefs.getBoolean("vibrate", true);
+        boolean vibrateOn = notificationsPreferences.getBoolean("notifications_vibrate", true);
 
         if (vibrateOn)
             notificationBuilder.setVibrate(new long[]{0, 50, 200, 50});
@@ -401,6 +402,7 @@ public class Notificator {
         final NotificationManager mNotificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.notify(TICKER, notification);
+        mNotificationManager.cancel(TICKER);
         clearNotifications();
     }
 
@@ -428,13 +430,14 @@ public class Notificator {
         notificationBuilder.setTicker(lastOnlineEvent.headerText + " " + lastOnlineEvent.messageText.toLowerCase())
         .setDefaults(Notification.DEFAULT_LIGHTS)
                 .setSmallIcon(R.drawable.ic_stat_spy);
-        SharedPreferences prefs = context.getSharedPreferences("notification", Context.MODE_MULTI_PROCESS);
 
-        boolean soundEnabled = prefs.getBoolean("sound", true);
-        if (soundEnabled)
-            notificationBuilder.setDefaults(Notification.DEFAULT_LIGHTS | Notification.DEFAULT_SOUND);
+        String soundUri = notificationsPreferences.getString("notifications_ringtone", "content://settings/system/notification_sound");
+        if(!TextUtils.isEmpty(soundUri)) {
+            notificationBuilder.setSound(Uri.parse(soundUri));
+        }
+            notificationBuilder.setDefaults(Notification.DEFAULT_LIGHTS);
 
-        boolean vibrateOn = prefs.getBoolean("vibrate", true);
+        boolean vibrateOn = notificationsPreferences.getBoolean("notifications_vibrate", true);
         if (vibrateOn)
             notificationBuilder.setVibrate(new long[]{0, 50, 200, 50});
 
@@ -483,7 +486,7 @@ public class Notificator {
     public static void showSingleNotification(Event event) {
         boolean tickerOnly = applicationIsOpened();
         if(tickerOnly){
-            showTicker(event.headerText +" "+ event.messageText.toLowerCase());
+            showTicker(event.headerText + " " + event.messageText.toLowerCase());
             return;
         }
         final NotificationCompat.Builder notificationBuilder =
@@ -495,17 +498,17 @@ public class Notificator {
                         .setContentText(event.messageText)
                         .setAutoCancel(true)
                         .setContentInfo("VK Spy");
-        notificationBuilder.setTicker(event.headerText + " " + event.messageText)
+        notificationBuilder.setTicker(event.headerText + " " + event.messageText.toLowerCase())
                 .setSmallIcon(R.drawable.ic_stat_spy)
                 .setDefaults(Notification.DEFAULT_LIGHTS);
 
-        SharedPreferences prefs = context.getSharedPreferences("notification", Context.MODE_MULTI_PROCESS);
+        String soundUri = notificationsPreferences.getString("notifications_ringtone", "content://settings/system/notification_sound");
+        if(!TextUtils.isEmpty(soundUri)) {
+            notificationBuilder.setSound(Uri.parse(soundUri));
+        }
+            notificationBuilder.setDefaults(Notification.DEFAULT_LIGHTS );
 
-        boolean soundEnabled = prefs.getBoolean("sound", true);
-        if (soundEnabled)
-            notificationBuilder.setDefaults(Notification.DEFAULT_LIGHTS | Notification.DEFAULT_SOUND);
-
-        boolean vibrateOn = prefs.getBoolean("vibrate", true);
+        boolean vibrateOn = notificationsPreferences.getBoolean("notifications_vibrate", true);
         if (vibrateOn)
             notificationBuilder.setVibrate(new long[]{0, 50, 200, 50});
 
@@ -601,7 +604,6 @@ public class Notificator {
             for (String url : urlStack) {
                 imagesStack.add(ImageLoader.getInstance().loadImageSync(url));
             }
-            ;
 
             Bitmap lastImage = imagesStack.get(0);
 
@@ -663,9 +665,12 @@ public class Notificator {
 
     public static void notifyDurov() {
         VKApiUserFull durov = Memory.getUserById(1);
-        Event event = new Event(durov.first_name+" "+ durov.last_name, context.getString(R.string.come_online_m) ,
+        final Event event = new Event(durov.first_name+" "+ durov.last_name, context.getString(R.string.come_online_m) ,
                 durov.getBiggestPhoto(), 1 );
-        showOnlines(event);
+        onlinesNotification.add(durov.first_name+ " "+ durov.last_name);
+        onlinePhotosStack.add(durov.getBiggestPhoto());
+        showNotification(new ArrayList<Event>(){{ add( event);}});
+
     }
 
     public static class ClearNotificationsReceiver extends BroadcastReceiver {

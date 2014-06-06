@@ -7,6 +7,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
+import com.agcy.vkproject.spy.Core.Memory;
+
 import java.util.HashMap;
 
 public class NetworkStateReceiver extends BroadcastReceiver {
@@ -22,7 +24,7 @@ public class NetworkStateReceiver extends BroadcastReceiver {
 
                 for(NetworkStateChangeListener listener : listeners.values()){
                     listener.onConnected();
-
+                    Memory.saveNetwork(true);
                 }
                 //listeners.clear();
             }
@@ -31,7 +33,7 @@ public class NetworkStateReceiver extends BroadcastReceiver {
 
             for(NetworkStateChangeListener listener : listeners.values()){
                 listener.onLost();
-
+                Memory.saveNetwork(false);
             }
             Log.d("AGCY SPY", "Connection lost");
 

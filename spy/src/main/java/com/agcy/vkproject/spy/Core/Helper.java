@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -79,6 +80,7 @@ public class Helper {
 
         VKSdk.initialize(context);
         BugSenseHandler.initAndStartSession(context,"07310e3f");
+        Log.i("AGCY SPY","Initialization ended");
     }
     static Handler minuteTimerHandler;
     static TimerTask minuteTimer = new TimerTask() {
@@ -150,6 +152,10 @@ public class Helper {
         editor = preferences.edit();
         editor.clear();
         editor.commit();
+        preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        editor = preferences.edit();
+        editor.clear();
+        editor.commit();
     }
 
     public static void stopLongpoll() {
@@ -196,12 +202,15 @@ public class Helper {
         ArrayList<LongPollService.Update> messages = new ArrayList<LongPollService.Update>();
         //Log.i("AGSY SPY", "New updates");
         //onlines we can save immediately
+        String logString = "";
         for (LongPollService.Update update : updates) {
 
             if (update.isStatusUpdate()) {
                 onlines.add(update);
+                logString += "userid: " + update.getUser().id +" update type: "+ update.getType();
             }
         }
+        Log.i("AGСY SPY", "Online updates: "+onlines.size());
         saveOnlines(onlines);
         Notificator.announce(onlines);
         // however other updates we have to check
@@ -215,6 +224,7 @@ public class Helper {
         for (LongPollService.Update update : updates) {
             if (update.getType() == LongPollService.Update.TYPE_MESSAGE) {
                 newMessage(update);
+                Log.i("AGСY SPY", "Message update from userid: " + update.getUser().id);
             }
         }
 
@@ -440,7 +450,7 @@ public class Helper {
         boolean isFemale = user.isFemale();
         Resources res = context.getResources();
         String lastSeen = res.getString(isFemale ? R.string.last_seen_f : R.string.last_seen) + " ";
-        if(getUnixNow()-time<10)
+        if(getUnixNow()-time<60)
             return lastSeen+res.getString(R.string.moment_ago);
         Boolean today = checkOneDay( getUnixNow(), time);
         if(getUnixNow()-time>12*60*60){
@@ -541,7 +551,7 @@ public class Helper {
                             break;
                         case 1:
                         case TIMEOUT_1HOUR:
-                            if(Memory.forceSetStatus(user, user.online, user.last_seen)) {
+                             if(Memory.saveStatus(user, user.online, user.last_seen)) {
 
                                 if (storedUser.tracked)
                                     handler.post(new Runnable() {

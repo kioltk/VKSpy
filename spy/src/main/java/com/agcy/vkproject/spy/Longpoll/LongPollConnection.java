@@ -40,7 +40,7 @@ public abstract class LongPollConnection extends AsyncTask<Void, Void, String> {
             HttpResponse httpResponse = httpClient.execute(get);
             HttpEntity httpEntity = httpResponse.getEntity();
             response = EntityUtils.toString(httpEntity);
-            Log.i("AGCY SPY","longoll responses: "+response);
+            Log.i("AGCY SPY","longoll responses");
             return response;
         }catch (Exception exp){
             this.exception = exp;

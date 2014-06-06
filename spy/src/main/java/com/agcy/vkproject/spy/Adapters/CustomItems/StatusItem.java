@@ -53,6 +53,7 @@ public class StatusItem extends UpdateItem {
         VKApiUserFull user = update.getOwner();
         name.setText(user.first_name+" "+user.last_name);
 
+        placeHolder(rootView);
 
         if(isNew()) {
 
@@ -72,10 +73,8 @@ public class StatusItem extends UpdateItem {
             time.startAnimation(fadeIn);
 
         }else{
-            if(imageLoaded)
+            if(imageLoaded || shouldLoadImage())
                 loadImage(rootView);
-            else
-                placeHolder(rootView);
 
         }
 

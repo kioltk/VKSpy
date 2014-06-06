@@ -7,9 +7,7 @@ import android.widget.AbsListView;
 import com.agcy.vkproject.spy.Adapters.UpdatesAdapter;
 import com.agcy.vkproject.spy.Fragments.Interfaces.LoadImagesOnScrollListener;
 
-/**
- * Created by kiolt_000 on 24-May-14.
- */
+
 public abstract class UpdatesFragment extends ListFragment {
 
     @Override

@@ -3,18 +3,23 @@ apply plugin: 'android'
 android {
     compileSdkVersion 19
     buildToolsVersion '19.0.3'
-
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 19
-        versionCode 18
-        versionName "0.9.8"
+        versionCode 20
+        versionName '0.9.8t'
     }
     buildTypes {
-        release {
+        debug {
             runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
+        release {
+            runProguard true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+    productFlavors {
     }
 }
 

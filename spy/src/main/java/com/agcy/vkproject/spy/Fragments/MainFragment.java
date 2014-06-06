@@ -193,27 +193,27 @@ public class MainFragment extends android.support.v4.app.Fragment {
             @Override
             public void onClick() {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                final AlertDialog selector;
-                builder.setTitle(R.string.app_about).
-                        setPositiveButton(R.string.app_about_button, new DialogInterface.OnClickListener() {
+                final AlertDialog aboutDialog;
+                builder.setTitle(R.string.app_about)
+                        .setCancelable(true)
+                        .setPositiveButton(R.string.app_about_button, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 
                             }
                         });
 
-                View happySanta = getActivity().getLayoutInflater().inflate(R.layout.main_santa, null);
+                View aboutView = getActivity().getLayoutInflater().inflate(R.layout.about, null);
 
-                TextView happySantaText = (TextView) happySanta.findViewById(R.id.happySantaText);
-                happySantaText.setText(Html.fromHtml(getResources().getString(R.string.app_about_description)));
-                TextView happySantaLink = (TextView) happySanta.findViewById(R.id.happySantaLink);
-                happySantaLink.setVisibility(View.GONE);
+                TextView aboutDescription = (TextView) aboutView.findViewById(R.id.description);
+                aboutDescription.setText(Html.fromHtml(getResources().getString(R.string.app_about_description)));
 
 
 
-                builder.setView(happySanta);
-                selector = builder.create();
-                selector.show();
+                builder.setView(aboutView);
+                aboutDialog = builder.create();
+                aboutDialog.setCanceledOnTouchOutside(true);
+                aboutDialog.show();
             }
         });
         preferencesView.setAdapter(new PreferenceAdapter(context,preferences));

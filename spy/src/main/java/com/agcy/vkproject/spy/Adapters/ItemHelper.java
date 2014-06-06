@@ -5,10 +5,12 @@ import android.util.Log;
 import com.agcy.vkproject.spy.Adapters.CustomItems.DateItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.FilterUserItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.HeaderItem;
+import com.agcy.vkproject.spy.Adapters.CustomItems.Interfaces.LoadableImage;
 import com.agcy.vkproject.spy.Adapters.CustomItems.Item;
 import com.agcy.vkproject.spy.Adapters.CustomItems.OnlineItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.StatusItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.TypingItem;
+import com.agcy.vkproject.spy.Adapters.CustomItems.UpdateItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.UserItem;
 import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Models.Online;
@@ -126,6 +128,9 @@ public class ItemHelper {
             }}, false);
             Item convertedItem = newConvertedItems.get(0);
             convertedItem.setNew(newEnabled);
+            if(convertedItem instanceof UpdateItem){
+                ((UpdateItem) convertedItem).loadImage();
+            }
             //convertedItems.add(addedNew? 1: 0,convertedItem );
 
             for (int i = 0; i < convertedItems.size(); i++) {
@@ -163,8 +168,18 @@ public class ItemHelper {
 
                     if (nowDateItem.getContent() == Helper.NOW) {
                         Update update = items.get(1);
-                        nowDateItem.recreate(update.getUnix());
+                        ArrayList<DateItem> dismissViews = new ArrayList<DateItem>();
+                        for (Item todayItem : convertedItems) {
+                            if(todayItem instanceof DateItem && ((DateItem)todayItem).isToday()){
+                                dismissViews.add((DateItem) todayItem);
+                            }
 
+                        }
+                        for (DateItem dismissView : dismissViews) {
+                            removeConverted(dismissView);
+                        }
+
+                        nowDateItem.recreate(update.getUnix());
                         return true;
                     }
                 }
@@ -271,10 +286,13 @@ public class ItemHelper {
 
         public abstract void newItem(T item);
         public void removeConverted(int position){
-            convertedItems.remove(position);
+
+            Item item = convertedItems.remove(position);
+            item.setDeleted();
         }
         public void removeConverted(Item item){
             convertedItems.remove(item);
+            item.setDeleted();
         }
 
         public void disableNewAnimation() {

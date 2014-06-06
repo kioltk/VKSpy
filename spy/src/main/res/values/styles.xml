@@ -1,8 +1,17 @@
 <resources>
 
-    <!-- Base application theme. -->
+    <style name="ModernTheme" parent="android:Theme.Holo.Light">
+
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:icon">@drawable/ic_ab_icon</item>
+        <item name="android:actionBarStyle">@style/MyActionBar</item>
+        <item name="android:homeAsUpIndicator">@drawable/ic_back_button</item>
+        <item name="android:windowContentOverlay">@null</item>
+
+        <item name="android:switchTextOn">@string/on</item>
+        <item name="android:switchTextOff">@string/off</item>
+    </style>
     <style name="AppTheme" parent="Theme.AppCompat.Light">
-        <!-- Customize your theme here. -->
         <item name="android:windowBackground">@android:color/white</item>
         <item name="actionBarStyle">@style/MyActionBar</item>
         <item name="homeAsUpIndicator">@drawable/ic_back_button</item>
@@ -10,8 +19,9 @@
         <item name="android:actionBarStyle">@style/MyActionBar</item>
         <item name="android:homeAsUpIndicator">@drawable/ic_back_button</item>
         <item name="android:windowContentOverlay">@null</item>
-        
-        
+
+        <item name="android:switchTextOn">@string/on</item>
+        <item name="android:switchTextOff">@string/off</item>
     </style>
     <style name="AppTheme.NoTitle" parent="AppTheme">
         <item name="android:windowNoTitle">true</item>
@@ -60,4 +70,7 @@
 
         <item name="android:textColor">@color/blue</item>
     </style>
+
+
+
 </resources>

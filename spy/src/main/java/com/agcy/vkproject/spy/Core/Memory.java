@@ -567,7 +567,7 @@ public class Memory {
         Cursor cursor = getCursor(DatabaseConnector.ONLINE_DATABASE,
                 DatabaseConnector.ONLINE_DATABASE_FIELDS,
                 "userid = 1",
-                null);
+                "id desc");
         int idColumnIndex = cursor.getColumnIndex("id");
         int tillColumnIndex = cursor.getColumnIndex("till");
 
@@ -621,12 +621,18 @@ public class Memory {
 
         if (cursor.moveToFirst()) {
             int lastOnline = cursor.getInt(sinceColumnIndex);
+            int lastOffline = cursor.getInt(tillColumnIndex);
 
             if (online) {
-               if(lastOnline-120<time&&lastOnline+120>time) {
-                   close();
-                   return false;
-               }
+                if (lastOnline - 300 < time && lastOnline + 300 > time) {
+                    close();
+                    return false;
+                }
+            } else {
+                if(lastOffline - 300 < time && lastOffline + 300 > time){
+                    close();
+                    return false;
+                }
             }
         }
         Log.i("AGCY SPY SQL", "Saving online.");
@@ -756,6 +762,15 @@ public class Memory {
         return false;
     }
 
+    public static void saveNetwork(boolean connected) {
+
+        ContentValues networkValues = new ContentValues();
+        networkValues.put("offline", connected);
+        networkValues.put("time", Helper.getUnixNow());
+
+        save(DatabaseConnector.NETWORK_DATABASE,networkValues);
+    }
+
 
     private static class DatabaseConnector extends SQLiteOpenHelper {
 
@@ -764,6 +779,7 @@ public class Memory {
         private static final String ONLINE_DATABASE = "online_database";
         private static final String TYPING_DATABASE = "typing_database";
         private static final String USER_DATABASE = "user_database";
+        private static final String NETWORK_DATABASE = "network_database";
         private static final String[] ONLINE_DATABASE_FIELDS = {
                 "id",
                 "userid",
@@ -814,24 +830,30 @@ public class Memory {
                         "userid integer not null," +
                         "time integer not null" +
                         " ) ";
+        public static final String NETWORK_DATABASE_CREATE =
+                "create table " +
+                        NETWORK_DATABASE +
+                        " ( " +
+                        "id integer primary key autoincrement," +
+                        "connected integer not null," +
+                        "time integer not null" +
+                        " ) ";
 
         public DatabaseConnector(Context context) {
-            super(context, DATABASE, null, 8);
+            super(context, DATABASE, null, 9);
         }
 
         @Override
         public void onCreate(SQLiteDatabase database) {
-
             database.execSQL(ONLINE_DATABASE_CREATE);
             database.execSQL(TYPING_DATABASE_CREATE);
             database.execSQL(USER_DATABASE_CREATE);
-
-
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
-
+            database.execSQL("drop table if exists "+ NETWORK_DATABASE);
+            database.execSQL(NETWORK_DATABASE_CREATE);
         }
 
     }

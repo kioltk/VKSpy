@@ -57,7 +57,7 @@
     <string name="durov_function_title">Суперфункция</string>
     <string name="durov_function_decription">Слежка за Павлом Дуровым!</string>
     <string name="app_about_button">Ясно</string>
-    <string name="app_about_description">2014</string>
+    <string name="app_about_description">Привет</string>
     <string name="important">Важные</string>
     <string name="select_all">Выбрать всех</string>
     <string name="deselect_all">Снять выделение</string>
@@ -83,13 +83,20 @@
     <string name="error">Ошибка</string>
     <string name="server_did_not_respond">Сервер не отвечает</string>
     <string name="check_connection">Проверьте ваше интернет соединение</string>
-    <string name="unknown_error">Неизвестная ошибка</string>
+    <string name="unknown_error">Что-то пошло не так</string>
     <string name="need_access">Для использования приложения нужен доступ</string>
     <string name="help">Помощь</string>
     <string name="no_typings">Тайпингов пока нет</string>
     <string name="no_friends">У вас нет друзей =(</string>
     <string name="close">Закрыть</string>
     <string name="durov_wanna_see">Хочу посмотреть!</string>
+    <string name="send_logs">Отправить логи</string>
+    <string name="vk_down">@string/unknown_error</string>
+    <string name="additional">Дополнительно</string>
+    <string name="termsandpolicy">Условия использования\nПолитика конфиденциальности</string>
+    <string name="on">on</string>
+    <string name="off">off</string>
+    <string name="silent">Silent</string>
 
     <plurals name="usersSelected">
         <item quantity="zero">Никого не выбрано</item>

@@ -49,9 +49,10 @@ public class TypingItem extends UpdateItem {
         name.setText(user.first_name+" "+user.last_name);
 
         ImageLoader.getInstance().displayImage(user.getBiggestPhoto(),photo);
-
+        rootView.setTag("typing");
         time.setText("" + getContent().getSmartTime());
 
+        time.setTag(getContent());
 
         return rootView;
     }

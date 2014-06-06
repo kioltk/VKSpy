@@ -27,7 +27,10 @@ public class DateItem extends Item {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         rootView = inflater.inflate(R.layout.list_item_date, null);
-        ((TextView)rootView.findViewById(R.id.time)).setText( getDate());
+        TextView timeView = ((TextView) rootView.findViewById(R.id.time));
+        timeView.setText(getDate());
+
+        timeView.setTag(time);
         return rootView;
     }
     public String getDate(){

@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -134,14 +135,19 @@ public class UserActivity extends ActionBarActivity {
         getMenuInflater().inflate(R.menu.user, menu);
 
         final MenuItem trackedButton = menu.getItem(0);
-        trackedButton.setActionView(R.layout.action_bar_track);
-        trackedButton.getActionView().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onOptionsItemSelected(trackedButton);
-            }
-        });
-        updateTrackMenuItem(trackedButton);
+        if(user.isFriend) {
+
+            trackedButton.setActionView(R.layout.action_bar_track);
+            trackedButton.getActionView().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onOptionsItemSelected(trackedButton);
+                }
+            });
+            updateTrackMenuItem(trackedButton);
+        }else{
+            menu.removeItem(trackedButton.getItemId());
+        }
         return true;
     }
 
@@ -322,7 +328,7 @@ public class UserActivity extends ActionBarActivity {
             return 1;
         }
     }
-    public class OnlinesListFragment extends UpdatesListFragment {
+    public static class OnlinesListFragment extends UpdatesListFragment {
 
 
         private ArrayList<Online> items;
@@ -344,12 +350,14 @@ public class UserActivity extends ActionBarActivity {
             if(items!=null && !items.isEmpty()){
                 Online last = items.get(0);
                 if(last.getTill()==Helper.ONLINE) {
-                    setOnline(ONLINE_TRUE);
+                    ((UserActivity)getActivity()).setOnline(ONLINE_TRUE);
                 }else{
                     if(user.last_seen<last.getTill()){
                         user.last_seen = last.getTill();
                     }
-                    setOnline( user.last_seen);
+                    FragmentActivity activity = getActivity();
+                    if(activity!=null)
+                        ((UserActivity)activity).setOnline( user.last_seen);
 
                 }
             }

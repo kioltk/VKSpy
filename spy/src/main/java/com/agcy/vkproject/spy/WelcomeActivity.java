@@ -110,7 +110,7 @@ public class WelcomeActivity extends ActionBarActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public class PlaceholderFragment extends Fragment {
+    public static class PlaceholderFragment extends Fragment {
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -136,7 +136,7 @@ public class WelcomeActivity extends ActionBarActivity {
             (rootView.findViewById(R.id.start)).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    login();
+                    ((WelcomeActivity)getActivity()).login();
                 }
             });
             return rootView;

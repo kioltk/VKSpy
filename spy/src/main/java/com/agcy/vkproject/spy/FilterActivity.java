@@ -76,6 +76,7 @@ public class FilterActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 onOptionsItemSelected(applyButton);
+
             }
         });
         this.menu = menu;

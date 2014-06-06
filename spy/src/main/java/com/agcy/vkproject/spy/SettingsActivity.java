@@ -1,66 +1,64 @@
 package com.agcy.vkproject.spy;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
-import android.preference.PreferenceFragment;
+import android.preference.Preference;
+import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.preference.RingtonePreference;
+import android.text.TextUtils;
 import android.view.MenuItem;
+import android.support.v4.app.NavUtils;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.agcy.vkproject.spy.Adapters.CustomItems.HeaderItem;
-import com.agcy.vkproject.spy.Adapters.CustomItems.Item;
-import com.agcy.vkproject.spy.Adapters.CustomItems.PreferenceItem;
-import com.agcy.vkproject.spy.Adapters.CustomItems.ToggleablePreferenceItem;
-import com.agcy.vkproject.spy.Core.Helper;
-import com.agcy.vkproject.spy.Core.UberFunktion;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.vk.sdk.VKUIHelper;
 
-import java.util.ArrayList;
+import com.agcy.vkproject.spy.Core.Helper;
+import com.agcy.vkproject.spy.Core.Logs;
+import com.nostra13.universalimageloader.core.ImageLoader;
+
+import java.io.File;
 
 /**
- * Created by kiolt_000 on 10-May-14.
+ * A {@link PreferenceActivity} that presents a set of application settings. On
+ * handset devices, settings are presented as a single list. On tablets,
+ * settings are split by category, with category headers shown to the left of
+ * the list of settings.
+ * <p>
+ * See <a href="http://developer.android.com/design/patterns/settings.html">
+ * Android Design: Settings</a> for design guidelines and the <a
+ * href="http://developer.android.com/guide/topics/ui/settings.html">Settings
+ * API Guide</a> for more information on developing a Settings UI.
  */
-public class SettingsActivity extends ActionBarActivity {
-
+public class SettingsActivity extends PreferenceActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
+        setupActionBar();
 
-        VKUIHelper.onCreate(this);
-
-        String title = getResources().getString(R.string.settings);
-
-        ActionBar bar = getSupportActionBar();
-        bar.setTitle(title);
-        bar.setDisplayHomeAsUpEnabled(true);
-
-
-        ListView listView = (ListView) findViewById(R.id.list);
-        SettingsAdapter adapter = new SettingsAdapter();
-
+        ListView listView = getListView();
+        listView.setPadding(0,0,0,0);
         View userView = getLayoutInflater().inflate(R.layout.user_view, null);
         View logoutButtonView = getLayoutInflater().inflate(R.layout.logout_button_view, null);
         listView.addHeaderView(userView,null,false);
         listView.addFooterView(logoutButtonView);
+        listView.setDivider(getResources().getDrawable(R.drawable.list_item_divider));
+        listView.setFooterDividersEnabled(false);
+        listView.setHeaderDividersEnabled(false);
 
-        listView.setAdapter(adapter);
+
 
         SharedPreferences prefs = getSharedPreferences("user", MODE_MULTI_PROCESS);
         String name = prefs.getString("name", "");
@@ -74,9 +72,86 @@ public class SettingsActivity extends ActionBarActivity {
         logoutButtonView.findViewById(R.id.logout).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                logout(v);
+                //logout(v);
             }
         });
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private void setupActionBar() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            // Show the Up button in the action bar.
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            // This ID represents the Home or Up button. In the case of this
+            // activity, the Up button is shown. Use NavUtils to allow users
+            // to navigate up one level in the application structure. For
+            // more details, see the Navigation pattern on Android Design:
+            //
+            // http://developer.android.com/design/patterns/navigation.html#up-vs-back
+            //
+            // TODO: If Settings has multiple levels, Up should navigate up
+            // that hierarchy.
+            NavUtils.navigateUpFromSameTask(this);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+
+        setupSimplePreferencesScreen();
+    }
+
+
+    private void setupSimplePreferencesScreen() {
+
+
+        addPreferencesFromResource(R.xml.pref_general);
+
+        addPreferencesFromResource(R.xml.pref_notification);
+
+        addPreferencesFromResource(R.xml.pref_additional);
+
+        bindPreferenceSummaryToValue(findPreference("notifications_ringtone"));
+        bindPreferenceSummaryToValue(findPreference("notifications_offline_type"));
+        bindPreferenceSummaryToValue(findPreference("notifications_online_type"));
+
+        Preference helpPreference = (Preference) findPreference("help");
+        helpPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            public boolean onPreferenceClick(Preference preference) {
+
+                Intent browserIntent = new Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("https://vk.com/topic-58810575_30129274")
+                );
+                startActivity(browserIntent);
+
+                return true;
+            }
+        });
+        Preference sendLogPreference = (Preference) findPreference("send_logs");
+        sendLogPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            public boolean onPreferenceClick(Preference preference) {
+
+                File F = Logs.getFile();
+                Uri U = Uri.fromFile(F);
+                Intent i = new Intent(Intent.ACTION_SEND);
+                i.setType("text/plain");
+                i.putExtra(Intent.EXTRA_STREAM, U);
+                startActivity(Intent.createChooser(i,"What should we do with logs?"));
+                return true;
+            }
+        });
+
     }
 
 
@@ -102,222 +177,73 @@ public class SettingsActivity extends ActionBarActivity {
         dialog.show();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        switch (item.getItemId())
-        {
-            case android.R.id.home:
-                onBackPressed();
-                break;
-
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-        return true;
-    }
-
-    public String getHelp() {
-        return getString(R.string.help);
-    }
-
-
-    private class SettingsAdapter extends BaseAdapter {
-
-
-        ArrayList<Item> items = new ArrayList<Item>(){{
-
-
-
-            final SharedPreferences notificationPreferences = getSharedPreferences("notification", Context.MODE_MULTI_PROCESS);
-            boolean notificationEnable = notificationPreferences.getBoolean("status", true);
-            boolean notificationVibrate = notificationPreferences.getBoolean("vibrate", true);
-            boolean notificationSound = notificationPreferences.getBoolean("sound", true);
-
-            boolean notificationOnline = notificationPreferences.getBoolean("notificationOnline", true);
-            int wayToNotifyOnline = notificationPreferences.getInt("wayToNotifyOnline", 0);
-
-            boolean notificationOffline = notificationPreferences.getBoolean("notificationOffline", true);
-            int wayToNotifyOffline = notificationPreferences.getInt("wayToNotifyOffline", 0);
-
-            add(new PreferenceItem(getHelp()) {
-                @Override
-                public void onClick() {
-
-                    Intent browserIntent = new Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse("https://vk.com/topic-58810575_30129274")
-                    );
-                    startActivity(browserIntent);
-                }
-            });
-
-            add(new HeaderItem(getNotifications()));
-            add(new ToggleablePreferenceItem(getEnabled(), notificationEnable) {
-                @Override
-                public void onToggle(Boolean isChecked) {
-
-                    SharedPreferences.Editor editor = notificationPreferences.edit();
-                    editor.putBoolean("status", isChecked);
-                    editor.commit();
-
-                }
-            });
-            add(new ToggleablePreferenceItem(getVibrate(), notificationVibrate) {
-                @Override
-                public void onToggle(Boolean isChecked) {
-
-                    SharedPreferences.Editor editor = notificationPreferences.edit();
-                    editor.putBoolean("vibrate", isChecked);
-                    editor.commit();
-                }
-            });
-            add(new ToggleablePreferenceItem(getSound(), notificationSound) {
-                @Override
-                public void onToggle(Boolean isChecked) {
-
-                    SharedPreferences.Editor editor = notificationPreferences.edit();
-                    editor.putBoolean("sound", isChecked);
-                    editor.commit();
-                }
-            });
-
-            add(new HeaderItem(getOnlineNotifications()));
-            add(new ToggleablePreferenceItem(getEnabled(), notificationOnline) {
-                @Override
-                public void onToggle(Boolean isChecked) {
-
-                    SharedPreferences.Editor editor = notificationPreferences.edit();
-                    editor.putBoolean("notificationOnline", isChecked);
-                    editor.commit();
-                }
-            });
-            add(new PreferenceItem(getWayToNotify(), wayToNotifyOnline > 0 ? getPopupText() : getNotificationText()) {
-                @Override
-                public void onClick() {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
-                    final AlertDialog selector;
-                    builder.setTitle(R.string.way_to_notify)
-                            .setItems(R.array.ways_to_notify, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    SharedPreferences.Editor editor = notificationPreferences.edit();
-                                    editor.putInt("wayToNotifyOnline", which);
-                                    editor.commit();
-
-                                    String text = which > 0 ? getPopupText() : getNotificationText();
-                                    setDescription(text);
-
-
-                                }
-                            });
-                    selector = builder.create();
-                    selector.show();
-
-                }
-            });
-
-            add(new HeaderItem(getOfflineNotifications()));
-            add(new ToggleablePreferenceItem(getEnabled(), notificationOffline) {
-                @Override
-                public void onToggle(Boolean isChecked) {
-
-                    SharedPreferences.Editor editor = notificationPreferences.edit();
-                    editor.putBoolean("notificationOffline", isChecked);
-                    editor.commit();
-                    //get(indexOf(this)+1).setEnabled(isChecked);
-                }
-            });
-            add(new PreferenceItem(getWayToNotify(), wayToNotifyOffline > 0 ? getPopupText() : getNotificationText()) {
-                @Override
-                public void onClick() {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
-                    final AlertDialog selector;
-                    builder.setTitle(R.string.way_to_notify)
-                            .setItems(R.array.ways_to_notify, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    SharedPreferences.Editor editor = notificationPreferences.edit();
-                                    editor.putInt("wayToNotifyOffline", which);
-                                    editor.commit();
-
-                                    String text = which > 0 ? getPopupText() : getNotificationText();
-                                    setDescription(text);
-
-
-                                }
-                            });
-                    selector = builder.create();
-                    selector.show();
-
-                }
-            });
-
-
-        }};
-
+    private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
         @Override
-        public boolean isEnabled(int position) {
-            return getItem(position).isEnabled();
-        }
+        public boolean onPreferenceChange(Preference preference, Object value) {
+            String stringValue = value.toString();
 
-        @Override
-        public int getCount() {
-            return items.size();
-        }
+            if (preference instanceof ListPreference) {
+                // For list preferences, look up the correct display value in
+                // the preference's 'entries' list.
+                ListPreference listPreference = (ListPreference) preference;
+                int index = listPreference.findIndexOfValue(stringValue);
 
-        @Override
-        public Item getItem(int position) {
-            return items.get(position);
-        }
+                // Set the summary to reflect the new value.
+                preference.setSummary(
+                        index >= 0
+                                ? listPreference.getEntries()[index]
+                                : null);
 
-        @Override
-        public long getItemId(int position) {
-            return 0;
-        }
+            } else if (preference instanceof RingtonePreference) {
+                // For ringtone preferences, look up the correct display value
+                // using RingtoneManager.
+                if (TextUtils.isEmpty(stringValue)) {
+                    // Empty values correspond to 'silent' (no ringtone).
+                    preference.setSummary(R.string.silent);
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            Item item = getItem(position);
-            View view = item.getView(getBaseContext());
-            if(
-                    item instanceof PreferenceItem &&
-                    position+1 != items.size() &&
-                    !(getItem(position+1) instanceof HeaderItem)
-                    ){
-                view.findViewById(R.id.divider).setVisibility(View.VISIBLE);
+                } else {
+                    Ringtone ringtone = RingtoneManager.getRingtone(
+                            preference.getContext(), Uri.parse(stringValue));
+
+                    if (ringtone == null) {
+                        // Clear the summary if there was a lookup error.
+                        preference.setSummary(null);
+                    } else {
+                        // Set the summary to reflect the new ringtone display
+                        // name.
+                        String name = ringtone.getTitle(preference.getContext());
+                        preference.setSummary(name);
+                    }
+                }
+
+            } else {
+                // For all other preferences, set the summary to the value's
+                // simple string representation.
+                preference.setSummary(stringValue);
             }
-            return view;
+            return true;
         }
-    }
+    };
 
-    public String getNotifications(){
-        return getResources().getString(R.string.notifications);
-    }
-    public String getOnlineNotifications() {
-        return getResources().getString(R.string.online_notifications);
-    }
-    public String getOfflineNotifications() {
-        return getResources().getString(R.string.offline_notifications);
-    }
-    private String getSound(){
-        return getResources().getString(R.string.sound);
-    }
-    private String getVibrate(){
-        return getResources().getString(R.string.vibrate);
-    }
+    /**
+     * Binds a preference's summary to its value. More specifically, when the
+     * preference's value is changed, its summary (line of text below the
+     * preference title) is updated to reflect the value. The summary is also
+     * immediately updated upon calling this method. The exact display format is
+     * dependent on the type of preference.
+     *
+     * @see #sBindPreferenceSummaryToValueListener
+     */
+    private static void bindPreferenceSummaryToValue(Preference preference) {
+        // Set the listener to watch for value changes.
+        preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
 
-    private String getEnabled(){
-
-        return getResources().getString(R.string.enabled);
+        // Trigger the listener immediately with the preference's
+        // current value.
+        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+                PreferenceManager
+                        .getDefaultSharedPreferences(preference.getContext())
+                        .getString(preference.getKey(), ""));
     }
-    private String getWayToNotify(){
-        return getResources().getString(R.string.way_to_notify);
-    }
-    private String getPopupText(){
-        return getResources().getString(R.string.popup);
-    }
-    private String getNotificationText(){
-        return getResources().getString(R.string.notification);
-    }
-
 
 }

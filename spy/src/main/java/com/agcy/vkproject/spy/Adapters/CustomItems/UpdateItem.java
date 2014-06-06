@@ -17,13 +17,19 @@ public abstract class UpdateItem extends Item implements LoadableImage, Reconver
 
     protected final Update update;
     protected boolean imageLoaded = false;
+    private boolean shouldLoadImage;
 
     public UpdateItem(Update update){
         this.update = update;
     }
     @Override
     public abstract View getView(Context context);
-
+    protected boolean shouldLoadImage(){
+        return shouldLoadImage;
+    }
+    public void loadImage(){
+        shouldLoadImage = true;
+    }
     @Override
     public void loadImage(View rootView) {
         if(rootView!=null) {

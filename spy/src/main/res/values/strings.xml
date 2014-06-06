@@ -40,7 +40,7 @@
     <string name="error">Error</string>
     <string name="server_did_not_respond">Server did not respond</string>
     <string name="check_connection">Check your internet connection</string>
-    <string name="unknown_error">Unknown error</string>
+    <string name="unknown_error">Something went wrong</string>
     <string name="need_access">Access is needed to use application</string>
     <string name="help">Help</string>
     <string name="close">Close</string>
@@ -114,6 +114,13 @@
     <string name="durov_joke_button">Вана молодец</string>
 
     <string name="open_profile">Open profile</string>
+    <string name="send_logs">Send logs</string>
+    <string name="vk_down">@string/unknown_error</string>
+    <string name="additional">Additional</string>
+    <string name="termsandpolicy">Terms of use and Privacy policy</string>
+    <string name="on">on</string>
+    <string name="off">off</string>
+    <string name="silent">Silent</string>
 
 
     <!-- Числительные -->

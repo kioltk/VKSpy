@@ -1,6 +1,8 @@
 package com.agcy.vkproject.spy.Core;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,7 +17,6 @@ import android.widget.TextView;
 
 import com.agcy.vkproject.spy.Models.DurovOnline;
 import com.agcy.vkproject.spy.R;
-import com.agcy.vkproject.spy.Receivers.NetworkStateReceiver;
 import com.agcy.vkproject.spy.UserActivity;
 import com.bugsense.trace.BugSenseHandler;
 import com.vk.sdk.api.VKApi;
@@ -127,10 +128,10 @@ public class UberFunktion {
                                                     public void run() {
                                                         loading = false;
                                                         if(dialog!=null) {
-                                                            AlertDialog.Builder successDialog = new AlertDialog.Builder(dialog.getContext());
-                                                            successDialog.setCancelable(true);
+                                                            AlertDialog.Builder successDialogBuilder = new AlertDialog.Builder(dialog.getContext());
+                                                            successDialogBuilder.setCancelable(true);
 
-                                                            successDialog.setTitle((R.string.durov_function_activated_title));
+                                                            successDialogBuilder.setTitle((R.string.durov_function_activated_title));
                                                             TextView resultView = new TextView(context);
                                                             resultView.setTextColor(0xff333333);
                                                             resultView.setTextSize(16);
@@ -138,8 +139,8 @@ public class UberFunktion {
                                                             resultView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                                                             resultView.setGravity(Gravity.CENTER);
                                                             resultView.setText(updateOnly ? (R.string.durov_function_updated) : (R.string.durov_function_activated));
-                                                            successDialog.setView(resultView);
-                                                            successDialog.setPositiveButton(context.getString(R.string.durov_wanna_see), new DialogInterface.OnClickListener() {
+                                                            successDialogBuilder.setView(resultView);
+                                                            successDialogBuilder.setPositiveButton(context.getString(R.string.durov_wanna_see), new DialogInterface.OnClickListener() {
                                                                 @Override
                                                                 public void onClick(DialogInterface dialog, int which) {
                                                                     Intent showDurov = new Intent(context, UserActivity.class);
@@ -150,11 +151,13 @@ public class UberFunktion {
                                                                     context.startActivity(showDurov);
                                                                 }
                                                             });
-                                                            successDialog.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
+                                                            successDialogBuilder.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
                                                                 @Override
                                                                 public void onClick(DialogInterface dialog, int which) {
                                                                 }
                                                             });
+                                                            AlertDialog successDialog = successDialogBuilder.create();
+                                                            successDialog.setCanceledOnTouchOutside(true);
                                                             successDialog.show();
                                                             try {
                                                                 dialog.dismiss();
@@ -177,12 +180,15 @@ public class UberFunktion {
 
                                     @Override
                                     public void onError(VKError error) {
-loading = false;
+                                        loading = false;
                                         if(dialog!=null) {
-                                            dialog.setTitle("Error");
-                                            dialog.setMessage("Нет соединения с вк");
-                                            dialog.setIndeterminate(false);
-                                            dialog.setCancelable(true);
+                                            try {
+                                                showError(dialog, context.getString(R.string.error), context.getString(R.string.vk_down))
+                                                        .show();
+                                                dialog.dismiss();
+                                            }catch (Exception exp){
+
+                                            }
                                         }
 
                                     }
@@ -195,8 +201,7 @@ loading = false;
                     protected void onError(Exception exp) {
                         loading = false;
                         if(dialog!=null) {
-                            dialog.setTitle(R.string.error);
-                            dialog.setMessage(context.getString(R.string.unknown_error));
+                            showError(dialog, context.getString(R.string.error), context.getString(R.string.unknown_error));
                         }
                     }
                 }.execute();
@@ -204,38 +209,37 @@ loading = false;
 
             @Override
             public void onError(Exception exp) {
-
+                loading = false;
                 if(dialog!=null) {
-                    dialog.setTitle(R.string.error);
+                    AlertDialog errorDialog = showError(dialog, context.getString(R.string.error), context.getString(R.string.vk_down));
+
+                    dialog.dismiss();
                     if (exp == null) {
-                        dialog.setMessage(context.getString(R.string.server_did_not_respond));
+                        errorDialog.setMessage(context.getString(R.string.server_did_not_respond));
                     } else {
                         if (exp instanceof UnknownHostException) {
-                            dialog.setMessage(context.getString(R.string.check_connection));
+                            errorDialog.setMessage(context.getString(R.string.check_connection));
                         } else {
-
-                            dialog.setMessage(context.getString(R.string.unknown_error));
+                            errorDialog.setMessage(context.getString(R.string.unknown_error));
                         }
                     }
-                    dialog.setIndeterminate(false);
-                    dialog.setCancelable(true);
-                }else{
-                    new NetworkStateReceiver.NetworkStateChangeListener(NetworkStateReceiver.NetworkStateChangeListener.DUROV_LOADER_NETWORK_LISTENER) {
-                        @Override
-                        public void onConnected() {
-                            reexecute();
-                        }
-
-                        @Override
-                        public void onLost() {
-
-                        }
-                    };
+                    errorDialog.setCancelable(true);
+                    errorDialog.setCanceledOnTouchOutside(true);
+                    errorDialog.show();
                 }
 
             }
         }.execute();
 
+    }
+    private static AlertDialog showError(Dialog dialog,String title, String message){
+
+        Activity activity = dialog.getOwnerActivity();
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(title);
+        builder.setMessage(message);
+
+        return builder.create();
     }
     private abstract static class Loader{
         private final int count;
