@@ -11,14 +11,12 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-/**
- * Created by kiolt_000 on 26-Apr-14.
- */
+
 public abstract class LongPollConnection extends AsyncTask<Void, Void, String> {
     private final String server;
     private final String key;
     private final String ts;
-    String url = "http://%s?act=a_check&key=%s&ts=%s&wait=25&mode=64";
+    String url = "http://%s?act=a_check&key=%s&ts=%s&wait=25&mode=66";
     private Exception exception;
     private boolean finished = false;
     public int duration = 0;
@@ -40,7 +38,7 @@ public abstract class LongPollConnection extends AsyncTask<Void, Void, String> {
             HttpResponse httpResponse = httpClient.execute(get);
             HttpEntity httpEntity = httpResponse.getEntity();
             response = EntityUtils.toString(httpEntity);
-            Log.i("AGCY SPY","longoll responses");
+            Log.i("AGCY SPY","longoll responses");//+ response);
             return response;
         }catch (Exception exp){
             this.exception = exp;

@@ -54,4 +54,5 @@
     <color name="popup_background">#e6545454</color>
     <color name="popup_title">#fff</color>
     <color name="popup_description">#bfbfbf</color>
+    <color name="additional_text_color">@color/grey_light</color>
 </resources>

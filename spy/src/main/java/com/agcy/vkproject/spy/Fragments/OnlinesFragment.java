@@ -48,7 +48,7 @@ public class OnlinesFragment extends UpdatesFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        inflater.inflate(R.layout.filter_button, (ViewGroup) rootView, true);
+        inflater.inflate(R.layout.filter_users_button, (ViewGroup) rootView, true);
 
         return rootView;
     }
@@ -77,7 +77,8 @@ public class OnlinesFragment extends UpdatesFragment {
 
         if(rootView==null)
             return;
-        if (Memory.users.isEmpty() && !Helper.isInitialized()){
+        if (Memory.users.isEmpty() && !Helper.isDownloaded()){
+            rootView.findViewById(R.id.status).setVisibility(View.GONE);
             rootView.findViewById(R.id.filter_tip).setVisibility(View.GONE);
             rootView.findViewById(R.id.loading).setVisibility(View.VISIBLE);
             return;

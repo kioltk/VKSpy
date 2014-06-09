@@ -20,7 +20,7 @@ public abstract class UpdatesFragment extends ListFragment {
     @Override
     public void onPause() {
         super.onPause();
-        Log.i("AGCY SPY", "OnlinesFragment paused");
+        Log.i("AGCY SPY", "UpdatesFragment paused");
         if(adapter!=null){
             ((UpdatesAdapter)adapter).pauseNew();
             ((UpdatesAdapter)adapter).recreateHeaders();

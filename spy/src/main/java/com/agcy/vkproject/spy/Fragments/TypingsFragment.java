@@ -1,7 +1,14 @@
 package com.agcy.vkproject.spy.Fragments;
 
+import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -15,12 +22,11 @@ import com.agcy.vkproject.spy.Models.Typing;
 import com.agcy.vkproject.spy.Models.Update;
 import com.agcy.vkproject.spy.R;
 
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/**
- * A placeholder fragment containing a simple view.
- */
+
 public class TypingsFragment extends UpdatesFragment {
 
     private NewUpdateListener contentListener = new NewUpdateListener() {
@@ -29,9 +35,40 @@ public class TypingsFragment extends UpdatesFragment {
             createContent();
         }
     };
+    private SharedPreferences.OnSharedPreferenceChangeListener changeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if(key.equals("notifications_chat_typing_enabled")) {
+                recreateContent();
+            }
+        }
+    };
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        prefs.registerOnSharedPreferenceChangeListener(changeListener);
+    }
+
     @Override
     public BaseAdapter adapter() {
-        return new UpdatesWithOwnerAdapter(Memory.getTyping(),context);
+
+        boolean chatsEnabled = true;
+        ArrayList<Typing> items;
+
+        FragmentActivity activity = getActivity();
+        if(activity!=null) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+
+            chatsEnabled = prefs.getBoolean("notifications_chat_typing_enabled", true);
+        }
+        if (chatsEnabled)
+            items = Memory.getTypings();
+        else
+            items = Memory.getTypings("chatid = 0");
+        return new UpdatesWithOwnerAdapter(items, context);
     }
     Handler handler = new Handler();
     Timer timer = new Timer();
@@ -79,6 +116,12 @@ public class TypingsFragment extends UpdatesFragment {
         bindTimer();
     }
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
+        //View button = inflater.inflate(R.layout.filter_typings_button, (ViewGroup) rootView, true);
+        return rootView;
+    }
     @Override
     public void onPause() {
         super.onPause();

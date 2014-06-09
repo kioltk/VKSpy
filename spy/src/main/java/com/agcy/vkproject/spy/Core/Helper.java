@@ -27,11 +27,16 @@ import com.vk.sdk.api.VKApi;
 import com.vk.sdk.api.VKApiConst;
 import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKParameters;
+import com.vk.sdk.api.VKParser;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
+import com.vk.sdk.api.methods.VKApiMessages;
+import com.vk.sdk.api.model.VKApiChat;
 import com.vk.sdk.api.model.VKApiUserFull;
 import com.vk.sdk.api.model.VKList;
 import com.vk.sdk.api.model.VKUsersArray;
+
+import org.json.JSONObject;
 
 import java.io.File;
 import java.net.SocketException;
@@ -46,13 +51,14 @@ import java.util.TimerTask;
 public class Helper {
 
     public static final int START_LOADER_ID = 150;
-    public static final int START_DOWNLOADER_ID = 151;
+    public static final int USER_DOWNLOADER_ID = 151;
     public static final int FIRST_LOADING = -1;
     public static final int TIMEOUT_5MINS = 5 * 60;
     public static final int TIMEOUT_1HOUR = 60 * 60;
     public static final int ONLINE = -1;
     public static final int NOW = -2;
     public static final int UNDEFINED = -3;
+    private static final int CHAT_DOWNLOADER_ID = 152;
     private static Context context;
     private static MainActivity mainActivity;
     public static PluralResources pluralResources;
@@ -202,12 +208,12 @@ public class Helper {
         ArrayList<LongPollService.Update> messages = new ArrayList<LongPollService.Update>();
         //Log.i("AGSY SPY", "New updates");
         //onlines we can save immediately
-        String logString = "";
+        //String logString = "";
         for (LongPollService.Update update : updates) {
 
             if (update.isStatusUpdate()) {
                 onlines.add(update);
-                logString += "userid: " + update.getUser().id +" update type: "+ update.getType();
+                //logString += "userid: " + update.getUser().id +" update type: "+ update.getType();
             }
         }
         Log.i("AGСY SPY", "Online updates: "+onlines.size());
@@ -216,18 +222,27 @@ public class Helper {
         // however other updates we have to check
         //Log.i("AGSY SPY", "Onlines saved");
         for (LongPollService.Update update : updates) {
-            if (update.getType() > 10) {
+            if (update.getType() == LongPollService.Update.TYPE_USER_TYPING) {
                 newTyping(update);
             }
         }
 
         for (LongPollService.Update update : updates) {
-            if (update.getType() == LongPollService.Update.TYPE_MESSAGE) {
+            if (update.getType() == LongPollService.Update.TYPE_MESSAGE && update.getExtra().equals(0)) {
                 newMessage(update);
-                Log.i("AGСY SPY", "Message update from userid: " + update.getUser().id);
+                Log.i("AGСY SPY", "Message update from userid: " + update.getUserId());
             }
         }
+        for (LongPollService.Update update : updates) {
 
+            if (update.getType() == LongPollService.Update.TYPE_CHAT_TYPING) {
+                newChatTyping(update);
+                continue;
+            }
+            if (update.getType() == LongPollService.Update.TYPE_MESSAGE && !update.getExtra().equals(0)) {
+                newChatMessage(update);
+            }
+        }
         Log.i("AGСY SPY", "Updates was processed");
 
     }
@@ -242,13 +257,15 @@ public class Helper {
         }
     }
 
-
+    private static void newChatMessage(LongPollService.Update update){
+        denyChatTyping(update.getUserId(), (Integer) update.getExtra());
+    }
     private static void newMessage(LongPollService.Update message) {
-        denyTyping(message.getUser());
+        denyTyping(message);
     }
 
     static HashMap<Integer, TypingTimer> typingTimers = new HashMap<Integer, TypingTimer>();
-
+    static HashMap<Integer, ChatTimer> chatTimers = new HashMap<Integer, ChatTimer>();
     public static void downloadUser(final int userid) {
         VKParameters parameters = new VKParameters();
         parameters.put(VKApiConst.USER_IDS, userid);
@@ -266,7 +283,7 @@ public class Helper {
                             public void run() {
 
                                 Memory.saveUser(((VKList<VKApiUserFull>) response.parsedModel).get(0));
-                                Memory.downloadingIds.remove((Integer) userid);
+                                Memory.downloadingUsersIds.remove((Integer) userid);
 
                             }
                         }).start();
@@ -281,7 +298,7 @@ public class Helper {
 
                         if (error.httpError instanceof SocketException || error.httpError instanceof UnknownHostException) {
 
-                            connectionListener = new NetworkStateReceiver.NetworkStateChangeListener(START_DOWNLOADER_ID) {
+                            connectionListener = new NetworkStateReceiver.NetworkStateChangeListener(USER_DOWNLOADER_ID) {
                                 @Override
                                 public void onConnected() {
 
@@ -304,7 +321,59 @@ public class Helper {
                 }
         );
     }
+    public static void downloadChat(final int chatid){
+        VKParameters parameters = new VKParameters();
+        parameters.put("chat_ids", chatid);
 
+        VKRequest request = new VKApiMessages().getChat(parameters);
+
+        request.executeWithListener(new VKRequest.VKRequestListener(){
+            public NetworkStateReceiver.NetworkStateChangeListener connectionListener;
+
+            @Override
+            public void onComplete(final VKResponse response) {
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        VKList<VKApiChat> parsedResponse = (VKList<VKApiChat>) response.parsedModel;
+                        Memory.saveChat(parsedResponse.get(0));
+                        Memory.downloadingChatsIds.remove((Integer) chatid);
+                    }
+                }).start();
+
+                if (connectionListener != null)
+                    connectionListener.remove();
+            }
+
+            @Override
+            public void onError(VKError error) {
+
+                if (error.httpError instanceof SocketException || error.httpError instanceof UnknownHostException) {
+
+                    connectionListener = new NetworkStateReceiver.NetworkStateChangeListener(CHAT_DOWNLOADER_ID) {
+                        @Override
+                        public void onConnected() {
+
+                            downloadChat(chatid);
+
+                        }
+
+                        @Override
+                        public void onLost() {
+                        }
+
+                    };
+                }
+                if (error.httpError != null)
+                    Log.e("AGCY SPY", error.httpError.toString());
+                else
+
+                    Log.e("AGCY SPY", error.toString());
+
+            }
+        });
+    }
     //endregion
     //region Helpers
     private static Float dpValue = null;
@@ -512,7 +581,7 @@ public class Helper {
             @Override
             public void run() {
                 Log.i("AGCY SPY HELPER","Fetching onlines from "+fetchingUsers.size()+" users");
-                Memory.open();
+                //Memory.open();
                 final ArrayList<Status> statuses = new ArrayList<Status>();
                 for (final VKApiUserFull user : fetchingUsers) {
                     if(user.is_deleted || user.id==1)
@@ -566,7 +635,7 @@ public class Helper {
 
                     }
                 }
-                Memory.close();
+                //Memory.close();
                 fetching = false;
             }
         }).start();
@@ -613,7 +682,30 @@ public class Helper {
         return timeFormat;
     }
 
+    static class ChatTimer extends HashMap<Integer,TypingTimer>{
 
+        public void start(LongPollService.Update update) {
+
+            TypingTimer typingTimer = new TypingTimer(update);
+            put(update.getUserId(), typingTimer);
+            typingTimer.start();
+        }
+
+        public void again(LongPollService.Update update) {
+            if(containsKey(update.getUserId())) {
+                get(update.getUserId()).again();
+            }else{
+                start(update);
+            }
+        }
+        public void deny(int userid) {
+
+            TypingTimer timer = remove(userid);
+            if (timer != null) {
+                timer.deny();
+            }
+        }
+    }
     static class TypingTimer extends Thread {
         public LongPollService.Update update;
         private boolean again = false;
@@ -624,30 +716,30 @@ public class Helper {
 
         @Override
         public void run() {
-            Log.i("AGCY SPY THREAD", "Task runs");
+            Log.i("AGCY SPY THREAD", "TypingTimer runs userid: " + update.getUserId()+", extras: "+update.getExtra() );
             do {
                 try {
                     // Ждем три минуты
-                    Thread.sleep(60 * 3 * 1000);
+                    Thread.sleep( 3* 60 * 1000);
                     // если дождались, тогда постим, что споймали новый тайпинг
                     typingHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             showTyping(update);
-                            denyTyping(update.getUser());
+                            denyTyping(update);
                         }
                     });
-                    Log.i("AGCY SPY THREAD", "Task ended");
+                    Log.i("AGCY SPY THREAD", "TypingTimer ended userid: " + update.getUserId()+", extras: "+update.getExtra() );
                 } catch (InterruptedException e) {
                     // если оборвалось
                     e.printStackTrace();
                     if (again) {
                         // обрыв, чтобы начать заново? тогда повторяем круг
                         again = false;
-                        Log.i("AGCY SPY THREAD", "Task repeated");
+                        Log.i("AGCY SPY THREAD", "TypingTimer repeated userid: " + update.getUserId()+", extras: "+update.getExtra() );
                         continue;
                     }
-                    Log.i("AGCY SPY THREAD", "Task denied");
+                    Log.i("AGCY SPY THREAD", "TypingTimer denied userid: " + update.getUserId()+", extras: "+update.getExtra() );
                     return;
                 }
 
@@ -657,39 +749,65 @@ public class Helper {
         public void again() {
             this.again = true;
             interrupt();
-            Log.i("AGCY SPY THREAD", "Task rerun");
+            Log.i("AGCY SPY THREAD", "TypingTimer rerun userid: " + update.getUserId()+", extras: "+update.getExtra() );
         }
 
         public void deny() {
             interrupt();
         }
     }
+    public static void newChatTyping(final LongPollService.Update update){
 
+        Integer chatid = (Integer) update.getExtra();
+        Memory.getChatById(chatid);
+        update.getUser();
+        if (chatTimers.containsKey(chatid)) {
+            chatTimers.get(chatid).again(update);
+        } else {
+            ChatTimer chatTimer = new ChatTimer();
+            chatTimer.start(update);
+
+            chatTimers.put(chatid, chatTimer);
+        }
+    }
     public static void newTyping(final LongPollService.Update typing) {
-        VKApiUserFull user = typing.getUser();
-        if (typingTimers.containsKey(user.id)) {
-            typingTimers.get(user.id).again();
+        typing.getUser();
+        if (typingTimers.containsKey(typing.getUserId())) {
+            typingTimers.get(typing.getUserId()).again();
         } else {
 
             TypingTimer typingTimer = new TypingTimer(typing);
             typingTimer.start();
-            typingTimers.put(user.id, typingTimer);
+            typingTimers.put(typing.getUserId(), typingTimer);
         }
 
     }
 
     private static Handler typingHandler = new Handler();
+    private static void denyChatTyping(int userid, int chatid){
 
-    private static void denyTyping(VKApiUserFull user) {
-        if (typingTimers.containsKey(user.id)) {
-            typingTimers.remove(user.id).deny();
+        if (chatTimers.containsKey(chatid)) {
+            chatTimers.get(chatid).deny(userid);
+        }
+    }
+    private static void denyTyping(LongPollService.Update update) {
+        if(update.getExtra().equals(0)) {
+            if (typingTimers.containsKey(update.getUserId())) {
+                typingTimers.remove(update.getUserId()).deny();
+            }
+        }else{
+            denyChatTyping(update.getUserId(), (Integer) update.getExtra());
         }
     }
 
     public static void showTyping(final LongPollService.Update update) {
         VKApiUserFull user = update.getUser();
-
-        Memory.setTyping(user);
+        if(update.getExtra().equals(0)) {
+            Memory.setTyping(user);
+        }else{
+            VKApiChat chat = Memory.getChatById((Integer) update.getExtra());
+            Memory.setChatTyping(user, chat);
+        }
 
         Notificator.announce(new ArrayList<LongPollService.Update>() {{
             add(update);

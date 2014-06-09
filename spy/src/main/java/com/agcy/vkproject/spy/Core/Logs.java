@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.Date;
 
 
 public class Logs {
@@ -24,10 +25,12 @@ public class Logs {
                     new InputStreamReader(process.getInputStream()));
 
             StringBuilder log = new StringBuilder();
+            log.append("File created at " +  new Date());
             String line;
             while ((line = bufferedReader.readLine()) != null) {
-                log.append("\n"+line);
+                log.append("\n" +line);
             }
+
             logString = log.toString();
         } catch (IOException e) {
             logString = "can't read logs: " + e.getMessage();
@@ -38,9 +41,9 @@ public class Logs {
     public static File getFile() {
         String logString = getLog();
         File sdCard = Environment.getExternalStorageDirectory();
-        File dir = new File (sdCard.getAbsolutePath() + "/myLogcat");
+        File dir = new File (sdCard.getAbsolutePath() + "/vkspy/logs");
         dir.mkdirs();
-        File file = new File(dir, "logcat.txt");
+        File file = new File(dir, "lastSaved.txt");
 
         try {
             //to write logcat in text file
@@ -57,6 +60,31 @@ public class Logs {
             e.printStackTrace();
         }
         return file;
+    }
+
+    public static void saveNewFile() {
+
+        String logString = getLog();
+        File sdCard = Environment.getExternalStorageDirectory();
+        File dir = new File (sdCard.getAbsolutePath() + "/vkspy/logs/auto");
+        dir.mkdirs();
+        File file = new File(dir, "logcat"+Helper.getUnixNow()+".txt");
+
+        try {
+            //to write logcat in text file
+            FileOutputStream fOut = new FileOutputStream(file);
+            OutputStreamWriter osw = new OutputStreamWriter(fOut);
+
+            // Write the string to the file
+            osw.write(logString);
+            osw.flush();
+            osw.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        getFile();
     }
 }
 

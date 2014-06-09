@@ -2,7 +2,6 @@ package com.agcy.vkproject.spy.Core;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -11,16 +10,19 @@ import android.util.Log;
 
 import com.agcy.vkproject.spy.Fragments.UsersListFragment;
 import com.agcy.vkproject.spy.Listeners.NewUpdateListener;
+import com.agcy.vkproject.spy.Models.ChatTyping;
 import com.agcy.vkproject.spy.Models.DurovOnline;
 import com.agcy.vkproject.spy.Models.Online;
 import com.agcy.vkproject.spy.Models.Status;
 import com.agcy.vkproject.spy.Models.Typing;
 import com.bugsense.trace.BugSenseHandler;
-import com.vk.sdk.api.model.VKApiUser;
+import com.vk.sdk.api.model.VKApiChat;
 import com.vk.sdk.api.model.VKApiUserFull;
+import com.vk.sdk.api.model.VKList;
 import com.vk.sdk.api.model.VKUsersArray;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 
@@ -29,10 +31,12 @@ public class Memory {
 
     private static int filteredUsersCount;
     public static VKUsersArray users = new VKUsersArray();
+    public static VKList<VKApiChat> chats = new VKList<VKApiChat>();
     private static Context context;
     private static DatabaseConnector databaseConnector;
     private static SQLiteDatabase database;
-    public static ArrayList<Integer> downloadingIds = new ArrayList<Integer>();
+    public static ArrayList<Integer> downloadingUsersIds = new ArrayList<Integer>();
+    public static ArrayList<Integer> downloadingChatsIds = new ArrayList<Integer>();
 
 
     public static void initialize(Context context) {
@@ -55,6 +59,8 @@ public class Memory {
         clearUsers();
         clearTypings();
         clearOnlines();
+        clearNetworks();
+        clearChats();
     }
 
     private static ArrayList<NewUpdateListener> typingListeners = new ArrayList<NewUpdateListener>();
@@ -92,7 +98,7 @@ public class Memory {
 
         ArrayList<VKApiUserFull> loadedUsers = new ArrayList<VKApiUserFull>();
         final Cursor cursor = getCursor(DatabaseConnector.USER_DATABASE,
-                DatabaseConnector.USER_DATABASE_FIELDS, null, "hint");
+                DatabaseConnector.USER_DATABASE_FIELDS, null, "hint", null);
 
         final int useridColumnIndex = cursor.getColumnIndex("userid");
         final int sexColumnIndex = cursor.getColumnIndex("sex");
@@ -116,19 +122,73 @@ public class Memory {
                     loadedUsers.add(user);
 
             } while (cursor.moveToNext());
+        cursor.close();
         close();
         users.addAll(loadedUsers);
         return !users.isEmpty();
     }
+    public static Boolean loadChats(){
 
+        ArrayList<VKApiChat> loadedChats = new ArrayList<VKApiChat>();
+        final Cursor cursor = getCursor(DatabaseConnector.CHAT_DATABASE,
+                DatabaseConnector.CHAT_DATABASE_FIELDS, null, null, null);
 
+        final int idColumnIndex = cursor.getColumnIndex("id");
+        final int titleColumnIndex = cursor.getColumnIndex("title");
+        final int photoColumnIndex = cursor.getColumnIndex("photo");
+        final int usersColumnIndex = cursor.getColumnIndex("users");
 
+        if (cursor.moveToFirst())
+            do {
+                VKApiChat chat = new VKApiChat() {{
+                    this.id = cursor.getInt(idColumnIndex);
+                    this.photo_200 = cursor.getString(photoColumnIndex);
+                    this.title = cursor.getString(titleColumnIndex);
+                    this.users = parseIds(cursor.getString(usersColumnIndex).split(","));
+                }};
+                if (chats.getById(chat.id) == null)
+                    loadedChats.add(chat);
+
+            } while (cursor.moveToNext());
+        cursor.close();
+        close();
+        chats.addAll(loadedChats);
+        return !users.isEmpty();
+    }
+
+    public static VKApiChat getChatById(int chatId){
+        if(chats.isEmpty()){
+            loadChats();
+        }
+        VKApiChat chat = null;
+        if(downloadingChatsIds.contains(chatId)){
+            Log.w("AGCY SPY", "No such chatid in memory: chatid = " + chatId);
+            chat = new VKApiChat();
+            chat.id = chatId;
+        }else{
+            for (VKApiChat vkApiChat : chats) {
+                if(vkApiChat.id == chatId){
+                    chat = vkApiChat;
+                    break;
+                }
+            }
+            if (chat == null) {
+
+                Helper.downloadChat(chatId);
+                downloadingChatsIds.add(chatId);
+
+                chat = new VKApiChat();
+                chat.id = chatId;
+            }
+        }
+        return chat;
+    }
     public static VKApiUserFull getUserById(int userid) {
         if (users.isEmpty()) {
             loadUsers();
         }
         VKApiUserFull user = null;
-        if (downloadingIds.contains(userid)) {
+        if (downloadingUsersIds.contains(userid)) {
             Log.w("AGCY SPY", "No such userid in memory: userid = " + userid);
             user = new VKApiUserFull();
             user.id = userid;
@@ -137,7 +197,7 @@ public class Memory {
             if (user == null) {
 
                 Helper.downloadUser(userid);
-                downloadingIds.add(userid);
+                downloadingUsersIds.add(userid);
 
                 user = new VKApiUserFull();
                 user.id = userid;
@@ -176,20 +236,23 @@ public class Memory {
 
     //endregion
     //region Getters
-    public static Cursor getCursor(String databaseName, String[] fields, String selector, String orderby) {
+    public static Cursor getCursor(String databaseName, String[] fields, String selector, String orderby, String limit) {
         open();
-        Cursor cursor;
+        Cursor cursor = null;
         try {
-            cursor = database.query(databaseName, fields, selector, null, null, null, orderby);
+            cursor = database.query(databaseName, fields, selector, null, null, null, orderby, limit);
         }
         catch(Exception exp) {
             HashMap<String,String> expHashmap = new HashMap<String, String>();
             expHashmap.put("databaseName",databaseName);
             expHashmap.put("selector",selector);
             BugSenseHandler.sendExceptionMap(expHashmap,exp);
+            if(cursor!=null){
+                cursor.close();
+            }
             close();
-            open();
-            return getCursor(databaseName,fields,selector,orderby);
+            //open();
+            return getCursor(databaseName,fields,selector,orderby, limit);
         }
         return cursor;
         // don't forget to close !!1
@@ -227,7 +290,7 @@ public class Memory {
         Cursor cursor = getCursor(DatabaseConnector.ONLINE_DATABASE,
                 DatabaseConnector.ONLINE_DATABASE_FIELDS,
                 selector,
-                order);
+                order, null);
         int useridColumnIndex = cursor.getColumnIndex("userid");
         int sinceColumnIndex = cursor.getColumnIndex("since");
         int tillColumnIndex = cursor.getColumnIndex("till");
@@ -242,6 +305,7 @@ public class Memory {
                 onlines.add(new Online(userid,since,till));
                 } while (cursor.moveToNext());
 
+        cursor.close();
         close();
         return onlines;
 
@@ -249,24 +313,25 @@ public class Memory {
 
 
 
-    public static ArrayList<Typing> getTyping() {
+    public static ArrayList<Typing> getTypings() {
         Log.i("AGCY SPY SQL", "Loading typings");
-        return getTyping(null, null);
+        return getTypings(null);
     }
 
-    public static ArrayList<Typing> getTyping(int userid) {
+    public static ArrayList<Typing> getTypingsByUserId(int userid) {
         Log.i("AGCY SPY SQL", "Loading typings by userid:" + userid);
-        return getTyping("userid = " + userid, null);
+        return getTypings("userid = " + userid);
     }
 
-    public static ArrayList<Typing> getTyping(String selector, String order) {
+    public static ArrayList<Typing> getTypings(String selector) {
 
         Cursor cursor = getCursor(DatabaseConnector.TYPING_DATABASE,
                 DatabaseConnector.TYPING_DATABASE_FIELDS,
                 selector,
-                "time desc");
+                "time desc", null);
         int useridColumnIndex = cursor.getColumnIndex("userid");
         int timeColumnIndex = cursor.getColumnIndex("time");
+        int chatidColumnIndex = cursor.getColumnIndex("chatid");
 
         ArrayList<Typing> typings = new ArrayList<Typing>();
 
@@ -274,9 +339,15 @@ public class Memory {
             do {
                 int userid = cursor.getInt(useridColumnIndex);
                 int time = cursor.getInt(timeColumnIndex);
-                Typing typing = new Typing(userid, time);
-                typings.add(typing);
+                int chatid = cursor.getInt(chatidColumnIndex);
+                if (chatid==0) {
+                    Typing typing = new Typing(userid, time);
+                    typings.add(typing);
+                }else{
+                    typings.add(new ChatTyping((userid),time,(chatid)));
+                }
             } while (cursor.moveToNext());
+        cursor.close();
         close();
         return typings;
     }
@@ -391,7 +462,7 @@ public class Memory {
 
         Cursor cursor = getCursor(DatabaseConnector.USER_DATABASE,
                 DatabaseConnector.USER_DATABASE_FIELDS,
-                "userid = " + userid,null);
+                "userid = " + userid,null, null);
 
         int trackedColumnIndex = cursor.getColumnIndex("tracked");
 
@@ -405,6 +476,7 @@ public class Memory {
             forceUpdate(DatabaseConnector.USER_DATABASE, values, "userid", String.valueOf(userid));
 
         }
+        cursor.close();
         close();
         return tracked;
 
@@ -432,7 +504,7 @@ public class Memory {
         Cursor cursor = getCursor(DatabaseConnector.ONLINE_DATABASE,
                 DatabaseConnector.ONLINE_DATABASE_FIELDS,
                 "userid = " + user.id,
-                "id desc");
+                "id desc", null);
         int idColumnIndex = cursor.getColumnIndex("id");
         int useridColumnIndex = cursor.getColumnIndex("userid");
         int sinceColumnIndex = cursor.getColumnIndex("since");
@@ -463,6 +535,7 @@ public class Memory {
                     // или, возможно это ошибка лонгпола\апи, и юзер выходит повторно
                     if ((lastOffline - inaccuracy < time && lastOffline + inaccuracy > time) ||
                             lastOffline>time) {
+                        cursor.close();
                         close();
                         return false;
                     }
@@ -474,6 +547,7 @@ public class Memory {
           value  = saveStatus(user, online, (int) time);
         }
 
+        cursor.close();
         close();
         return value;
     }
@@ -558,7 +632,7 @@ public class Memory {
             valuesList.add(values);
         }
 
-        clearDatabase(DatabaseConnector.USER_DATABASE, DatabaseConnector.USER_DATABASE_CREATE);
+        clearDatabase(DatabaseConnector.USER_DATABASE);
         save(DatabaseConnector.USER_DATABASE, valuesList);
 
     }
@@ -567,7 +641,7 @@ public class Memory {
         Cursor cursor = getCursor(DatabaseConnector.ONLINE_DATABASE,
                 DatabaseConnector.ONLINE_DATABASE_FIELDS,
                 "userid = 1",
-                "id desc");
+                "id desc", null);
         int idColumnIndex = cursor.getColumnIndex("id");
         int tillColumnIndex = cursor.getColumnIndex("till");
 
@@ -584,6 +658,7 @@ public class Memory {
         for (DurovOnline online : onlines) {
             saveOnline(durov,online.from,online.to);
         }
+        cursor.close();
         close();
     }
 
@@ -613,7 +688,7 @@ public class Memory {
         Cursor cursor = getCursor(DatabaseConnector.ONLINE_DATABASE,
                 DatabaseConnector.ONLINE_DATABASE_FIELDS,
                 "userid = " + user.id,
-                "id desc");
+                "id desc", null);
         int idColumnIndex = cursor.getColumnIndex("id");
         int useridColumnIndex = cursor.getColumnIndex("userid");
         int sinceColumnIndex = cursor.getColumnIndex("since");
@@ -625,11 +700,13 @@ public class Memory {
 
             if (online) {
                 if (lastOnline - 300 < time && lastOnline + 300 > time) {
+                    cursor.close();
                     close();
                     return false;
                 }
             } else {
                 if(lastOffline - 300 < time && lastOffline + 300 > time){
+                    cursor.close();
                     close();
                     return false;
                 }
@@ -640,45 +717,51 @@ public class Memory {
         values.put("userid", user.id);
         values.put(online ? "since" : "till", time);
         save(DatabaseConnector.ONLINE_DATABASE, values);
+        cursor.close();
         close();
         return true;
     }
 
 
-    public static void saveTyping(VKApiUserFull user) {
+    public static void saveTyping(int userid) {
+        saveTyping((userid), 0);
+    }
+    public static void saveTyping(int userid, int chatid){
 
         Log.i("AGCY SPY SQL", "Saving typing.");
         ContentValues values = new ContentValues();
-        values.put("userid", user.id);
+        values.put("userid", userid);
+        values.put("chatid", chatid);
         values.put("time", Helper.getUnixNow() - 3 * 60);
 
         save(DatabaseConnector.TYPING_DATABASE, values);
-
-
-
     }
     //endregion
     //region Clearer
 
     public static void clearUsers() {
         users.clear();
-        clearDatabase(DatabaseConnector.USER_DATABASE, DatabaseConnector.USER_DATABASE_CREATE);
+        clearDatabase(DatabaseConnector.USER_DATABASE);
     }
 
     public static void clearTypings() {
-        clearDatabase(DatabaseConnector.TYPING_DATABASE, DatabaseConnector.TYPING_DATABASE_CREATE);
+        clearDatabase(DatabaseConnector.TYPING_DATABASE);
     }
 
     public static void clearOnlines() {
-        clearDatabase(DatabaseConnector.ONLINE_DATABASE, DatabaseConnector.ONLINE_DATABASE_CREATE);
+        clearDatabase(DatabaseConnector.ONLINE_DATABASE);
+    }
+    public static void clearChats() {
+        clearDatabase(DatabaseConnector.CHAT_DATABASE);
+    }
+    public static void clearNetworks() {
+        clearDatabase(DatabaseConnector.NETWORK_DATABASE);
     }
 
-    private static void clearDatabase(String databaseName, String createDatabase) {
+    private static void clearDatabase(String databaseName) {
         open();
-
         Log.i("AGCY SPY SQL", "Clearing database " + databaseName);
         database.delete(databaseName, null, null);
-
         close();
     }
     //endregion
@@ -699,7 +782,7 @@ public class Memory {
             }
 
         }
-        Log.i("AGCY SPY SQL", "New operation. Count of operation: " + dbOperations);
+        //Log.i("AGCY SPY SQL", "New operation. Count of operation: " + dbOperations);
     }
 
     public static void close() {
@@ -711,7 +794,7 @@ public class Memory {
             databaseConnector.close();
         }
         dbOperations--;
-        Log.i("AGCY SPY SQL", "Operation ended. Count of operation: " + dbOperations);
+        //Log.i("AGCY SPY SQL", "Operation ended. Count of operation: " + dbOperations);
     }
 
     public static int getCountOfTracked() {
@@ -723,19 +806,30 @@ public class Memory {
         }
         return filteredUsersCount;
     }
-
-    public static void setTyping(VKApiUserFull user) {
-
-        Typing typing = new Typing(user, Helper.getUnixNow());
-        for (NewUpdateListener onlineListener : typingListeners) {
-            onlineListener.newItem(typing);
+    public static void setChatTyping(VKApiUserFull user, VKApiChat chat){
+        ChatTyping typing = new ChatTyping(user, Helper.getUnixNow()- 180, chat);
+        for (NewUpdateListener typingListener : typingListeners) {
+            typingListener.newItem(typing);
         }
-        for (NewUpdateListener onlineListener : typingOnceListeners) {
-            onlineListener.newItem(typing);
+        for (NewUpdateListener typingOnceListener : typingOnceListeners) {
+            typingOnceListener.newItem(typing);
         }
         typingOnceListeners.clear();
 
-        saveTyping(user);
+        saveTyping(user.id,chat.id);
+    }
+    public static void setTyping(VKApiUserFull user) {
+
+        Typing typing = new Typing(user, Helper.getUnixNow() - 180);
+        for (NewUpdateListener typingListener : typingListeners) {
+            typingListener.newItem(typing);
+        }
+        for (NewUpdateListener typingOnceListener : typingOnceListeners) {
+            typingOnceListener.newItem(typing);
+        }
+        typingOnceListeners.clear();
+
+        saveTyping(user.id);
     }
     private static UsersListFragment.UsersListener usersListener;
     public static void addUsersListener(UsersListFragment.UsersListener usersListener){
@@ -750,14 +844,16 @@ public class Memory {
         Cursor cursor = getCursor(DatabaseConnector.ONLINE_DATABASE,
                 DatabaseConnector.ONLINE_DATABASE_FIELDS,
                 "userid = " + id,
-                "id desc");
+                "id desc", "1");
         int tillColumnIndex = cursor.getColumnIndex("till");
         if (cursor.moveToFirst()) {
             int lastOffline = cursor.getInt(tillColumnIndex);
+            cursor.close();
             close();
             return (lastOffline<=0);
 
         }
+        cursor.close();
         close();
         return false;
     }
@@ -765,10 +861,23 @@ public class Memory {
     public static void saveNetwork(boolean connected) {
 
         ContentValues networkValues = new ContentValues();
-        networkValues.put("offline", connected);
+        networkValues.put("connected", connected);
         networkValues.put("time", Helper.getUnixNow());
 
         save(DatabaseConnector.NETWORK_DATABASE,networkValues);
+    }
+
+    public static void saveChat(VKApiChat chat) {
+
+        Log.i("AGCY SPY SQL", "Saving chat.");
+        ContentValues values = new ContentValues();
+        values.put("id", chat.id);
+        values.put("title", chat.title);
+        values.put("photo", chat.getBiggestPhoto());
+        values.put("users", Arrays.toString(chat.users).replace("[","").replace("]",""));
+        save(DatabaseConnector.CHAT_DATABASE, values);
+        chats.add(chat);
+
     }
 
 
@@ -780,6 +889,7 @@ public class Memory {
         private static final String TYPING_DATABASE = "typing_database";
         private static final String USER_DATABASE = "user_database";
         private static final String NETWORK_DATABASE = "network_database";
+        public static final String CHAT_DATABASE = "chat_database";
         private static final String[] ONLINE_DATABASE_FIELDS = {
                 "id",
                 "userid",
@@ -789,7 +899,8 @@ public class Memory {
         private static final String[] TYPING_DATABASE_FIELDS = {
                 "id",
                 "userid",
-                "time"
+                "time",
+                "chatid"
         };
         private static final String[] USER_DATABASE_FIELDS = {
                 "userid",
@@ -799,6 +910,12 @@ public class Memory {
                 "last_name",
                 "isFriend",
                 "tracked"
+        };
+        public static final String[] CHAT_DATABASE_FIELDS = {
+                "id",
+                "title",
+                "photo",
+                "users"
         };
         private static final String USER_DATABASE_CREATE =
                 "create table " +
@@ -828,7 +945,8 @@ public class Memory {
                         " ( " +
                         "id integer primary key autoincrement," +
                         "userid integer not null," +
-                        "time integer not null" +
+                        "time integer not null," +
+                        "chatid integer default 0" +
                         " ) ";
         public static final String NETWORK_DATABASE_CREATE =
                 "create table " +
@@ -838,9 +956,19 @@ public class Memory {
                         "connected integer not null," +
                         "time integer not null" +
                         " ) ";
+        public static final String CHAT_DATABASE_CREATE =
+                " create table " +
+                        CHAT_DATABASE +
+                        " ( " +
+                        " id integer primary key, " +
+                        " title text, " +
+                        " photo text, " +
+                        " users text "+
+                        " ) "
+                ;
 
         public DatabaseConnector(Context context) {
-            super(context, DATABASE, null, 9);
+            super(context, DATABASE, null, 13);
         }
 
         @Override
@@ -848,12 +976,23 @@ public class Memory {
             database.execSQL(ONLINE_DATABASE_CREATE);
             database.execSQL(TYPING_DATABASE_CREATE);
             database.execSQL(USER_DATABASE_CREATE);
+            database.execSQL(CHAT_DATABASE_CREATE);
+            database.execSQL(NETWORK_DATABASE_CREATE);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
-            database.execSQL("drop table if exists "+ NETWORK_DATABASE);
-            database.execSQL(NETWORK_DATABASE_CREATE);
+
+            if(oldVersion<11){
+                database.execSQL(CHAT_DATABASE_CREATE);
+            }
+            if(oldVersion<12){
+                database.execSQL("alter table "+ TYPING_DATABASE+" add chatid default 0");
+            }
+            if(oldVersion<13) {
+                database.execSQL("drop table if exists " + NETWORK_DATABASE);
+                database.execSQL(NETWORK_DATABASE_CREATE);
+            }
         }
 
     }

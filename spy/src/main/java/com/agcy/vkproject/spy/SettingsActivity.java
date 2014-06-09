@@ -2,6 +2,7 @@ package com.agcy.vkproject.spy;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,6 +17,7 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
+import android.util.AttributeSet;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
 import android.view.View;
@@ -72,7 +74,7 @@ public class SettingsActivity extends PreferenceActivity {
         logoutButtonView.findViewById(R.id.logout).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //logout(v);
+                logout();
             }
         });
     }
@@ -83,6 +85,29 @@ public class SettingsActivity extends PreferenceActivity {
             // Show the Up button in the action bar.
             getActionBar().setDisplayHomeAsUpEnabled(true);
         }
+    }
+
+    @Override
+    public View onCreateView(String name, Context context, AttributeSet attrs) {
+
+        View view = super.onCreateView(name, context, attrs);
+        if(view!=null) {
+            view.setPadding(0, 0, 0, 0);
+            ListView listView = getListView();
+            listView.setPadding(0,0,0,0);
+        }
+        return view;
+    }
+
+    @Override
+    public View onCreateView(View parent, String name, Context context, AttributeSet attrs) {
+        View view = super.onCreateView(parent, name, context, attrs);
+        if(view!=null) {
+            view.setPadding(0, 0, 0, 0);
+            ListView listView = getListView();
+            listView.setPadding(0, 0, 0, 0);
+        }
+        return view;
     }
 
     @Override
@@ -98,7 +123,7 @@ public class SettingsActivity extends PreferenceActivity {
             //
             // TODO: If Settings has multiple levels, Up should navigate up
             // that hierarchy.
-            NavUtils.navigateUpFromSameTask(this);
+            onBackPressed();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -119,7 +144,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         addPreferencesFromResource(R.xml.pref_notification);
 
-        addPreferencesFromResource(R.xml.pref_additional);
+        //addPreferencesFromResource(R.xml.pref_additional);
 
         bindPreferenceSummaryToValue(findPreference("notifications_ringtone"));
         bindPreferenceSummaryToValue(findPreference("notifications_offline_type"));
@@ -138,7 +163,8 @@ public class SettingsActivity extends PreferenceActivity {
                 return true;
             }
         });
-        Preference sendLogPreference = (Preference) findPreference("send_logs");
+        //Preference sendLogPreference = (Preference) findPreference("send_logs");
+        /*
         sendLogPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
 
@@ -151,11 +177,11 @@ public class SettingsActivity extends PreferenceActivity {
                 return true;
             }
         });
-
+        */
     }
 
 
-    public void logout(View view) {
+    public void logout() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setMessage(getString(R.string.logout_message))

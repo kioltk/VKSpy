@@ -143,9 +143,6 @@ public class FilterActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
     public static class FilterUsersFragment extends UsersListFragment {
         FilterActivity activity;
         private ListView listView;

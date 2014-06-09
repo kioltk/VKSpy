@@ -6,6 +6,7 @@ import android.os.Build;
 import android.util.Log;
 
 import com.agcy.vkproject.spy.Core.Helper;
+import com.agcy.vkproject.spy.Core.Logs;
 import com.agcy.vkproject.spy.Core.Notificator;
 import com.bugsense.trace.BugSenseHandler;
 import com.bugsense.trace.ExceptionCallback;
@@ -20,7 +21,7 @@ public class SpyApplication extends Application implements ExceptionCallback {
     public void onCreate() {
 
         super.onCreate();
-
+        Logs.saveNewFile();
         try {
             Helper.pluralResources = new PluralResources( getResources() );
         } catch (SecurityException e1) {

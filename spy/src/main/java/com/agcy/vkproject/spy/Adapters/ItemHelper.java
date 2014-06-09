@@ -2,6 +2,7 @@ package com.agcy.vkproject.spy.Adapters;
 
 import android.util.Log;
 
+import com.agcy.vkproject.spy.Adapters.CustomItems.ChatTypingItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.DateItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.FilterUserItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.HeaderItem;
@@ -13,6 +14,7 @@ import com.agcy.vkproject.spy.Adapters.CustomItems.TypingItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.UpdateItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.UserItem;
 import com.agcy.vkproject.spy.Core.Helper;
+import com.agcy.vkproject.spy.Models.ChatTyping;
 import com.agcy.vkproject.spy.Models.Online;
 import com.agcy.vkproject.spy.Models.Status;
 import com.agcy.vkproject.spy.Models.Typing;
@@ -41,10 +43,13 @@ public class ItemHelper {
             Item item = null;
             if (update instanceof Online)
                 item = new OnlineItem((Online) update);
-            if(update instanceof Status)
+            if (update instanceof Status)
                 item = new StatusItem((Status) update);
             if (update instanceof Typing)
-                item = new TypingItem((Typing) update);
+                if (update instanceof ChatTyping) {
+                    item = new ChatTypingItem((ChatTyping)update);
+                } else
+                    item = new TypingItem((Typing) update);
             items.add(item);
             lastUpdate = update;
         }

@@ -18,7 +18,7 @@
     <string name="logout_cancel">Отмена</string>
     <string name="nothinghere">Событий пока нет</string>
     <string name="signin">Войти</string>
-    <string name="welcome_text">Дбро пжлвать в дивный мир абстркцй и наркмньй</string>
+    <string name="welcome_text">Добро пожаловать в дивный новый мир приватности и социальных сетей</string>
     <string name="come_online_m">Зашёл в сеть</string>
     <string name="come_online_f">Зашла в сеть</string>
     <string name="gone_offline_m">Вышел из сети</string>
@@ -56,8 +56,8 @@
     <string name="app_about">О приложении</string>
     <string name="durov_function_title">Суперфункция</string>
     <string name="durov_function_decription">Слежка за Павлом Дуровым!</string>
-    <string name="app_about_button">Ясно</string>
-    <string name="app_about_description">Привет</string>
+    <string name="app_about_button">Ага</string>
+    <string name="app_about_description"><![CDATA[Приложение незаметно следит за пользователями ВК.\n<a href="http://vk.com/happysanta"><br/><br/>Happy Santa LLC</a> © 2014<br/><br/>Сооружено <a href="http://vk.com/kio_tk">Денисом Давыдовым</a> при поддержке <a href="http://vk.com/ez">Жени</a> и <a href="http://vk.com/emc2">Вани</a>.]]></string>
     <string name="important">Важные</string>
     <string name="select_all">Выбрать всех</string>
     <string name="deselect_all">Снять выделение</string>
@@ -72,10 +72,9 @@
     <string name="durov_function_activating_title">Суперфича</string>
     <string name="durov_function_activating_message">Загрузка</string>
     <string name="durov_function_activated">Функция активирована</string>
-    <string name="durov_joke">Место для Ваниной шутки</string>
-    <string name="durov_joke_title">Место для Ваниной шутки</string>
-    <string name="durov_joke_message">Ванина шутка</string>
-    <string name="durov_joke_button">Вана молодец</string>
+    <string name="durov_joke_title">Слежка за Павлом Дуровым</string>
+    <string name="durov_joke_message">Подобно Павлу, мы не идем на компромиссы. Да, руками разработчиков ВК ему удалось спрятать свой статус онлайн от чужих глаз. Но только не от нашего сумрачного гения. Happy Santa возвращает вам свободу, ведь vita sene libertate nlhil.</string>
+    <string name="durov_joke_button">Следить</string>
     <string name="durov_function_almost">Почти готово</string>
     <string name="durov_function_activated_title">Слежка за Дуровым</string>
     <string name="durov_function_updated">Обновлено</string>
@@ -94,9 +93,14 @@
     <string name="vk_down">@string/unknown_error</string>
     <string name="additional">Дополнительно</string>
     <string name="termsandpolicy">Условия использования\nПолитика конфиденциальности</string>
-    <string name="on">on</string>
-    <string name="off">off</string>
+    <string name="on">ВКЛ</string>
+    <string name="off">ВЫКЛ</string>
     <string name="silent">Silent</string>
+    <string name="typings_notifications">Тайпинг уведомления</string>
+    <string name="chats">Чаты</string>
+    <string name="chat">Чат</string>
+    <string name="was_writing_chat_m">Писал в чате 3 минуты назад</string>
+    <string name="was_writing_chat_f">Писала в чате 3 минуты назад</string>
 
     <plurals name="usersSelected">
         <item quantity="zero">Никого не выбрано</item>
@@ -106,16 +110,22 @@
         <item quantity="other">Выбрано %d</item>
     </plurals>
     <plurals name="onlines_notification" >
-        <item quantity="one">И ещё %d человек зашёл в сеть</item>
+        <item quantity="one">И ещё %d человек зашёли в сеть</item>
         <item quantity="few">И ещё %d человека зашли в сеть</item>
         <item quantity="many">И ещё %d человек зашли в сеть</item>
         <item quantity="other">И ещё %d человека зашли в сеть</item>
     </plurals>
     <plurals name="offlines_notification">
-        <item quantity="one">И ещё %d человек вышел из сети</item>
+        <item quantity="one">И ещё %d человек вышли из сети</item>
         <item quantity="few">И ещё %d человека вышли из сети</item>
         <item quantity="many">И ещё %d человек вышли из сети</item>
         <item quantity="other">И ещё %d человека  вышли из сети</item>
+    </plurals>
+    <plurals name="chat_notification">
+        <item quantity="one">И ещё %d человек писали в чате</item>
+        <item quantity="few">И ещё %d человека писали в чате</item>
+        <item quantity="many">И ещё %d человек писали в чате</item>
+        <item quantity="other">И ещё %d человека  писали в чате</item>
     </plurals>
 
 </resources>

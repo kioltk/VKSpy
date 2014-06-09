@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">VK Spy</string>
+    <string name="main">Головна</string>
+    <string name="login">Вхід</string>
+    <string name="friends">Друзі</string>
+    <string name="settings">Налаштування</string>
+    <string name="welcome">Привіт</string>
+    <string name="user">Користувач</string>
+    <string name="onlines">Онлайни</string>
+    <string name="typings">Тайпінги</string>
+    <string name="logout">Вихід</string>
+    <string name="app_description"><![CDATA[<b>VK Spy</b> непомітно відстежує активність Ваших друзів та інших користувачів ВКонтактi.]]></string>
+    <string name="logout_message">Після виходу ми не зможемо далі відстежувати активність користувачів</string>
+    <string name="logout_title">Дійсно вийти?</string>
+    <string name="logout_accept">Вихід!</string>
+    <string name="logout_cancel">Скасувати</string>
+    <string name="nothinghere">Подій поки немає</string>
+    <string name="signin">Ввійти</string>
+    <string name="welcome_text">Ласкаво просимо в прекрасний новий світ приватності і соціальних мереж</string>
+    <string name="come_online_m">Зайшов в мережу</string>
+    <string name="come_online_f">Зайшла в мережу</string>
+    <string name="gone_offline_m">Вийшов з мережі</string>
+    <string name="gone_offline_f">Вийшла з мережі</string>
+    <string name="was_writing_m">Писав 3 хвилини тому</string>
+    <string name="was_writing_f">Писала 3 хвилини тому</string>
+    <string name="last_seen">заходив</string>
+    <string name="last_seen_f">заходила</string>
+    <string name="at">в</string>
+    <string name="ago">назад</string>
+    <string name="now">зараз</string>
+    <string name="today">сьогодні</string>
+    <string name="yesterday">вчора</string>
+    <string name="moment">момент</string>
+    <string name="min">хв</string>
+    <string name="hr">ч</string>
+    <string name="hrs">ч</string>
+    <string name="undefined">undefined</string>
+    <string name="day">д</string>
+    <string name="sec">сек</string>
+    <string name="title_activity_filter">За ким стежити</string>
+    <string name="apply">ОК</string>
+    <string name="no_tracks">Не за ким стежити</string>
+    <string name="no_events">Подій поки немає</string>
+    <string name="filter_tip">Виберіть за ким стежити</string>
+    <string name="way_to_notify">Спосіб повідомлення</string>
+    <string name="popup">Спливаюче сповіщення</string>
+    <string name="notification">Повідомлення до шторці</string>
+    <string name="enabled">Увімкнено</string>
+    <string name="offline_notifications">Оффлайн повідомлення</string>
+    <string name="online_notifications">Онлайн повідомлення</string>
+    <string name="sound">Звук</string>
+    <string name="vibrate">Вібро</string>
+    <string name="notifications">Сповіщення</string>
+    <string name="app_about">Про програму</string>
+    <string name="durov_function_title">Суперфункція</string>
+    <string name="durov_function_decription">Стеження за Павлом Дуровим!</string>
+    <string name="app_about_button">Ага</string>
+    <string name="app_about_description"><![CDATA[Додаток непомiтно стежить за користувачами ВК.\n<a href="http://vk.com/happysanta"><br/><br/>Happy Santa LLC</a> © 2014<br/><br/>Споруджено <a href="http://vk.com/kio_tk">Денисом Давидовим</a> за підтримки <a href="http://vk.com/ez">Жені</a> та <a href="http://vk.com/emc2">Вані</a>.]]></string>
+    <string name="important">Важливі</string>
+    <string name="select_all">Вибрати всіх</string>
+    <string name="deselect_all">Зняти виділення</string>
+    <string name="moment_ago">щойно</string>
+    <string name="enable_spy">Увімкнути стеження</string>
+    <string name="onlines_notification" />
+    <string name="durov_start_message">Включити стеження за Павлом Дуровим?</string>
+    <string name="durov_start_title">Ексклюзивна фіча</string>
+    <string name="durov_start_ok">Стежити!</string>
+    <string name="durov_start_update">Оновити</string>
+    <string name="durov_start_cancel">Хто це?</string>
+    <string name="durov_function_activating_title">Суперфіча</string>
+    <string name="durov_function_activating_message">Завантаження</string>
+    <string name="durov_function_activated">Функція активована</string>
+    <string name="durov_joke">Місце для Ваніного жарту</string>
+    <string name="durov_joke_title">@string/durov_function_title</string>
+    <string name="durov_joke_message">Подібно до Павла, ми не йдемо на компроміси. Так, руками розробників ВК йому вдалося сховати свій статус онлайн від чужих очей. Але тільки не від нашого сутінкового генія. Happy Santa повертає вам свободу, адже vita sene libertate nlhil.</string>
+    <string name="durov_joke_button">@string/durov_start_ok</string>
+    <string name="durov_function_almost">Майже готово</string>
+    <string name="durov_function_activated_title">Стеження за Дуровим</string>
+    <string name="durov_function_updated">Оновлено</string>
+    <string name="durov_function_updating">Оновлення</string>
+    <string name="error">Помилка</string>
+    <string name="server_did_not_respond">Сервер не відповідає</string>
+    <string name="check_connection">Перевірте ваше інтернет з\'єднання</string>
+    <string name="unknown_error">Щось пішло не так</string>
+    <string name="need_access">Для використання програми потрібен доступ</string>
+    <string name="help">Допомога</string>
+    <string name="no_typings">Тайпінгiв поки немає</string>
+    <string name="no_friends">У вас немає друзів =(</string>
+    <string name="close">Закрити</string>
+    <string name="durov_wanna_see">Хочу подивитися!</string>
+    <string name="send_logs">Надіслати логи</string>
+    <string name="vk_down">@string/unknown_error</string>
+    <string name="additional">Додатково</string>
+    <string name="termsandpolicy">Умови використання\nПолітіка конфіденційності</string>
+    <string name="on">ВКЛ</string>
+    <string name="off">ВИКЛ</string>
+    <string name="silent">Silent</string>
+    <string name="typings_notifications">Тайпінг повідомлення</string>
+    <string name="chats">Чати</string>
+
+    <string name="was_writing_chat_m">Писав в чаті 3 хвилини тому</string>
+    <string name="was_writing_chat_f">Писала в чаті 3 хвилини тому</string>
+
+    <plurals name="usersSelected">
+        <item quantity="zero">Нікого не вибрано</item>
+        <item quantity="one">Вибран %d</item>
+        <item quantity="few">Вибрано %d</item>
+        <item quantity="many">Вибрані %d</item>
+        <item quantity="other">Вибрані %d</item>
+   </plurals>
+    <plurals name="onlines_notification">
+        <item quantity="one">І ще %d людина зайшли в мережу</item>
+        <item quantity="few">І ще %d людини зайшли в мережу</item>
+        <item quantity="many">І ще %d людей зайшли в мережу</item>
+        <item quantity="other">І ще %d людини зайшли в мережу</item>
+   </plurals>
+    <plurals name="offlines_notification">
+        <item quantity="one">І ще %d людина вийшли з мережі</item>
+        <item quantity="few">І ще %d людини вийшли з мережі</item>
+        <item quantity="many">І ще %d людей вийшли з мережі</item>
+        <item quantity="other">І ще %d людини вийшли з мережі</item>
+   </plurals>
+    <plurals name="chat_notification">
+        <item quantity="one">І ще %d людина писала в чатi</item>
+        <item quantity="few">І ще %d людини писали в чатi</item>
+        <item quantity="many">І ще %d людей писали в чатi</item>
+        <item quantity="other">І ще %d людини писали в чатi</item>
+    </plurals>
+</resources>

@@ -7,7 +7,9 @@
     android:layout_height="120dp">
     <LinearLayout
 
-        android:layout_width="120dp"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:minWidth="120dp"
         android:layout_height="match_parent"
         android:gravity="right|center_vertical"
         android:orientation="vertical">
@@ -24,16 +26,18 @@
         android:layout_width="30dp"
         android:layout_height="match_parent"/>
     <LinearLayout
-        android:gravity="center"
-        android:layout_width="120dp"
+        android:gravity="left|center_vertical"
+        android:layout_weight="1"
+        android:minWidth="120dp"
+        android:layout_width="0dp"
         android:layout_height="match_parent">
 
         <TextView
-            android:visibility="gone"
-            android:id="@+id/online"
-            android:text="Online"
-            android:textAllCaps="true"
-            android:layout_width="120dp"
+            android:textColor="@color/additional_text_color"
+            android:id="@+id/additional"
+            android:visibility="invisible"
+            android:text="@string/chat"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>
 </LinearLayout>

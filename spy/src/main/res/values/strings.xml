@@ -17,7 +17,7 @@
     <!-- Окно "об приложении" -->
     <string name="app_about">About the app</string>
     <string name="app_about_button">OK</string>
-    <string name="app_about_description">Some description</string>
+    <string name="app_about_description"><![CDATA[This app invisibly monitors your friends and VK users activity.<br/><br/><a href="http://vk.com/happysanta">Happy Santa LLC</a> © 2014<br/><br/>Created by <a href="http://vk.com/kio_tk">Denis Davidov</a>, <a href="http://vk.com/ez">Evgeny Zinoviev</a>, <a href="http://vk.com/emc2">Ivan Gusev</a>.]]></string>
 
     <!-- Настройки, подсказки к настройкам и разное-->
     <string name="enable_spy">Enable spy</string>
@@ -70,7 +70,9 @@
     <string name="gone_offline_m">has gone offline</string>
     <string name="gone_offline_f">has gone offline</string>
     <string name="was_writing_m">was typing 3 minutes ago</string>
-    <string name="was_writing_f">was typing 3 minutes ago</string>
+    <string name="was_writing_f">@string/was_writing_m</string>
+    <string name="was_writing_chat_m">was typing 3 in the chat minutes ago</string>
+    <string name="was_writing_chat_f">@string/was_writing_chat_m</string>
 
     <!-- статус на странице -->
     <string name="online">online</string>
@@ -94,7 +96,7 @@
 
     <string name="durov_start_title">Exclusive feature</string>
     <string name="durov_start_message">Enable spying upon Mr.Durov?</string>
-    <string name="durov_start_ok">Sure!</string>
+    <string name="durov_start_ok">Spy on</string>
     <string name="durov_start_update">Update</string>
     <string name="durov_start_cancel">Who’s that guy?</string>
 
@@ -108,19 +110,22 @@
     <string name="durov_function_updated">Updated</string>
     <string name="durov_wanna_see">Wanna see!</string>
 
-    <string name="durov_joke">Место для Ваниной шутки</string>
-    <string name="durov_joke_title">Место для Ваниной шутки</string>
-    <string name="durov_joke_message">Ванина шутка</string>
-    <string name="durov_joke_button">Вана молодец</string>
+
+    <string name="durov_joke_title">@string/durov_function_title</string>
+    <string name="durov_joke_message">Just like Pavel, we don’t compromise. Sure, VK developers made his online status invisible. But not for our dark minds. Happy Santa brings back your freedom, after all vita sene libertate nlhil.</string>
+    <string name="durov_joke_button">@string/durov_start_ok</string>
 
     <string name="open_profile">Open profile</string>
     <string name="send_logs">Send logs</string>
     <string name="vk_down">@string/unknown_error</string>
     <string name="additional">Additional</string>
     <string name="termsandpolicy">Terms of use and Privacy policy</string>
-    <string name="on">on</string>
-    <string name="off">off</string>
+    <string name="on">ON</string>
+    <string name="off">OFF</string>
     <string name="silent">Silent</string>
+    <string name="typings_notifications">Typing notifications</string>
+    <string name="chats">Chats</string>
+    <string name="chat">Chat</string>
 
 
     <!-- Числительные -->
@@ -140,6 +145,11 @@
         <item quantity="one">And one more have gone offline</item>
         <item quantity="many">And %d more have gone offline</item>
         <item quantity="other">And %d more have gone offline</item>
+    </plurals>
+    <plurals name="chat_notification">
+        <item quantity="one">And one more were typing in the chat</item>
+        <item quantity="many">And %d more were typing in the chat</item>
+        <item quantity="other">And %d more were typing in the chat</item>
     </plurals>
 
 

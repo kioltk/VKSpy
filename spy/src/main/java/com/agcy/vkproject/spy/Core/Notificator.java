@@ -23,14 +23,12 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.agcy.vkproject.spy.Longpoll.LongPollService;
 import com.agcy.vkproject.spy.MainActivity;
 import com.agcy.vkproject.spy.R;
-import com.agcy.vkproject.spy.SpyApplication;
 import com.agcy.vkproject.spy.UserActivity;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
@@ -38,6 +36,7 @@ import com.nostra13.universalimageloader.core.assist.ImageLoadingListener;
 import com.vk.sdk.api.model.VKApiUserFull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class Notificator {
@@ -79,15 +78,7 @@ public class Notificator {
     }
 
     private static boolean applicationIsOpened() {
-        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-
-        List<ActivityManager.RunningTaskInfo> taskInfo = am.getRunningTasks(1);
-
-        Log.d("topActivity", "CURRENT Activity ::"
-                + taskInfo.get(0).topActivity.getClassName());
-
-        ComponentName componentInfo = taskInfo.get(0).topActivity;
-        return componentInfo.getPackageName().equals(context.getPackageName());
+        return MainActivity.isOpened;
     }
 
     /**
@@ -101,7 +92,7 @@ public class Notificator {
             return null;
         switch (update.getType()) {
             case LongPollService.Update.TYPE_OFFLINE:
-                if (!Memory.isTracked(update.getUser()) || onlinesOpened)
+                if (!Memory.isTracked(update.getUserId()) || onlinesOpened)
                     return null;
 
                 boolean enabledOffline = notificationsPreferences.getBoolean("notifications_offline_enabled", true);
@@ -111,7 +102,7 @@ public class Notificator {
                 return notificationsPreferences.getString("notifications_offline_type", "1").equals("1");
 
             case LongPollService.Update.TYPE_ONLINE:
-                if (!Memory.isTracked(update.getUser()) || onlinesOpened)
+                if (!Memory.isTracked(update.getUserId()) || onlinesOpened)
                     return null;
 
                 boolean enabledOnline = notificationsPreferences.getBoolean("notifications_online_enabled", true);
@@ -119,56 +110,60 @@ public class Notificator {
                     return null;
                 return notificationsPreferences.getString("notifications_offline_type", "1").equals("1");
 
-            case LongPollService.Update.TYPE_USER_TYPING:
-                return false;
             case LongPollService.Update.TYPE_CHAT_TYPING:
+                boolean multichatEnabled = notificationsPreferences.getBoolean("notifications_chat_typing_enabled", true);
+                return multichatEnabled ? false : null;
+            case LongPollService.Update.TYPE_USER_TYPING:
+                boolean typingEnabled = notificationsPreferences.getBoolean("notifications_typing_enabled", true);
+                return typingEnabled ? false : null;
             default:
                 return null;
         }
 
 
     }
+
     /**
      * these methods are not needed now
-    public static Boolean updateShouldPopup(LongPollService.Update update) {
-
-        SharedPreferences prefs = context.getSharedPreferences("popup", Context.MODE_MULTI_PROCESS);
-        switch (update.getType()) {
-            case LongPollService.Update.TYPE_OFFLINE:
-            case LongPollService.Update.TYPE_ONLINE:
-                return Memory.isTracked(update.getUser());
-            case LongPollService.Update.TYPE_CHAT_TYPING:
-            case LongPollService.Update.TYPE_USER_TYPING:
-            default:
-                return false;
-        }
-    }
-
-    public static Boolean updateShouldNotify(LongPollService.Update update) {
-
-        SharedPreferences prefs = context.getSharedPreferences("notification", Context.MODE_MULTI_PROCESS);
-
-
-        switch (update.getType()) {
-            case LongPollService.Update.TYPE_OFFLINE:
-                boolean offlineNotify = prefs.getBoolean("notificationOffline", true);
-                if (!offlineNotify)
-                    return false;
-                return update.getUser().isTracked();
-            case LongPollService.Update.TYPE_ONLINE:
-
-                boolean onlineNotify = prefs.getBoolean("notificationOnline", true);
-                if (!onlineNotify)
-                    return false;
-                return update.getUser().isTracked();
-            case LongPollService.Update.TYPE_USER_TYPING:
-                return true;
-            case LongPollService.Update.TYPE_CHAT_TYPING:
-            default:
-                return false;
-        }
-    }
-    */
+     * public static Boolean updateShouldPopup(LongPollService.Update update) {
+     * <p/>
+     * SharedPreferences prefs = context.getSharedPreferences("popup", Context.MODE_MULTI_PROCESS);
+     * switch (update.getType()) {
+     * case LongPollService.Update.TYPE_OFFLINE:
+     * case LongPollService.Update.TYPE_ONLINE:
+     * return Memory.isTracked(update.getUser());
+     * case LongPollService.Update.TYPE_CHAT_TYPING:
+     * case LongPollService.Update.TYPE_USER_TYPING:
+     * default:
+     * return false;
+     * }
+     * }
+     * <p/>
+     * public static Boolean updateShouldNotify(LongPollService.Update update) {
+     * <p/>
+     * SharedPreferences prefs = context.getSharedPreferences("notification", Context.MODE_MULTI_PROCESS);
+     * <p/>
+     * <p/>
+     * switch (update.getType()) {
+     * case LongPollService.Update.TYPE_OFFLINE:
+     * boolean offlineNotify = prefs.getBoolean("notificationOffline", true);
+     * if (!offlineNotify)
+     * return false;
+     * return update.getUser().isTracked();
+     * case LongPollService.Update.TYPE_ONLINE:
+     * <p/>
+     * boolean onlineNotify = prefs.getBoolean("notificationOnline", true);
+     * if (!onlineNotify)
+     * return false;
+     * return update.getUser().isTracked();
+     * case LongPollService.Update.TYPE_USER_TYPING:
+     * return true;
+     * case LongPollService.Update.TYPE_CHAT_TYPING:
+     * default:
+     * return false;
+     * }
+     * }
+     */
 
     public static void showPopup(ArrayList<Event> events) {
         if (events.isEmpty())
@@ -192,10 +187,10 @@ public class Notificator {
             }
         }
         if (lastOnlineEvent != null) {
-            showPopup(lastOnlineEvent,onlinesPopup);
+            showPopup(lastOnlineEvent, onlinesPopup);
         }
         if (lastOfflineEvent != null) {
-            showPopup(lastOfflineEvent,offlinesPopup);
+            showPopup(lastOfflineEvent, offlinesPopup);
         }
     }
 
@@ -210,9 +205,9 @@ public class Notificator {
         TextView titleView = (TextView) rootView.findViewById(R.id.title);
         titleView.setText(lastEvent.headerText);
         TextView descriptionView = (TextView) rootView.findViewById(R.id.description);
-        if(countEvents==1){
+        if (countEvents == 1) {
             descriptionView.setText(lastEvent.messageText);
-        }else{
+        } else {
             descriptionView.setText(Helper.getQuantityString(
                     lastEvent.getType() == LongPollService.Update.TYPE_OFFLINE ?
                             R.plurals.offlines_notification : R.plurals.onlines_notification,
@@ -247,59 +242,102 @@ public class Notificator {
             }
         });
     }
+    public static void clearOfflines(){
 
-    public static void clearNotifications(){
-        if(context!=null) {
+        offlinePhotosStack.clear();
+        offlinesNotification.clear();
+    }
+    public static void clearOnlines(){
+        onlinePhotosStack.clear();
+        onlinesNotification.clear();
+    }
+    public static void clearChat(int chatid){
+        chatsNotifications.get(chatid).clear();
+        chatsPhotosStacks.get(chatid).clear();
+    }
+
+    public static void clearNotifications() {
+        if (context != null) {
             final NotificationManager mNotificationManager =
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             mNotificationManager.cancelAll();
         }
+        clearOfflines();
+        clearOnlines();
 
-        onlinesNotification.clear();
-        offlinesNotification.clear();
-        offlinePhotosStack.clear();
-        onlinePhotosStack.clear();
+        chatsNotifications.clear();
+        chatsPhotosStacks.clear();
     }
+    // меньше ООП = больше гемора. Большее ООП = больше гемора. ПИКАЧУ, Я ВЫБИРАЮ ТЕБЯ!
+    // адреса картинок
     private static ArrayList<String> onlinePhotosStack = new ArrayList<String>();
     private static ArrayList<String> offlinePhotosStack = new ArrayList<String>();
-    private static ArrayList<String> onlinesNotification = new ArrayList<String>();
-    private static ArrayList<String> offlinesNotification = new ArrayList<String>();
+    private static HashMap<Integer,ArrayList<String>> chatsPhotosStacks = new HashMap<Integer, ArrayList<String>>();
+    // integer - айди юзеров
+    private static ArrayList<Integer> onlinesNotification = new ArrayList<Integer>();
+    private static ArrayList<Integer> offlinesNotification = new ArrayList<Integer>();
+    private static HashMap<Integer,ArrayList<Integer>> chatsNotifications = new HashMap<Integer, ArrayList<Integer>>();
     public static void showNotification(ArrayList<Event> notifyEvents) {
 
         if (notifyEvents.isEmpty())
             return;
-
+        Integer indexIfExists = null;
         Event lastOnlineEvent = null;
         Event lastOfflineEvent = null;
+        HashMap<Integer,Event> lastChatEvents = new HashMap<Integer, Event>();
         for (Event notifyEvent : notifyEvents) {
             switch (notifyEvent.getType()) {
                 case LongPollService.Update.TYPE_ONLINE:
                     lastOnlineEvent = notifyEvent;
-                    putImageToStack(notifyEvent.imageUrl, onlinePhotosStack);
-                    onlinesNotification.remove(notifyEvent.getShortMessage());
-                    onlinesNotification.add(0, notifyEvent.getShortMessage());
+                    indexIfExists = onlinesNotification.indexOf(notifyEvent.getUserId());
+                    putImageToStack(notifyEvent.imageUrl, onlinePhotosStack, indexIfExists);
+                    onlinesNotification.remove(notifyEvent.getUserId());
+                    onlinesNotification.add(0, notifyEvent.getUserId());
                     break;
 
                 case LongPollService.Update.TYPE_OFFLINE:
                     lastOfflineEvent = notifyEvent;
-                    putImageToStack(notifyEvent.imageUrl, offlinePhotosStack);
-                    offlinePhotosStack.remove(notifyEvent.getShortMessage());
-                    offlinesNotification.add(0, notifyEvent.getShortMessage());
+                    indexIfExists = offlinesNotification.indexOf(notifyEvent.getUserId());
+                    putImageToStack(notifyEvent.imageUrl, offlinePhotosStack, indexIfExists);
+                    offlinesNotification.remove(notifyEvent.getUserId());
+                    offlinesNotification.add(0, notifyEvent.getUserId());
                     break;
                 case LongPollService.Update.TYPE_USER_TYPING:
                     showSingleNotification(notifyEvent);
                     break;
+                case LongPollService.Update.TYPE_CHAT_TYPING:
+                    int chatid = (Integer) notifyEvent.getExtra();
+                    lastChatEvents.put(chatid, notifyEvent);
+                    ArrayList<String> chatPhotoStack;
+                    ArrayList<Integer> chatNotifications;
+                    if (!chatsNotifications.containsKey(chatid)){
+                        chatsPhotosStacks.put(chatid, new ArrayList<String>());
+                        chatsNotifications.put(chatid, new ArrayList<Integer>());
+                    }
+                    chatPhotoStack = chatsPhotosStacks.get(chatid);
+                    chatNotifications = chatsNotifications.get(chatid);
+
+
+                    indexIfExists = chatNotifications.indexOf(notifyEvent.getUserId());
+
+                    putImageToStack(notifyEvent.imageUrl, chatPhotoStack, indexIfExists);
+                    chatNotifications.remove(notifyEvent.getUserId());
+                    chatNotifications.add(0, notifyEvent.getUserId());
+                    break;
 
             }
         }
-        if ((onlinesNotification.size()>1) && lastOnlineEvent != null) {
+        if(!lastChatEvents.isEmpty()) {
+            showChatTypings(lastChatEvents);
+        }
+        if ((onlinesNotification.size() > 1) && lastOnlineEvent != null) {
             showOnlines(lastOnlineEvent);
         } else {
             if (lastOnlineEvent != null) {
                 showSingleNotification(lastOnlineEvent);
             }
         }
-        if ((offlinesNotification.size()>1) && lastOfflineEvent != null) {
+        if ((offlinesNotification.size() > 1) && lastOfflineEvent != null) {
             showOfflines(lastOfflineEvent);
         } else {
             if (lastOfflineEvent != null) {
@@ -309,35 +347,173 @@ public class Notificator {
 
 
     }
+
+    private static void showChatTypings(HashMap<Integer, Event> lastChatEvents) {
+        for (Event event : lastChatEvents.values()) {
+            showChatTyping(event);
+        }
+    }
+    static void showNotificationExample(Event event){
+        NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(context)
+                        .setSmallIcon(R.drawable.ic_stat_spy)
+                        .setContentInfo("contentInfo")
+                        .setSubText("subText")
+
+                        .setContentTitle(context.getString(R.string.notification))
+                        .setContentText(context.getString(R.string.no_events))
+                        .setDefaults(Notification.DEFAULT_ALL) // requires VIBRATE permission
+        /*
+         * Sets the big view "big text" style and supplies the
+         * text (the user's reminder message) that will be displayed
+         * in the detail area of the expanded notification.
+         * These calls are ignored by the support library for
+         * pre-4.1 devices.
+         */
+                        .setStyle(new NotificationCompat.BigTextStyle().setSummaryText("summary")
+                                //                .bigText("ololo")
+                        );
+        Notification notification = builder.build();
+        final NotificationManager mNotificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.notify(1, notification);
+    }
+
+    static void showChatTyping(Event lastChatEvent){
+        boolean tickerOnly = applicationIsOpened();
+        if (tickerOnly) {
+            showTicker(lastChatEvent.headerText + " " + lastChatEvent.messageText.toLowerCase());
+            return;
+        }
+
+        int chatid =(Integer) lastChatEvent.getExtra();
+        String chatTitle = lastChatEvent.getChatTitle();
+        ArrayList<Integer> chatNotifications = chatsNotifications.get(chatid);
+        final ArrayList<String> chatPhotoStack = chatsPhotosStacks.get(chatid);
+        final NotificationCompat.Builder notificationBuilder =
+                new NotificationCompat.Builder(context);
+
+        String content ;
+        if(chatNotifications.size()>1)
+            content = Helper.getQuantityString(R.plurals.chat_notification, chatNotifications.size() - 1, chatNotifications.size() - 1);
+        else
+            content = lastChatEvent.getMessageText();;
+
+
+        notificationBuilder
+                .setContentTitle(lastChatEvent.headerText)
+                .setContentText(content)
+                .setSubText(chatTitle);
+        notificationBuilder
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(content)
+                        .setSummaryText(chatTitle));
+        notificationBuilder
+                .setAutoCancel(true)
+                .setContentInfo("VK Spy");
+        notificationBuilder.setTicker(lastChatEvent.headerText + " " + lastChatEvent.messageText.toLowerCase())
+                .setSmallIcon(R.drawable.ic_stat_spy)
+                .setDefaults(Notification.DEFAULT_LIGHTS);
+
+
+
+        String soundUri = notificationsPreferences.getString("notifications_ringtone", "content://settings/system/notification_sound");
+        if (!TextUtils.isEmpty(soundUri)) {
+            notificationBuilder.setSound(Uri.parse(soundUri));
+        }
+        notificationBuilder.setDefaults(Notification.DEFAULT_LIGHTS);
+
+        boolean vibrateOn = notificationsPreferences.getBoolean("notifications_vibrate", true);
+        if (vibrateOn)
+            notificationBuilder.setVibrate(new long[]{0, 50, 200, 50});
+
+
+        int id = chatid;
+        Intent resultIntent;
+
+            //id = lastChatEvent.userid;
+            resultIntent = new Intent(context, MainActivity.class);
+        /*
+        if (lastChatEvent.getType() == LongPollService.Update.TYPE_USER_TYPING) {
+        } else {
+
+            resultIntent = new Intent(context, UserActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putInt("id", lastChatEvent.userid);
+            resultIntent.putExtras(bundle);
+        }*/
+
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(
+                        context,
+                        0,
+                        resultIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+
+        Intent intent = new Intent(context, ClearNotificationsReceiver.class);
+        intent.setAction(ClearNotificationsReceiver.ACTION_CLEAR);
+        intent.putExtra(ClearNotificationsReceiver.ACTION_CLEAR_TYPE,ClearNotificationsReceiver.ACTION_CLEAR_CHAT);
+        intent.putExtra(ClearNotificationsReceiver.ACTION_CLEAR_CHAT_EXTRA, chatid);
+        notificationBuilder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT));
+
+
+        notificationBuilder.setContentIntent(resultPendingIntent);
+        final NotificationManager mNotificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        // mId allows you to update the notification later on.
+
+        final int mId = id;
+        final Handler handler = new Handler();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                notificationBuilder.setLargeIcon(getBitmap(onlinePhotosStack));
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        Bitmap convertedBitmap = getBitmap(chatPhotoStack);
+                        notificationBuilder.setLargeIcon(convertedBitmap);
+
+                        Notification notification = notificationBuilder.build();
+                        mNotificationManager.notify(mId, notification);
+
+                    }
+                });
+            }
+        }).start();
+
+
+    }
     static void showOfflines(final Event lastOnlineEvent) {
 
         final String offlineHeaderText = lastOnlineEvent.headerText;
         final String offlineMessageText = lastOnlineEvent.messageText;
         String offlinesSummary = Helper.getQuantityString(R.plurals.offlines_notification, offlinesNotification.size() - 1, offlinesNotification.size() - 1);
-        String imageUrl = lastOnlineEvent.imageUrl;
+        //String imageUrl = lastOnlineEvent.imageUrl;
         final String finalSummary = offlinesSummary;
 
         boolean tickerOnly = applicationIsOpened();
-        if(tickerOnly){
-            showTicker(offlineHeaderText +" "+ finalSummary.toLowerCase());
+        if (tickerOnly) {
+            showTicker(offlineHeaderText + " " + finalSummary.toLowerCase());
             return;
         }
 
         final NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(context);
-        if(!applicationIsOpened())
-        notificationBuilder
-                        .setContentTitle(offlineHeaderText)
-                        .setAutoCancel(true)
-                        .setContentText(finalSummary)
-                        .setContentInfo("VK Spy");
+        if (!applicationIsOpened())
+            notificationBuilder
+                    .setContentTitle(offlineHeaderText)
+                    .setAutoCancel(true)
+                    .setContentText(finalSummary)
+                    .setContentInfo("VK Spy");
         notificationBuilder.setTicker(offlineHeaderText + " " + offlineMessageText.toLowerCase())
                 .setDefaults(Notification.DEFAULT_LIGHTS)
                 .setSmallIcon(R.drawable.ic_stat_spy);
 
         notificationBuilder.setDefaults(Notification.DEFAULT_LIGHTS);
         String soundUri = notificationsPreferences.getString("notifications_ringtone", "content://settings/system/notification_sound");
-        if(!TextUtils.isEmpty(soundUri)) {
+        if (!TextUtils.isEmpty(soundUri)) {
             notificationBuilder.setSound(Uri.parse(soundUri));
         }
         boolean vibrateOn = notificationsPreferences.getBoolean("notifications_vibrate", true);
@@ -346,6 +522,7 @@ public class Notificator {
 
         Intent intent = new Intent(context, ClearNotificationsReceiver.class);
         intent.setAction(ClearNotificationsReceiver.ACTION_CLEAR);
+        intent.putExtra(ClearNotificationsReceiver.ACTION_CLEAR_TYPE,ClearNotificationsReceiver.ACTION_CLEAR_OFFLINES);
         notificationBuilder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT));
 
         Intent resultIntent = new Intent(context, MainActivity.class);
@@ -387,7 +564,7 @@ public class Notificator {
 
     }
 
-    private static void showTicker(String tickerText){
+    private static void showTicker(String tickerText) {
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
         notificationBuilder.setTicker(tickerText)
@@ -414,28 +591,28 @@ public class Notificator {
 
         final String finalSummary = onlineSummaryText;
         boolean tickerOnly = applicationIsOpened();
-        if(tickerOnly){
-            showTicker(onlineHeaderText +" "+ finalSummary.toLowerCase());
+        if (tickerOnly) {
+            showTicker(onlineHeaderText + " " + finalSummary.toLowerCase());
             return;
         }
         final NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(context);
 
-        if(!applicationIsOpened())
+        if (!applicationIsOpened())
             notificationBuilder
-                        .setContentTitle(onlineHeaderText)
-                        .setContentText(finalSummary)
-                        .setAutoCancel(true)
-                        .setContentInfo("VK Spy");
+                    .setContentTitle(onlineHeaderText)
+                    .setContentText(finalSummary)
+                    .setAutoCancel(true)
+                    .setContentInfo("VK Spy");
         notificationBuilder.setTicker(lastOnlineEvent.headerText + " " + lastOnlineEvent.messageText.toLowerCase())
-        .setDefaults(Notification.DEFAULT_LIGHTS)
+                .setDefaults(Notification.DEFAULT_LIGHTS)
                 .setSmallIcon(R.drawable.ic_stat_spy);
 
         String soundUri = notificationsPreferences.getString("notifications_ringtone", "content://settings/system/notification_sound");
-        if(!TextUtils.isEmpty(soundUri)) {
+        if (!TextUtils.isEmpty(soundUri)) {
             notificationBuilder.setSound(Uri.parse(soundUri));
         }
-            notificationBuilder.setDefaults(Notification.DEFAULT_LIGHTS);
+        notificationBuilder.setDefaults(Notification.DEFAULT_LIGHTS);
 
         boolean vibrateOn = notificationsPreferences.getBoolean("notifications_vibrate", true);
         if (vibrateOn)
@@ -443,6 +620,7 @@ public class Notificator {
 
         Intent intent = new Intent(context, ClearNotificationsReceiver.class);
         intent.setAction(ClearNotificationsReceiver.ACTION_CLEAR);
+        intent.putExtra(ClearNotificationsReceiver.ACTION_CLEAR_TYPE,ClearNotificationsReceiver.ACTION_CLEAR_ONLINES);
         notificationBuilder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT));
 
         Intent resultIntent = new Intent(context, MainActivity.class);
@@ -481,11 +659,11 @@ public class Notificator {
         }).start();
 
 
-
     }
+
     public static void showSingleNotification(Event event) {
         boolean tickerOnly = applicationIsOpened();
-        if(tickerOnly){
+        if (tickerOnly) {
             showTicker(event.headerText + " " + event.messageText.toLowerCase());
             return;
         }
@@ -493,41 +671,40 @@ public class Notificator {
                 new NotificationCompat.Builder(context);
 
 
-            notificationBuilder
-                        .setContentTitle(event.headerText)
-                        .setContentText(event.messageText)
-                        .setAutoCancel(true)
-                        .setContentInfo("VK Spy");
+        notificationBuilder
+                .setContentTitle(event.headerText)
+                .setContentText(event.messageText)
+                .setAutoCancel(true)
+                .setContentInfo("VK Spy");
         notificationBuilder.setTicker(event.headerText + " " + event.messageText.toLowerCase())
                 .setSmallIcon(R.drawable.ic_stat_spy)
                 .setDefaults(Notification.DEFAULT_LIGHTS);
 
         String soundUri = notificationsPreferences.getString("notifications_ringtone", "content://settings/system/notification_sound");
-        if(!TextUtils.isEmpty(soundUri)) {
+        if (!TextUtils.isEmpty(soundUri)) {
             notificationBuilder.setSound(Uri.parse(soundUri));
         }
-            notificationBuilder.setDefaults(Notification.DEFAULT_LIGHTS );
+        notificationBuilder.setDefaults(Notification.DEFAULT_LIGHTS);
 
         boolean vibrateOn = notificationsPreferences.getBoolean("notifications_vibrate", true);
         if (vibrateOn)
             notificationBuilder.setVibrate(new long[]{0, 50, 200, 50});
 
 
-        int id ;
+        int id;
         Intent resultIntent;
 
         if (event.getType() == LongPollService.Update.TYPE_USER_TYPING) {
-            id = event.id;
+            id = event.userid;
             resultIntent = new Intent(context, MainActivity.class);
-        }else{
+        } else {
             resultIntent = new Intent(context, UserActivity.class);
             Bundle bundle = new Bundle();
-            bundle.putInt("id", event.id);
+            bundle.putInt("id", event.userid);
             resultIntent.putExtras(bundle);
-            if(event.getType()== LongPollService.Update.TYPE_ONLINE) {
+            if (event.getType() == LongPollService.Update.TYPE_ONLINE) {
                 id = ONLINES_NOTIFICATION;
-            }
-            else {
+            } else {
                 id = OFFLINES_NOTIFICATION;
             }
         }
@@ -566,7 +743,6 @@ public class Notificator {
                 int width = (int) context.getResources().getDimension(android.R.dimen.notification_large_icon_width);
 
 
-
                 Bitmap convertedBitmap = bitmap;
 
                 convertedBitmap = Bitmap.createScaledBitmap(convertedBitmap, width, height, true);
@@ -583,16 +759,19 @@ public class Notificator {
             }
         });
     }
-    private static Boolean putImageToStack(String url, ArrayList<String> imagesStack) {
-        Boolean exists = false;
-        if (!imagesStack.remove(url)) {
+
+    private static void putImageToStack(String url, ArrayList<String> imagesStack, Integer removeAtIndex) {
+
+        if (removeAtIndex!=null && removeAtIndex>=0 && imagesStack.size() > removeAtIndex)
+            imagesStack.remove((int) removeAtIndex);
+        else {
             if (imagesStack.size() == 3)
                 imagesStack.remove(2);
-            exists= true;
         }
+
         imagesStack.add(0, url);
-        return exists;
     }
+
     private static Bitmap getBitmap(ArrayList<String> urlStack) {
         try {
 
@@ -654,7 +833,6 @@ public class Notificator {
     }
 
 
-
     public static void DESTROY() {
         context = null;
     }
@@ -665,33 +843,53 @@ public class Notificator {
 
     public static void notifyDurov() {
         VKApiUserFull durov = Memory.getUserById(1);
-        final Event event = new Event(durov.first_name+" "+ durov.last_name, context.getString(R.string.come_online_m) ,
-                durov.getBiggestPhoto(), 1 );
-        onlinesNotification.add(durov.first_name+ " "+ durov.last_name);
+        final Event event = new Event(durov.first_name + " " + durov.last_name, context.getString(R.string.come_online_m),
+                durov.getBiggestPhoto(), 1);
+        onlinesNotification.add(1);
         onlinePhotosStack.add(durov.getBiggestPhoto());
-        showNotification(new ArrayList<Event>(){{ add( event);}});
+        showNotification(new ArrayList<Event>() {{
+            add(event);
+        }});
 
     }
 
     public static class ClearNotificationsReceiver extends BroadcastReceiver {
         public static final String ACTION_CLEAR = "AGCY_SPY_NOTIFICATIONS_CANCEL";
+        public static final String ACTION_CLEAR_TYPE = "AGCY_SPY_NOTIFICATIONS_CANCEL_EXTRA";
+        public static final int ACTION_CLEAR_ONLINES = -1;
+        public static final int ACTION_CLEAR_OFFLINES = -2;
+        public static final int ACTION_CLEAR_CHAT = -3;
+        public static final String ACTION_CLEAR_CHAT_EXTRA = "AGCY_SPY_NOTIFICATIONS_CANCEL_CHAT_EXTRA";
 
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action.equals(ACTION_CLEAR)) {
-                clearNotifications();
+
+                int notificationType = intent.getIntExtra(ACTION_CLEAR_TYPE,0);
+                switch (notificationType){
+                    case ACTION_CLEAR_OFFLINES:
+                        clearOfflines();
+                        break;
+                    case ACTION_CLEAR_ONLINES:
+                        clearOnlines();
+                        break;
+                    case ACTION_CLEAR_CHAT:
+                        int chatid = intent.getIntExtra(ACTION_CLEAR_CHAT_EXTRA,0);
+                        clearChat(chatid);
+                        break;
+                }
             }
         }
     }
 
-public static class Event {
+    public static class Event {
 
-        private int id;
+        private Object extra;
+        private int userid;
         public String headerText;
-        public String messageText;
+        private String messageText;
         public String imageUrl;
-        private String shortMessage;
         private int type;
 
         public Event(String headerText, String messageText, String imageUrl, int id) {
@@ -699,26 +897,35 @@ public static class Event {
             this.messageText = messageText;
             this.imageUrl = imageUrl;
 
-            this.id = id;
+            this.userid = id;
         }
 
         public Event(LongPollService.Update update) {
 
             this.headerText = update.getHeader();
             this.messageText = update.getMessage();
-            this.shortMessage = update.getShortMessage();
             this.imageUrl = update.getImageUrl();
             this.type = update.getType();
-            this.id = update.getUser().id;
+            this.userid = update.getUserId();
+            if(type == LongPollService.Update.TYPE_CHAT_TYPING)
+                this.extra = update.getExtra();
         }
 
-
-
-
-        public String getShortMessage() {
-            return shortMessage;
+        public String getMessageText() {
+            return messageText;
         }
 
+        public Integer getUserId() {
+            return userid;
+        }
+        public Object getExtra(){
+            return extra;
+        }
+        public String getChatTitle(){
+            if(extra!=null)
+            return Memory.getChatById((Integer) extra).title;
+            return context.getString(R.string.chat);
+        }
         public int getType() {
             return type;
         }

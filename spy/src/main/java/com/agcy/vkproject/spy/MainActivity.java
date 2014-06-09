@@ -15,6 +15,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.agcy.vkproject.spy.Core.Helper;
 import com.agcy.vkproject.spy.Core.Memory;
@@ -44,6 +45,7 @@ import java.net.UnknownHostException;
 public class MainActivity extends ActionBarActivity {
 
     public static final int ONLINES = 1;
+    public static boolean isOpened = false;
     private OnlinesFragment onlinesFragment;
 
 
@@ -53,10 +55,17 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        isOpened = false;
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         Notificator.clearNotifications();
         VKUIHelper.onResume(this);
+        isOpened = true;
     }
     @Override
     protected void onDestroy() {
@@ -96,12 +105,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onPageSelected(int position) {
                 Log.i("AGCY SPY", "Page selected: " + position);
-                if (position != 1)
-                    if (onlinesFragment != null) {
-                        onlinesFragment.recreateHeaders();
-                        Notificator.clearNotifications();
-                    }else{
-                    }
+
             }
 
             @Override
@@ -145,26 +149,26 @@ public class MainActivity extends ActionBarActivity {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-
                         Helper.loadingEnded();
-                        friendsRequest.executeWithListener(
+                    }
+                });
+                friendsRequest.executeWithListener(
+                        new VKRequest.VKRequestListener() {
 
-                                new VKRequest.VKRequestListener() {
+                            public NetworkStateReceiver.NetworkStateChangeListener connectionListener;
 
-                                    public NetworkStateReceiver.NetworkStateChangeListener connectionListener;
-
+                            @Override
+                            public void onComplete(final VKResponse response) {
+                                // асинхронно сохраняем, чтобы никого не задеть...
+                                // мы ведь внутри обычного потока
+                                new Thread(new Runnable() {
                                     @Override
-                                    public void onComplete(final VKResponse response) {
-                                        // асинхронно сохраняем, чтобы никого не задеть...
-                                        // мы ведь внутри обычного потока
-                                        new Thread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                boolean firstLoading = false;
-                                                if(Memory.users.isEmpty()){
-                                                    firstLoading = true;
-                                                }
-                                                VKUsersArray friends = (VKUsersArray) response.parsedModel;
+                                    public void run() {
+                                        boolean firstLoading = false;
+                                        if(Memory.users.isEmpty()){
+                                            firstLoading = true;
+                                        }
+                                        VKUsersArray friends = (VKUsersArray) response.parsedModel;
                                                 /*
                                                 final VKUsersArray friendsArrayCopy = new VKUsersArray();
                                                 for (VKApiUserFull vkApiUserFull : friends) {
@@ -172,80 +176,77 @@ public class MainActivity extends ActionBarActivity {
                                                 }
                                                 Helper.fetchOnlines(friends,0);
                                                 */
-                                                Memory.saveFriends(friends);
+                                        Memory.saveFriends(friends);
 
-                                                final boolean finalFirstLoading = firstLoading;
+                                        final boolean finalFirstLoading = firstLoading;
 
-                                                handler.post(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        if(Memory.users.getById(1)!=null){
-                                                            UberFunktion.initializeBackground(getBaseContext());
-                                                        }
-                                                        if(finalFirstLoading){
-                                                            Helper.trackedUpdated();
-                                                        }
-                                                        Helper.downloadingEnded();
-                                                        startLongpoll();
-                                                    }
-                                                });
-                                            }
-                                        }).start();
-
-                                        if (connectionListener != null)
-                                            connectionListener.remove();
-                                    }
-
-                                    @Override
-                                    public void onError(VKError error) {
-                                        super.onError(error);
-
-                                        switch (error.errorCode) {
-                                            case VKError.VK_API_REQUEST_HTTP_FAILED:
-                                                if (error.httpError instanceof SocketException || error.httpError instanceof UnknownHostException) {
-
-                                                    //((TextView)findViewById(R.id.status)).setText("Проверьте подключение");
-                                                    connectionListener = new NetworkStateReceiver.NetworkStateChangeListener(Helper.START_LOADER_ID) {
-
-                                                        @Override
-                                                        public void onConnected() {
-
-                                                            //((TextView)findViewById(R.id.status)).setText("Подключение восстановленно");
-                                                            downloadData();
-
-                                                        }
-
-                                                        @Override
-                                                        public void onLost() {
-                                                            //((TextView)findViewById(R.id.status)).setText("Проверьте подключение");
-                                                        }
-
-                                                    };
+                                        handler.post(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                if(Memory.users.getById(1)!=null){
+                                                    UberFunktion.initializeBackground(getBaseContext());
                                                 }
-                                                break;
-                                            default:
-                                                Log.e("AGCY SPY", error.toString());
-                                                break;
-                                        }
+                                                if(finalFirstLoading){
+                                                    Helper.trackedUpdated();
+                                                }
+                                                Helper.downloadingEnded();
+                                                startLongpoll();
+                                            }
+                                        });
                                     }
+                                }).start();
 
-                                }
-                        );
-
-                        VKParameters userParameters = new VKParameters();
-                        userParameters.put("fields", "sex,photo_200,photo_200_orig,photo_50,photo_100");
-                        VKApi.users().get(userParameters).executeWithListener(new VKRequest.VKRequestListener() {
-                            @Override
-                            public void onComplete(VKResponse response) {
-                                VKApiUserFull user = ((VKList<VKApiUserFull>) response.parsedModel).get(0);
-                                SharedPreferences.Editor editor = getSharedPreferences("user",MODE_MULTI_PROCESS).edit();
-                                editor.putString("name",user.first_name+ " " + user.last_name);
-                                editor.putString("photo",user.getBiggestPhoto());
-                                editor.putInt("id",user.id);
-                                editor.commit();
+                                if (connectionListener != null)
+                                    connectionListener.remove();
                             }
-                        });
 
+                            @Override
+                            public void onError(VKError error) {
+                                super.onError(error);
+
+                                switch (error.errorCode) {
+                                    case VKError.VK_API_REQUEST_HTTP_FAILED:
+                                        if (error.httpError instanceof SocketException || error.httpError instanceof UnknownHostException) {
+
+                                            //((TextView)findViewById(R.id.status)).setText("Проверьте подключение");
+                                            connectionListener = new NetworkStateReceiver.NetworkStateChangeListener(Helper.START_LOADER_ID) {
+
+                                                @Override
+                                                public void onConnected() {
+
+                                                    //((TextView)findViewById(R.id.status)).setText("Подключение восстановленно");
+                                                    downloadData();
+
+                                                }
+
+                                                @Override
+                                                public void onLost() {
+                                                    //((TextView)findViewById(R.id.status)).setText("Проверьте подключение");
+                                                }
+
+                                            };
+                                        }
+                                        break;
+                                    default:
+                                        Log.e("AGCY SPY", error.toString());
+                                        break;
+                                }
+                            }
+
+                        }
+                );
+
+                VKParameters userParameters = new VKParameters();
+                userParameters.put("fields", "sex,photo_200,photo_200_orig,photo_50,photo_100");
+                VKApi.users().get(userParameters).executeWithListener(new VKRequest.VKRequestListener() {
+                    @Override
+                    public void onComplete(VKResponse response) {
+                        VKApiUserFull user = ((VKList<VKApiUserFull>) response.parsedModel).get(0);
+                        SharedPreferences.Editor editor = getSharedPreferences("user",MODE_MULTI_PROCESS).edit();
+                        editor.putString("name",user.first_name+ " " + user.last_name);
+                        editor.putString("photo",user.getBiggestPhoto());
+                        editor.putInt("id",user.id);
+                        editor.commit();
                     }
                 });
             }
@@ -279,10 +280,12 @@ public class MainActivity extends ActionBarActivity {
             return true;
     }
 
-    public void filter(View view) {
+    public void filterOnlines(View view) {
         startActivity(new Intent(this, FilterActivity.class));
     }
-
+    public void filterTypings(View view){
+        Toast.makeText(getBaseContext(),".!.",Toast.LENGTH_SHORT).show();
+    }
     private class MainPagerAdapter extends FragmentPagerAdapter implements ContentPagerAdapter<Integer> {
         public MainPagerAdapter(FragmentManager fm) {
             super(fm);

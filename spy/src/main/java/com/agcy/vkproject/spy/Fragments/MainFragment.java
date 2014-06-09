@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +24,7 @@ import com.agcy.vkproject.spy.Adapters.CustomItems.PreferenceItem;
 import com.agcy.vkproject.spy.Adapters.CustomItems.ToggleablePreferenceItem;
 import com.agcy.vkproject.spy.Adapters.PreferenceAdapter;
 import com.agcy.vkproject.spy.Core.Helper;
+import com.agcy.vkproject.spy.Core.Logs;
 import com.agcy.vkproject.spy.Core.Memory;
 import com.agcy.vkproject.spy.Core.UberFunktion;
 import com.agcy.vkproject.spy.Longpoll.LongPollService;
@@ -31,6 +33,7 @@ import com.agcy.vkproject.spy.SettingsActivity;
 import com.bugsense.trace.BugSenseHandler;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
+import java.io.File;
 import java.util.ArrayList;
 
 
@@ -65,6 +68,22 @@ public class MainFragment extends android.support.v4.app.Fragment {
                         Uri.parse("http://vk.com/happysanta")
                 );
                 startActivity(browserIntent);
+            }
+        });
+        happySanta.setOnClickListener(new View.OnClickListener() {
+            int i = 1;
+            @Override
+            public void onClick(View v) {
+                if(i<10) i++;
+                else {
+                    i = 0;
+                    File F = Logs.getFile();
+                    Uri U = Uri.fromFile(F);
+                    Intent i = new Intent(Intent.ACTION_SEND);
+                    i.setType("text/plain");
+                    i.putExtra(Intent.EXTRA_STREAM, U);
+                    startActivity(Intent.createChooser(i, "What should we do with logs?"));
+                }
             }
         });
 
@@ -123,7 +142,7 @@ public class MainFragment extends android.support.v4.app.Fragment {
                 if(Memory.users.getById(1)!=null && !updateOnly) {
                     builder.setTitle(R.string.durov_joke_title);
                     ((TextView)durov.findViewById(R.id.description)).setText(R.string.durov_joke_message);
-                    ( durov.findViewById(R.id.doge)).setVisibility(View.VISIBLE);
+                    ( durov.findViewById(R.id.cat)).setVisibility(View.VISIBLE);
 
                     builder.setNegativeButton(R.string.durov_joke_button, new DialogInterface.OnClickListener() {
                         @Override
@@ -207,7 +226,7 @@ public class MainFragment extends android.support.v4.app.Fragment {
 
                 TextView aboutDescription = (TextView) aboutView.findViewById(R.id.description);
                 aboutDescription.setText(Html.fromHtml(getResources().getString(R.string.app_about_description)));
-
+                aboutDescription.setMovementMethod(LinkMovementMethod.getInstance());
 
 
                 builder.setView(aboutView);

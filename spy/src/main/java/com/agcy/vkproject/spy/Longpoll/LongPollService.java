@@ -162,6 +162,8 @@ public class LongPollService extends Service {
 
         com.agcy.vkproject.spy.Core.VKSdk.initialize(getApplicationContext());
 
+        Memory.loadUsers();
+
         restoreStatusesAndStartLongpoll();
 
         Log.i("AGCY SPY LONGPOLLSERVICE", "Started safe" + " key: " + key);
@@ -305,9 +307,9 @@ public class LongPollService extends Service {
                                     .replace("[", "")
                                     .replace("]", "")
                                     .split(",");
-                            if (isTyping(updateJson))
+                            if (isTyping(updateJson)) {
                                 updates.add(new Update(updateJson));
-
+                            }
 
                         } catch (Exception exp) {
                             Log.e("AGCY SPY LONGPOLL", "update parsing error: " + exp.toString());
@@ -418,11 +420,9 @@ public class LongPollService extends Service {
             case Update.TYPE_ONLINE:
             case Update.TYPE_OFFLINE:
             case Update.TYPE_USER_TYPING:
-                return true;
             case Update.TYPE_MESSAGE:
-                int flags = Integer.valueOf(updateArray[2]);
-                return (flags & Update.FLAG_MESSAGE_CHAT) != Update.FLAG_MESSAGE_CHAT;
             case Update.TYPE_CHAT_TYPING:
+                return true;
             default:
                 return false;
         }
@@ -443,27 +443,54 @@ public class LongPollService extends Service {
         private final int updateType;
         private final int flags;
         private final int userId;
-
-        public Update(String[] updateArray){
-
+        private final String title;
+        public Update(String[] updateArray) {
+            int tempUserId = 0;
+            int tempFlags = 0;
+            String tempTitle = "...";
             int tempUpdateType = Integer.valueOf(updateArray[0]);
-            if(tempUpdateType==TYPE_MESSAGE) {
+            switch (tempUpdateType) {
 
-                this.userId = Integer.valueOf(updateArray[3]);
-                this.flags = Integer.valueOf(updateArray[2]);
-                if((flags & FLAG_MESSAGE_CHAT) == FLAG_MESSAGE_CHAT){
-                    tempUpdateType = TYPE_MESSAGE_CHAT;
-                }
-            }else {
-                this.userId = Integer.valueOf(updateArray[1]) * (tempUpdateType < 10 ? -1 : 1);
-                this.flags = Integer.valueOf(updateArray[2]);
+                // сообщение в любом случае приходит от юзера.
+                // если getExtra() = 0, тогда это обычное сообщение.
+                // иначе getExtra() = chatId
+
+                case TYPE_MESSAGE:
+                    tempFlags = Integer.valueOf(updateArray[2]);
+                    if ((tempFlags & FLAG_MESSAGE_CHAT) == FLAG_MESSAGE_CHAT) {
+                        tempFlags = Integer.valueOf(updateArray[3]) - 2000000000;
+                        tempTitle = updateArray[5];
+                        try {
+                            JSONObject attaches = new JSONObject(updateArray[7]);
+                            tempUserId = attaches.getInt("from");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        tempUserId = Integer.valueOf(updateArray[3]);
+                    }
+                    break;
+                case TYPE_CHAT_TYPING:
+                    tempFlags = Integer.valueOf(updateArray[2]);
+                case TYPE_USER_TYPING:
+                    tempUserId = Integer.valueOf(updateArray[1]);
+                    break;
+                // online или offline
+                default:
+                    tempUserId = Integer.valueOf(updateArray[1]) * -1 ;
+                    tempFlags = Integer.valueOf(updateArray[2]);
+                    break;
             }
+            flags = tempFlags;
+            userId = tempUserId;
+            title = tempTitle;
             updateType = tempUpdateType;
         }
 
         public int getType(){return updateType;}
         public String getHeader(){
-            return getUser().first_name+" "+getUser().last_name;
+            VKApiUserFull user = getUser();
+            return user.first_name+" "+user.last_name;
         }
         public String getMessage(){
             VKApiUserFull user = getUser();
@@ -477,7 +504,7 @@ public class LongPollService extends Service {
                 case Update.TYPE_USER_TYPING:
                     return (user.sex ==2?getString(R.string.was_writing_m):getString(R.string.was_writing_f) ) ;
                 case Update.TYPE_CHAT_TYPING:
-                    return (user.sex ==2?"Писал в беседе 3 минуты назад":"Писала в беседе 3 минуты назад" ) ;
+                    return (user.sex ==2?getString(R.string.was_writing_chat_m):getString(R.string.was_writing_chat_f) ) ;
             }
             return "Уведомление";
         }
@@ -488,17 +515,21 @@ public class LongPollService extends Service {
         public VKApiUserFull getUser() {
             return Memory.getUserById(userId);
         }
-
+        public int getUserId(){
+            return userId;
+        }
         public Object getExtra() {
             switch (updateType) {
                 case Update.TYPE_ONLINE:
-                    return 0 ;
+                    return 0;
                 case Update.TYPE_OFFLINE:
-                    return  (flags==0? 0:60*15) ;//таймаунт в секундах
+                    return (flags == 0 ? 0 : 60 * 15);//таймаунт в секундах
                 case Update.TYPE_USER_TYPING:
-                    return "Пишет..";
+                    return 0;
                 case Update.TYPE_CHAT_TYPING:
-                    return "Пишет в беседе";
+                    return flags;
+                case TYPE_MESSAGE:
+                    return flags;
             }
             return null;
         }
@@ -507,8 +538,6 @@ public class LongPollService extends Service {
             return updateType == TYPE_OFFLINE || updateType == TYPE_ONLINE;
         }
 
-        public String getShortMessage() {
-            return getUser().first_name;
-        }
+
     }
 }

@@ -62,7 +62,7 @@ public class VKApiChat extends VKApiModel implements Identifiable, android.os.Pa
      * List of chat participants' IDs.
      */
     public int[] users;
-
+    public String photo_200;
     /**
      * Fills a Chat instance from JSONObject.
      */
@@ -70,6 +70,7 @@ public class VKApiChat extends VKApiModel implements Identifiable, android.os.Pa
         id = source.optInt("id");
         type = source.optString("type");
         title = source.optString("title");
+        photo_200 = source.optString("photo_200");
         admin_id = source.optInt("admin_id");
         JSONArray users = source.optJSONArray("users");
         if(users != null) {
@@ -90,6 +91,7 @@ public class VKApiChat extends VKApiModel implements Identifiable, android.os.Pa
         this.title = in.readString();
         this.admin_id = in.readInt();
         this.users = in.createIntArray();
+        this.photo_200 = in.readString();
     }
 
     /**
@@ -116,6 +118,7 @@ public class VKApiChat extends VKApiModel implements Identifiable, android.os.Pa
         dest.writeString(this.title);
         dest.writeInt(this.admin_id);
         dest.writeIntArray(this.users);
+        dest.writeString(this.photo_200);
     }
 
     public static Creator<VKApiChat> CREATOR = new Creator<VKApiChat>() {
@@ -127,4 +130,22 @@ public class VKApiChat extends VKApiModel implements Identifiable, android.os.Pa
             return new VKApiChat[size];
         }
     };
+
+    public String getBiggestPhoto() {
+        String biggestPhoto = photo_200;
+        return biggestPhoto;
+    }
+
+    public static int[] parseIds(String[] ids){
+        int[] parsedIds = new int[ids.length];
+        for (int i = 0; i < ids.length; i++) {
+            String id = ids[i];
+            try {
+                parsedIds[i] = Integer.parseInt(id);
+            }catch (Exception exp){
+                parsedIds[i] =0;
+            }
+        }
+        return parsedIds;
+    }
 }

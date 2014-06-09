@@ -50,6 +50,7 @@ public class StatusItem extends UpdateItem {
     public View reconvert(Context context,View rootView) {
         TextView name = (TextView) rootView.findViewById(R.id.name);
         TextView time = (TextView) rootView.findViewById(R.id.time);
+        View textHolder = rootView.findViewById(R.id.text_holder);
         VKApiUserFull user = update.getOwner();
         name.setText(user.first_name+" "+user.last_name);
 
@@ -69,7 +70,7 @@ public class StatusItem extends UpdateItem {
             fadeIn.setInterpolator(new AccelerateInterpolator());
             fadeIn.setDuration(750);
             fadeIn.setStartOffset(700);
-            name.startAnimation(fadeIn);
+            textHolder.startAnimation(fadeIn);
             time.startAnimation(fadeIn);
 
         }else{

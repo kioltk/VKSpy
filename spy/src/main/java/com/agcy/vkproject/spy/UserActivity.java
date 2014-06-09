@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -320,7 +321,7 @@ public class UserActivity extends ActionBarActivity {
 
         @Override
         public BaseAdapter adapter() {
-            return new UpdatesAdapter(Memory.getTyping(user.id),context);
+            return new UpdatesAdapter(Memory.getTypingsByUserId(user.id),context);
         }
 
         @Override

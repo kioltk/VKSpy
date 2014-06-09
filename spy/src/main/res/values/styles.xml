@@ -1,7 +1,6 @@
 <resources>
 
     <style name="ModernTheme" parent="android:Theme.Holo.Light">
-
         <item name="android:windowBackground">@android:color/white</item>
         <item name="android:icon">@drawable/ic_ab_icon</item>
         <item name="android:actionBarStyle">@style/MyActionBar</item>
@@ -10,6 +9,7 @@
 
         <item name="android:switchTextOn">@string/on</item>
         <item name="android:switchTextOff">@string/off</item>
+        <!--item name="android:switchPreferenceStyle">@style/mySwitchPreferenceStyle</item-->
     </style>
     <style name="AppTheme" parent="Theme.AppCompat.Light">
         <item name="android:windowBackground">@android:color/white</item>
@@ -71,6 +71,11 @@
         <item name="android:textColor">@color/blue</item>
     </style>
 
+    <style name="mySwitchPreferenceStyle">
+            <item name="android:widgetLayout">@layout/preference_widget_switch</item>
+            <item name="android:switchTextOn">@string/on</item>
+            <item name="android:switchTextOff">@string/off</item>
+    </style>
 
 
 </resources>
