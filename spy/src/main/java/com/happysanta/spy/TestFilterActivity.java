@@ -349,6 +349,9 @@ public class TestFilterActivity extends ActionBarActivity {
         }
         @Override
         protected void create() {
+            if(rootView==null)
+                return;
+
             listView = getListView();
             if(this instanceof FilterExternalsFragment){
                 activity.selectedExternals.clear();
@@ -474,12 +477,7 @@ public class TestFilterActivity extends ActionBarActivity {
             return R.string.no_tracks;
         }
 
-        @Override
-        public void showNoUsers() {
-            super.showNoUsers();
-            rootView.findViewById(R.id.filter_tip).setVisibility(View.VISIBLE);
 
-        }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
