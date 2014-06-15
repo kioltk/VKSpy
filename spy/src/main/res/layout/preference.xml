@@ -22,8 +22,7 @@
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:gravity="center_vertical"
-    android:paddingLeft="22dp"
-    android:paddingRight="22dp" >
+    android:paddingLeft="22dp" >
 
     <ImageView
         android:id="@+android:id/icon"
@@ -67,7 +66,8 @@
     </RelativeLayout>
 
     <!-- Preference should place its actual preference widget here. -->
-    <LinearLayout android:id="@android:id/widget_frame"
+    <LinearLayout
+        android:id="@android:id/widget_frame"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="center_vertical"

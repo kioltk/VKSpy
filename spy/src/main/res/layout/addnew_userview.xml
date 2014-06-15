@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    >
+    <LinearLayout
+        android:gravity="center"
+        android:id="@+id/userview_holder"
+        android:orientation="vertical"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/user"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/carousel_container_height">
+
+            <com.roundedimage.RoundedImageView
+                app:is_oval="true"
+                android:id="@+id/photo"
+                android:src="@drawable/user_placeholder"
+                android:layout_margin="15dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp" />
+
+            <TextView
+                android:id="@+id/name"
+                android:layout_marginBottom="20dp"
+                android:textSize="16sp"
+                android:textColor="#808080"
+
+                android:gravity="center"
+                android:text="happysanta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

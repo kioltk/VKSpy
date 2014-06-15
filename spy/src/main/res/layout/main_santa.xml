@@ -88,7 +88,7 @@
         <TextView
             android:gravity="center"
             android:textSize="17sp"
-            android:textColor="@color/link_color_selector"
+            android:textColor="@color/link_color"
             android:text="vk.com/happysanta"
             android:layout_marginTop="4dp"
             android:id="@+id/happySantaLink"

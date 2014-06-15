@@ -43,16 +43,24 @@
             android:layout_height="match_parent"/>
 
         <LinearLayout
+            android:orientation="vertical"
             android:gravity="center"
             android:layout_width="120dp"
             android:layout_height="match_parent">
 
             <TextView
                 android:id="@+id/streak"
-                android:textColor="@color/grey_light"
-                android:visibility="gone"
+                android:textColor="@color/grey_dark"
                 android:text="ONLINE"
+                android:visibility="gone"
                 android:layout_width="120dp"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/additional"
+                android:text="android"
+                android:visibility="gone"
+                android:textColor="@color/grey_light"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </LinearLayout>
     </LinearLayout>

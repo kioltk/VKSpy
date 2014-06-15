@@ -39,6 +39,8 @@ public class VKApiUserFull extends VKApiUser implements android.os.Parcelable {
      */
     public static final String LAST_SEEN = "last_seen";
 
+    public static final String PLATFORM = "platform";
+
     /**
      * Filed bdate from VK fields set
      */
@@ -213,6 +215,8 @@ public class VKApiUserFull extends VKApiUser implements android.os.Parcelable {
      * Last visit date(in Unix time).
      */
     public int last_seen;
+
+    public int platform;
 
     /**
      * List of user's universities
@@ -436,6 +440,7 @@ public class VKApiUserFull extends VKApiUser implements android.os.Parcelable {
 
         // general
         last_seen = (int) parseLong(user.optJSONObject(LAST_SEEN), "time");
+        platform = (int) parseLong(user.optJSONObject(LAST_SEEN), "platform");
         bdate = user.optString(BDATE);
 
         JSONObject city = user.optJSONObject(CITY);

@@ -4,9 +4,16 @@
         android:title="@string/additional"
         android:layout="@layout/preference_header"
         >
-        <Preference
+        <!--Preference
             android:title="@string/send_logs"
             android:key="send_logs"
+            android:layout="@layout/preference"
+            android:icon="@null"
+            /-->
+        <Preference
+            android:key="license"
+            android:title="Open source licenses"
+            android:summary="Special for Google"
             android:layout="@layout/preference"
             android:icon="@null"
             />

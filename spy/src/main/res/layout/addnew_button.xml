@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:onClick="showAddUser"
+    android:id="@+id/filter"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="14dp"
+    android:layout_alignParentRight="true"
+    android:layout_alignParentBottom="true">
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/filter_tip"
+        android:textSize="18dp"
+        android:textColor="@color/text_center_screen"
+        android:layout_marginRight="10dp"
+        android:text="@string/filter_tip"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center"
+        android:layout_height="wrap_content"/>
+    <ImageButton
+        android:onClick="showAddUser"
+        android:background="@drawable/filter"
+        android:src="@drawable/ic_filter"
+        android:layout_height="42dp"
+        android:layout_width="42dp"
+        />
+</LinearLayout>

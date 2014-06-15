@@ -31,8 +31,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.agcy.vkproject.spy.Core.Helper;
-import com.agcy.vkproject.spy.R;
+import com.happysanta.spy.Core.Helper;
+import com.happysanta.spy.R;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;

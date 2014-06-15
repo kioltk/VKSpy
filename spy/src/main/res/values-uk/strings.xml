@@ -41,12 +41,12 @@
     <string name="sec">сек</string>
     <string name="title_activity_filter">За ким стежити</string>
     <string name="apply">ОК</string>
-    <string name="no_tracks">Не за ким стежити</string>
+    <string name="no_tracks">Немає за ким стежити</string>
     <string name="no_events">Подій поки немає</string>
-    <string name="filter_tip">Виберіть за ким стежити</string>
+    <string name="filter_tip">Оберіть за ким стежити</string>
     <string name="way_to_notify">Спосіб повідомлення</string>
     <string name="popup">Спливаюче сповіщення</string>
-    <string name="notification">Повідомлення до шторці</string>
+    <string name="notification">Повідомлення у шторці</string>
     <string name="enabled">Увімкнено</string>
     <string name="offline_notifications">Оффлайн повідомлення</string>
     <string name="online_notifications">Онлайн повідомлення</string>
@@ -57,7 +57,7 @@
     <string name="durov_function_title">Суперфункція</string>
     <string name="durov_function_decription">Стеження за Павлом Дуровим!</string>
     <string name="app_about_button">Ага</string>
-    <string name="app_about_description"><![CDATA[Додаток непомiтно стежить за користувачами ВК.\n<a href="http://vk.com/happysanta"><br/><br/>Happy Santa LLC</a> © 2014<br/><br/>Споруджено <a href="http://vk.com/kio_tk">Денисом Давидовим</a> за підтримки <a href="http://vk.com/ez">Жені</a> та <a href="http://vk.com/emc2">Вані</a>.]]></string>
+    <string name="app_about_description"><![CDATA[Додаток непомiтно стежить за користувачами ВК.\n<br/><br/><a href="http://vk.com/happysanta">Happy Santa LLC</a> © 2014<br/><br/>Споруджено <a href="http://vk.com/kio_tk">Денисом Давидовим</a> за підтримки <a href="http://vk.com/ez">Жені</a> та <a href="http://vk.com/emc2">Вані</a>.]]></string>
     <string name="important">Важливі</string>
     <string name="select_all">Вибрати всіх</string>
     <string name="deselect_all">Зняти виділення</string>
@@ -93,7 +93,6 @@
     <string name="send_logs">Надіслати логи</string>
     <string name="vk_down">@string/unknown_error</string>
     <string name="additional">Додатково</string>
-    <string name="termsandpolicy">Умови використання\nПолітіка конфіденційності</string>
     <string name="on">ВКЛ</string>
     <string name="off">ВИКЛ</string>
     <string name="silent">Silent</string>
@@ -102,6 +101,45 @@
 
     <string name="was_writing_chat_m">Писав в чаті 3 хвилини тому</string>
     <string name="was_writing_chat_f">Писала в чаті 3 хвилини тому</string>
+    <string name="no_browser">Ого, у вас немає браузера, наверное</string>
+    <string name="ok">OK</string>
+    <string name="login_title">Terms</string>
+    <string name="login_message">You agree with temrs, right?</string>
+
+    <string name="license">Ліцензія</string>
+    <string name="termsandpolicy_abl">Умовами використання і Політикою конфіденційності</string>
+    <string name="termsandpolicy">Умови використання і Політіка конфіденційності</string>
+    <string name="agreewithprivacy">Використовуючи ций додаток,ви погоджуєтесь з </string>
+    <string name="privacypolicy_title">Політіка конфіденційності</string>
+    <string name="terms_title">Умови використання</string>
+    <string name="privacypolicy">
+        <![CDATA[
+            1. В целях улучшения качества ПО, в процессе работы приложения мы анонимно собираем информацию посредством сервиса Bugsense. Политика сборка, хранения, передачи информации в данном случае является <a href=”http://www.splunk.com/view/SP-CAAAAAG”>политикой Splunk Inc.</a>. Информация, получаемая разработчиками с помощью сервиса Bugsense, не передаётся и не продаётся третьим лицам.
+            <br/><br/>2. Данные пользователей vk.com, используемые в приложении, публичны, и находятся по адресу api.vk.com. Права пользователей сервиса vk.com соблюдены по <a href="http://vk.com/privacy">правилам сервиса vk.com</a>.
+            <br/><br/>3. Любая личная информация пользователя, полученная через API VK (api.vk.com) используется исключительно локально на устройстве и не передаётся третим сервисам.
+        ]]>
+    </string>
+    <string name="terms"><![CDATA[Пользователь может использовать данные, собираемые приложением, на своё усмотрение. Happy Santa LLC не несёт никакой ответственности за то, как пользователь использует собранные данные.]]></string>
+
+    <string name="important_notification">Important notification</string>
+    <string name="external">External</string>
+    <string name="adduser">Spy upon external user</string>
+    <string name="search">Search</string>
+    <string name="loading">Loading</string>
+    <string name="spyon">Spy on</string>
+    <string name="fill_addnew">Enter user id or link</string>
+    <string name="error_user_durov">Нене, Пашку добавлять нужно через Überfunktion.</string>
+    <string name="error_user_loading">Помилка завантаження</string>
+    <string name="error_user_deleted">Користувач видалений</string>
+    <string name="error_user_exists">Користувач вже добавлений</string>
+    <string name="error_user_idparsing">Невірно введений id</string>
+    <string name="connection">Connection</string>
+    <string name="connection_external">External</string>
+    <string name="mobile">mobile</string>
+    <string name="iphone">iPhone</string>
+    <string name="ipad">iPad</string>
+    <string name="android">Android</string>
+    <string name="wphone">Windows Phone</string>
 
     <plurals name="usersSelected">
         <item quantity="zero">Нікого не вибрано</item>
