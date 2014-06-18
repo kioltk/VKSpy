@@ -287,14 +287,14 @@ public class TestFilterActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
     private void updateActionBarButtons() {
-        if (menu != null)
+        if (menu != null && friendsFragment !=null && externalsFragment != null)
             if (currentItem instanceof FilterExternalsFragment) {
                 menu.removeItem(R.id.select);
                 menu.removeItem(R.id.deselect);
                 menu.removeItem(R.id.addButton);
                 menu.add(0, R.id.addButton, 1, R.string.adduser);
                 menu.getItem(1).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
-                menu.getItem(1).setIcon(android.R.drawable.ic_menu_add);
+                menu.getItem(1).setIcon(R.drawable.ic_ab_add);
             } else {
                 menu.removeItem(R.id.addButton);
                 if (selectedUsers.size() == friendsFragment.users.size()) {
@@ -347,11 +347,16 @@ public class TestFilterActivity extends ActionBarActivity {
             }
             return null;
         }
+
+        @Override
+        protected UserListAdapter adapter() {
+            return new UserListAdapter(new ItemHelper.ObservableFilterUsersArray(users, true), getActivity());
+        }
+
         @Override
         protected void create() {
             if(rootView==null)
                 return;
-
             listView = getListView();
             if(this instanceof FilterExternalsFragment){
                 activity.selectedExternals.clear();
@@ -373,7 +378,7 @@ public class TestFilterActivity extends ActionBarActivity {
                     }
                     listView.setAdapter(null);
                     //listView = (ListView) rootView.findViewById(R.id.list);
-                    adapter = new UserListAdapter(new ItemHelper.ObservableFilterUsersArray(users), getActivity());
+                    adapter = adapter();
                     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -401,7 +406,9 @@ public class TestFilterActivity extends ActionBarActivity {
                     });
                     listView.setOnScrollListener(new LoadImagesOnScrollListener(listView));
                     listView.setAdapter(adapter);
-                    rootView.findViewById(com.happysanta.spy.R.id.loading).setVisibility(View.GONE);
+                    listView.setVisibility(View.VISIBLE);
+                    rootView.findViewById(R.id.loading).setVisibility(View.GONE);
+                    rootView.findViewById(R.id.status).setVisibility(View.GONE);
                 } else {
                     showNoUsers();
                 }
@@ -477,14 +484,18 @@ public class TestFilterActivity extends ActionBarActivity {
             return R.string.no_tracks;
         }
 
-
+        @Override
+        protected UserListAdapter adapter() {
+            return new UserListAdapter(new ItemHelper.ObservableFilterUsersArray(users, false), getActivity());
+        }
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-            super.onCreateView(inflater, container, savedInstanceState);
-            //inflater.inflate(R.layout.addnew_button, (ViewGroup) rootView, true);
-            return rootView;
+        public void showNoUsers() {
+            {
+                ((TextView) rootView.findViewById(R.id.status)).setText(getListEmpty());
+                rootView.findViewById(R.id.status).setVisibility(View.VISIBLE);
+                rootView.findViewById(R.id.loading).setVisibility(View.GONE);
+            }
         }
     }
 

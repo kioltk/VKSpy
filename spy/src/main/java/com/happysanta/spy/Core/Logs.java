@@ -4,6 +4,8 @@ import android.os.Environment;
 import android.util.Log;
 
 
+import com.happysanta.spy.Helper.Time;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -87,7 +89,7 @@ public class Logs {
         File sdCard = Environment.getExternalStorageDirectory();
         File dir = new File (sdCard.getAbsolutePath() + "/vkspy/logs/auto");
         dir.mkdirs();
-        File file = new File(dir, "logcat"+Helper.getUnixNow()+".txt");
+        File file = new File(dir, "logcat"+ Time.getUnixNow()+".txt");
 
         try {
             //to write logcat in text file

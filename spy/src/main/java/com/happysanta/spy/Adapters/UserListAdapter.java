@@ -21,7 +21,7 @@ public class UserListAdapter extends BaseAdapter {
     private final ItemHelper.ObservableUsersArray items;
     public UserListAdapter(ArrayList<VKApiUserFull> users,Context context) {
         this.context = context;
-        items = new ItemHelper.ObservableUsersArray(users);
+        items = new ItemHelper.ObservableUsersArray(users, true);
     }
     public UserListAdapter(ItemHelper.ObservableUsersArray items, Context context){
         this.items = items;

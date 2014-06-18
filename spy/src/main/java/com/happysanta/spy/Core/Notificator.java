@@ -20,10 +20,17 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.happysanta.spy.Garbage.MagicBounceInterpolator;
 import com.happysanta.spy.Longpoll.LongPollService;
 import com.happysanta.spy.MainActivity;
 import com.happysanta.spy.R;
@@ -200,9 +207,9 @@ public class Notificator {
         final Toast toast = new Toast(context);
 
 
-        TextView titleView = (TextView) rootView.findViewById(R.id.title);
+        final TextView titleView = (TextView) rootView.findViewById(R.id.title);
         titleView.setText(lastEvent.headerText);
-        TextView descriptionView = (TextView) rootView.findViewById(R.id.description);
+        final TextView descriptionView = (TextView) rootView.findViewById(R.id.description);
         if (countEvents == 1) {
             descriptionView.setText(lastEvent.messageText);
         } else {
@@ -213,10 +220,11 @@ public class Notificator {
                     countEvents - 1
             ));
         }
-        final ImageView photoView = (ImageView) rootView.findViewById(R.id.photo);
+        final ImageView photoHolder = (ImageView) rootView.findViewById(R.id.photo);
         toast.setView(rootView);
         toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 100);
         toast.setDuration(Toast.LENGTH_LONG);
+
         ImageLoader.getInstance().loadImage(lastEvent.imageUrl, new ImageLoadingListener() {
             @Override
             public void onLoadingStarted(String s, View view) {
@@ -230,8 +238,32 @@ public class Notificator {
 
             @Override
             public void onLoadingComplete(String s, View view, Bitmap bitmap) {
-                photoView.setImageBitmap(bitmap);
+                photoHolder.setImageBitmap(bitmap);
                 toast.show();
+
+
+
+                ScaleAnimation blinkAnimation = new ScaleAnimation(0, 1, 0, 1, Animation.RELATIVE_TO_SELF, (float) 0.5, Animation.RELATIVE_TO_SELF, 0.5f);
+                blinkAnimation.setInterpolator(new MagicBounceInterpolator());
+                blinkAnimation.setDuration(1200);
+                blinkAnimation.setStartOffset(00);
+                photoHolder.startAnimation(blinkAnimation);
+
+                AlphaAnimation alphaAnimation = new AlphaAnimation(0,1);
+
+                TranslateAnimation translateAnimation = new TranslateAnimation(200,0,0,0);
+
+                AnimationSet slideInAnimation = new AnimationSet(true);
+                slideInAnimation.setInterpolator(new DecelerateInterpolator());
+                slideInAnimation.setDuration(400);
+                slideInAnimation.setStartOffset(100);
+
+                slideInAnimation.addAnimation(alphaAnimation);
+                slideInAnimation.addAnimation(translateAnimation);
+
+                titleView.startAnimation(slideInAnimation);
+                descriptionView.startAnimation(slideInAnimation);
+
             }
 
             @Override
@@ -240,6 +272,7 @@ public class Notificator {
             }
         });
     }
+
     public static void clearOfflines(){
 
         offlinePhotosStack.clear();

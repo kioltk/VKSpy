@@ -11,6 +11,8 @@ import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import com.happysanta.spy.Helper.Time;
+import com.happysanta.spy.Helper.Type;
 import com.happysanta.spy.Longpoll.LongPollService;
 import com.happysanta.spy.MainActivity;
 import com.happysanta.spy.Models.Online;
@@ -41,8 +43,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.TimerTask;
 
 public class Helper {
@@ -52,7 +52,6 @@ public class Helper {
     public static final int FETCHING_HOUR = 60 * 60;
     public static final int FETCHING_EXTERNAL = 9999;
 
-    private static int timeFormat = 0;
     public static final int ONLINE = -1;
     public static final int NOW = -2;
     public static final int UNDEFINED = -3;
@@ -89,28 +88,6 @@ public class Helper {
         VKSdk.initialize(context);
         BugSenseHandler.initAndStartSession(context,"07310e3f");
         Log.i("AGCY SPY","Initialization ended");
-    }
-    static Handler minuteTimerHandler;
-    static TimerTask minuteTimer = new TimerTask() {
-        @Override
-        public void run() {
-            try {
-                Thread.sleep(60*1000);
-                for (Runnable timerListener : timerListeners) {
-                    minuteTimerHandler.post(timerListener);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-        }
-    } ;
-    static ArrayList<Runnable> timerListeners = new ArrayList<Runnable>();
-    public static void addMinuteTimer(Runnable timerListener){
-        if(minuteTimerHandler==null) {
-            minuteTimerHandler = new Handler();
-        }
-        timerListeners.add(timerListener);
     }
 
     public static void logout() {
@@ -225,26 +202,26 @@ public class Helper {
         //Log.i("AGSY SPY", "Onlines saved");
         for (LongPollService.Update update : updates) {
             if (update.getType() == LongPollService.Update.TYPE_USER_TYPING) {
-                newTyping(update);
-            }
-        }
-
-        for (LongPollService.Update update : updates) {
-            if (update.getType() == LongPollService.Update.TYPE_MESSAGE && update.getExtra().equals(0)) {
-                newMessage(update);
-                Log.i("AGСY SPY", "Message update from userid: " + update.getUserId());
-            }
-        }
-        for (LongPollService.Update update : updates) {
-
-            if (update.getType() == LongPollService.Update.TYPE_CHAT_TYPING) {
-                newChatTyping(update);
+                Type.newTyping(update);
                 continue;
             }
-            if (update.getType() == LongPollService.Update.TYPE_MESSAGE && !update.getExtra().equals(0)) {
-                newChatMessage(update);
+            if (update.getType() == LongPollService.Update.TYPE_CHAT_TYPING) {
+                Type.newChatTyping(update);
             }
         }
+
+        for (LongPollService.Update update : updates) {
+            if (update.getType() == LongPollService.Update.TYPE_MESSAGE && !update.isChatMessage()) {
+                Log.i("AGСY SPY", "Message update from userid: " + update.getUserId());
+                Type.newMessage(update);
+                continue;
+            }
+            if (update.isChatMessage()) {
+                Log.i("AGСY SPY", "Chat message update from userid: " + update.getUserId() + " in chatid: " + update.getExtra());
+                Type.newChatMessage(update);
+            }
+        }
+
         Log.i("AGСY SPY", "Updates was processed");
 
     }
@@ -262,15 +239,6 @@ public class Helper {
         }
     }
 
-    private static void newChatMessage(LongPollService.Update update){
-        denyChatTyping(update.getUserId(), (Integer) update.getExtra());
-    }
-    private static void newMessage(LongPollService.Update message) {
-        denyTyping(message);
-    }
-
-    static HashMap<Integer, TypingTimer> typingTimers = new HashMap<Integer, TypingTimer>();
-    static HashMap<Integer, ChatTimer> chatTimers = new HashMap<Integer, ChatTimer>();
     public static void downloadUser(final int userid) {
         VKParameters parameters = new VKParameters();
         parameters.put(VKApiConst.USER_IDS, userid);
@@ -392,164 +360,6 @@ public class Helper {
         return px;
     }
 
-    public static int getUnixNow() {
-        return (int) (System.currentTimeMillis() / 1000L);
-    }
-
-    public static String getDate(int unix) {
-        Date date = new Date(unix * 1000L);
-
-        return String.format("%1$td %1$tB",
-                date);
-        //return String.format("%2$td %2$tB", date);
-        //return ft.format(date);
-    }
-
-    public static String getTime(int unix) {
-
-        switch (unix){
-            case NOW:
-                return context.getString(R.string.now);
-            case UNDEFINED:
-                return context.getString(R.string.undefined);
-        }
-
-        Date date = new Date(unix * 1000L);
-
-            if (Helper.getTimeFormat() == 24) {
-
-                return String.format("%tT",
-                        date);
-
-            }
-        int hrs = date.getHours();
-        Boolean isPM = hrs > 12;
-        return String.format("%1$tl:%1$tM:%1$tS " + (isPM ? "pm" : "am"),
-                date);
-
-    }
-
-    public static String getSmartDate(int time) {
-        Resources res = context.getResources();
-        if (time == NOW)
-            return res.getString(R.string.now);
-        if(time==UNDEFINED){
-            return res.getString(R.string.undefined);
-        }
-        if (isToday(time))
-            return res.getString(R.string.today);
-        if (getDate( getUnixNow() - 24 * 3600).equals(getDate(time)))
-            return res.getString(R.string.yesterday);
-        return getDate(time);
-    }
-
-    public static String getSmartTime(Integer unix) {
-        Resources res = context.getResources();
-        if (isToday(unix)) {
-            long time = getUnixNow() - unix;
-            if (time < 3600 * 12) {
-                if (time < 3600) {
-                    int minutes = (int) time / 60;
-                    if (minutes == 0)
-                        return res.getString(R.string.moment);
-                    return minutes + " " + res.getString(R.string.min);
-                }
-                if (time > 3600 && time < 7200)
-                    return 1 + " " + res.getString(R.string.hr);
-                return time / 3600 + " " + res.getString(R.string.hrs);
-            }
-        }
-        return getTimeShort(unix);
-    }
-
-    public static String getTimeShort(int unix) {
-
-        Date date = new Date(unix * 1000L);
-
-            if (getTimeFormat() == 24) {
-
-                return String.format("%tR",
-                        date);
-
-            }
-        int hrs = date.getHours();
-        Boolean isPM = hrs > 12;
-        return String.format("%1$tl:%1$tM " + (isPM ? "pm" : "am"),
-                date);
-    }
-
-    public static boolean isOnline(int userid) {
-        return Memory.getUserById(userid).online;
-    }
-
-
-    public static String getStreak(int till, int since) {
-
-        Resources res = context.getResources();
-        if (till <= 0 || since <= 0)
-            return res.getString(R.string.undefined);
-        String convertedStreak = "";
-        int streak = till - since;
-        if (streak < 5) {
-            return res.getString(R.string.moment);
-        }
-        if (streak / (24 * 3600) > 0) {
-            convertedStreak += streak / (24 * 3600) + " "+ res.getString(R.string.day)+" ";
-            streak = streak % (24 * 3600);
-        }
-        if (streak / (3600) > 0) {
-            int hrOrHrs = streak / 3600;
-            if (hrOrHrs == 1)
-                convertedStreak += 1 + " "+res.getString(R.string.hr)+" ";
-            else
-                convertedStreak += hrOrHrs +" "+res.getString(R.string.hrs)+" ";
-            streak = streak % (3600);
-        }
-        if (streak / 60 > 0) {
-            convertedStreak += streak / 60 + " "+res.getString(R.string.min)+" ";
-            streak = streak % 60;
-        }
-        if (streak > 0) {
-            convertedStreak += streak + " "+res.getString(R.string.sec)+" ";
-        }
-        return convertedStreak;
-    }
-
-    public static String getLastSeen(VKApiUserFull user) {
-
-        int time = (int) user.last_seen;
-        if (time == 0) {
-            return "";
-        }
-        boolean isFemale = user.isFemale();
-        Resources res = context.getResources();
-        String lastSeen = res.getString(isFemale ? R.string.last_seen_f : R.string.last_seen) + " ";
-        if(getUnixNow()-time<60)
-            return lastSeen+res.getString(R.string.moment_ago);
-        Boolean today = checkOneDay( getUnixNow(), time);
-        if(getUnixNow()-time>12*60*60){
-
-            lastSeen += getSmartDate(time) + " " + res.getString(R.string.at) + " " + getSmartTime(time);
-            return lastSeen;
-        }
-        if (!today) {
-            lastSeen += getSmartDate(time) + " " + res.getString(R.string.at) + " ";
-        }
-
-        lastSeen += getSmartTime(time);
-        if (today) {
-            lastSeen += " " + res.getString(R.string.ago);
-        }
-        return lastSeen;
-    }
-
-    public static boolean isToday(Integer content) {
-        return checkOneDay((int) getUnixNow(), content);
-    }
-
-    public static Boolean checkOneDay(int date1, int date2) {
-        return getDate(date1).equals(getDate(date2));
-    }
 
     public static void setMainActivity(MainActivity mainActivity) {
         Helper.mainActivity = mainActivity;
@@ -565,10 +375,6 @@ public class Helper {
 
     public static boolean isInitialized() {
         return context != null;
-    }
-
-    public static String getSmartDateTime(long time) {
-        return getSmartTime((int) time);
     }
 
     public static String getUberFunctionUrl() {
@@ -789,34 +595,6 @@ public class Helper {
         return pluralResources.getQuantityString(resId,quantityIndicator,quantityDecimal);
     }
 
-    public static int getTimeFormat() {
-        if(timeFormat != 0)
-            return timeFormat;
-        try {
-            int time_format = Settings.System.getInt(context.getContentResolver(), Settings.System.TIME_12_24);
-            timeFormat = time_format;
-            Log.i("AGCY SPY", "Time format detected: " + time_format);
-        } catch (Settings.SettingNotFoundException e) {
-            e.printStackTrace();
-            timeFormat = 24;
-        }
-        return timeFormat;
-    }
-
-    public static void stopTimers(){
-        for (TypingTimer typingTimer : typingTimers.values()) {
-            typingTimer.deny();
-        }
-        typingTimers.clear();
-
-        for (ChatTimer chatTimer : chatTimers.values()) {
-            for (TypingTimer typingTimer : chatTimer.values()) {
-                typingTimer.deny();
-            }
-        }
-        chatTimers.clear();
-    }
-
     public static boolean isFetching() {
         return fetching;
     }
@@ -845,138 +623,8 @@ public class Helper {
         }
     }
 
-    static class ChatTimer extends HashMap<Integer,TypingTimer>{
-
-        public void start(LongPollService.Update update) {
-
-            TypingTimer typingTimer = new TypingTimer(update);
-            put(update.getUserId(), typingTimer);
-            typingTimer.start();
-        }
-
-        public void again(LongPollService.Update update) {
-            if(containsKey(update.getUserId())) {
-                get(update.getUserId()).again();
-            }else{
-                start(update);
-            }
-        }
-        public void deny(int userid) {
-
-            TypingTimer timer = remove(userid);
-            if (timer != null) {
-                timer.deny();
-            }
-        }
-    }
-    static class TypingTimer extends Thread {
-        public LongPollService.Update update;
-        private boolean again = false;
-
-        public TypingTimer(LongPollService.Update update) {
-            this.update = update;
-        }
-
-        @Override
-        public void run() {
-            Log.i("AGCY SPY THREAD", "TypingTimer runs userid: " + update.getUserId()+", extras: "+update.getExtra() );
-            do {
-                again = false;
-                try {
-                    // Ждем три минуты
-                    Thread.sleep( 3* 60 * 1000);
-                    // если дождались, тогда постим, что споймали новый тайпинг
-                    typingHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            showTyping(update);
-                            denyTyping(update);
-                        }
-                    });
-                    Log.i("AGCY SPY THREAD", "TypingTimer ended userid: " + update.getUserId()+", extras: "+update.getExtra() );
-                    return;
-                } catch (InterruptedException e) {
-                    // если оборвалось
-                    e.printStackTrace();
-                    if (again) {
-                        // обрыв, чтобы начать заново? тогда повторяем круг
-                        Log.i("AGCY SPY THREAD", "TypingTimer repeated userid: " + update.getUserId()+", extras: "+update.getExtra() );
-                        continue;
-                    }
-                    Log.i("AGCY SPY THREAD", "TypingTimer denied userid: " + update.getUserId()+", extras: "+update.getExtra() );
-                    return;
-                }
-
-            } while (again);
-        }
-
-        public void again() {
-            this.again = true;
-            interrupt();
-            Log.i("AGCY SPY THREAD", "TypingTimer rerun userid: " + update.getUserId()+", extras: "+update.getExtra() );
-        }
-
-        public void deny() {
-            interrupt();
-        }
-    }
-    public static void newChatTyping(final LongPollService.Update update){
-
-        Integer chatid = (Integer) update.getExtra();
-        Memory.getChatById(chatid);
-        update.getUser();
-        if (chatTimers.containsKey(chatid)) {
-            chatTimers.get(chatid).again(update);
-        } else {
-            ChatTimer chatTimer = new ChatTimer();
-            chatTimer.start(update);
-
-            chatTimers.put(chatid, chatTimer);
-        }
-    }
-    public static void newTyping(final LongPollService.Update typing) {
-
-        typing.getUser();
-        if (typingTimers.containsKey(typing.getUserId())) {
-            typingTimers.get(typing.getUserId()).again();
-        } else {
-
-            TypingTimer typingTimer = new TypingTimer(typing);
-            typingTimer.start();
-            typingTimers.put(typing.getUserId(), typingTimer);
-        }
-
-    }
-
-    private static Handler typingHandler = new Handler();
-    private static void denyChatTyping(int userid, int chatid){
-
-        if (chatTimers.containsKey(chatid)) {
-            chatTimers.get(chatid).deny(userid);
-        }
-    }
-    private static void denyTyping(LongPollService.Update update) {
-        if(update.getExtra().equals(0)) {
-            if (typingTimers.containsKey(update.getUserId())) {
-                typingTimers.remove(update.getUserId()).deny();
-            }
-        }else{
-            denyChatTyping(update.getUserId(), (Integer) update.getExtra());
-        }
-    }
-
-    public static void showTyping(final LongPollService.Update update) {
-        VKApiUserFull user = update.getUser();
-        if(update.getExtra().equals(0)) {
-            Memory.setTyping(user);
-        }else{
-            VKApiChat chat = Memory.getChatById((Integer) update.getExtra());
-            Memory.setChatTyping(user, chat);
-        }
-
-        Notificator.announce(new ArrayList<LongPollService.Update>() {{
-            add(update);
-        }});
+    public static Context getContext() {
+        return context;
     }
 
     //endregion

@@ -56,15 +56,23 @@ public class ItemHelper {
     }
     private static ArrayList<Item> convertUsers (List<? extends VKApiUserFull> users,boolean first) {
         ArrayList<Item> convertedUsers = new ArrayList<Item>();
-        if (first) {
 
-            if (users.size() > 5) {
+        if (users.size() > 5) {
+            if (first) {
+
                 convertedUsers.add(new HeaderItem(R.string.important));
+
+                for (VKApiUserFull user : users.subList(0, 5)) {
+                    convertedUsers.add(new UserItem(user));
+                }
             }
+        } else {
             for (VKApiUserFull user : users.subList(0, users.size() > 5 ? 5 : users.size())) {
                 convertedUsers.add(new UserItem(user));
             }
         }
+
+
         if (users.size() > 5) {
 
 
@@ -104,7 +112,7 @@ public class ItemHelper {
         private boolean addedNew = false;
 
         public ObservableUpdatesArray(ArrayList<? extends Update> items) {
-            super(items, 20);
+            super(items, 20, true);
         }
 
         @Override
@@ -196,8 +204,8 @@ public class ItemHelper {
 
     public static class ObservableFilterUsersArray extends ObservableUsersArray{
 
-        public ObservableFilterUsersArray(ArrayList<? extends VKApiUserFull> items) {
-            super(items);
+        public ObservableFilterUsersArray(ArrayList<? extends VKApiUserFull> items, boolean firstHeader) {
+            super(items, firstHeader);
             reconvert();
         }
         public void reconvert(){
@@ -213,8 +221,8 @@ public class ItemHelper {
         }
     }
     public static class ObservableUsersArray extends ObservableArray<VKApiUserFull>{
-        public ObservableUsersArray(ArrayList<? extends VKApiUserFull> items) {
-            super(items,items.size());
+        public ObservableUsersArray(ArrayList<? extends VKApiUserFull> items, boolean firstHeader) {
+            super(items,items.size(), firstHeader);
         }
 
         @Override
@@ -235,18 +243,18 @@ public class ItemHelper {
         protected final ArrayList<T> items = new ArrayList<T>();
         protected boolean newEnabled = true;
 
-        public ObservableArray(ArrayList<? extends T> items, int startCount){
+        public ObservableArray(ArrayList<? extends T> items, int startCount, boolean firstHeader){
             for(T item : items) {
                 this.items.add(item);
             }
 
             if (items.size() != 0) {
 
-                convertMore(startCount,true);
+                convertMore(startCount,firstHeader);
             }
         }
         public ObservableArray(ArrayList<? extends T> items) {
-            this(items,200);
+            this(items,200, true);
         }
 
         protected Boolean convertMore(int count,boolean first){

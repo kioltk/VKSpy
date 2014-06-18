@@ -217,7 +217,9 @@ public class VKApiUserFull extends VKApiUser implements android.os.Parcelable {
     public int last_seen;
 
     public int platform;
-
+    public boolean isOnlineMobile(){
+        return platform!=0 && platform < 6 ;
+    }
     /**
      * List of user's universities
      */

@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -91,14 +92,16 @@ public class UsersListFragment extends Fragment {
         create();
         return rootView;
     }
-
+    protected UserListAdapter adapter(){
+        return new UserListAdapter(users, context);
+    }
     protected void create() {
         if(!users.isEmpty()) {
 
             final ListView listView = (ListView) rootView.findViewById(R.id.list);
             listView.setAdapter(null);
 
-            adapter = new UserListAdapter(users, context);
+            adapter = adapter();
 
             LoadImagesOnScrollListener listener = new LoadImagesOnScrollListener(listView);
             listView.setOnScrollListener(listener);
@@ -119,6 +122,7 @@ public class UsersListFragment extends Fragment {
                 }
             });
             rootView.findViewById(R.id.loading).setVisibility(View.GONE);
+            rootView.findViewById(R.id.status).setVisibility(View.GONE);
         }else {
             showNoUsers();
         }
@@ -132,8 +136,8 @@ public class UsersListFragment extends Fragment {
             rootView.findViewById(R.id.status).setVisibility(View.VISIBLE);
             rootView.findViewById(R.id.loading).setVisibility(View.GONE);
         } else {
-            rootView.findViewById(R.id.loading).setVisibility(View.VISIBLE);
             rootView.findViewById(R.id.status).setVisibility(View.GONE);
+            rootView.findViewById(R.id.loading).setVisibility(View.VISIBLE);
         }
     }
 

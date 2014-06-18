@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.happysanta.spy.Helper.Type;
 import com.happysanta.spy.Longpoll.LongPollService;
 import com.happysanta.spy.MainActivity;
 import com.happysanta.spy.R;
@@ -158,7 +159,7 @@ public class VKSdk {
             stopLongpoll.putExtras(bundle);
             context.startService(stopLongpoll);
 
-            Helper.stopTimers();
+            Type.stopTimers();
             Helper.stopMainActivity();
             Helper.clearAllPreferences();
 

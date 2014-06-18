@@ -9,6 +9,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 
 import com.happysanta.spy.Core.Helper;
+import com.happysanta.spy.Helper.Time;
 import com.happysanta.spy.R;
 
 /**
@@ -34,7 +35,7 @@ public class DateItem extends Item {
         return rootView;
     }
     public String getDate(){
-        return Helper.getSmartDate(time);
+        return Time.getSmartDate(time);
     }
     @Override
     public Integer getContent() {
@@ -86,7 +87,7 @@ public class DateItem extends Item {
 
 
     public boolean isToday() {
-        return Helper.isToday(this.time);
+        return Time.isToday(this.time);
     }
 
     public boolean isNow() {

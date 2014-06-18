@@ -120,6 +120,7 @@ public class MainFragment extends android.support.v4.app.Fragment {
         ListView preferencesView = (ListView) rootView.findViewById(R.id.preference);
         preferencesView.addHeaderView(happySanta,null,false);
         ArrayList<PreferenceItem> preferences = new ArrayList<PreferenceItem>();
+        /*
         preferences.add(new PreferenceItem(getUberfunction(), getUberfunctionDescription()) {
             @Override
             public void onClick() {
@@ -207,6 +208,7 @@ public class MainFragment extends android.support.v4.app.Fragment {
                 selector.show();
             }
         });
+        */
 
         preferences.add(new ToggleablePreferenceItem(getEnableSpy(), null, longpollStatus) {
 

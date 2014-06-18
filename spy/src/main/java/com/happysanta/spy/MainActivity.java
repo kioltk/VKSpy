@@ -256,6 +256,8 @@ public class MainActivity extends ActionBarActivity {
                     e.printStackTrace();
                 }
                 new VKRequest("execute.getUser", userParameters).executeWithListener(new VKRequest.VKRequestListener() {
+
+
                     @Override
                     public void onComplete(VKResponse response) {
                         try {
@@ -294,6 +296,12 @@ public class MainActivity extends ActionBarActivity {
                             });
                             successDialogBuilder.show();
                         }
+                    }
+
+                    @Override
+                    public void onError(VKError error) {
+                        super.onError(error);
+
                     }
                 });
             }

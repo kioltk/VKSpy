@@ -174,7 +174,7 @@
     <string name="loading">Loading</string>
     <string name="spyon">Spy on</string>
     <string name="fill_addnew">Enter user id or link</string>
-    <string name="error_user_durov">Doh, add Mr.Durov using Überfunktion not here.</string>
+    <string name="error_user_durov">We\'ve done with spying on him. Honeymoon is over</string>
     <string name="error_user_loading">Loading failed</string>
     <string name="error_user_exists">User already exists</string>
     <string name="error_user_idparsing">Uncorrect ID</string>

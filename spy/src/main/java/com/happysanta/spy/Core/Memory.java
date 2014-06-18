@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.happysanta.spy.Fragments.UsersListFragment;
+import com.happysanta.spy.Helper.Time;
 import com.happysanta.spy.Listeners.NewUpdateListener;
 import com.happysanta.spy.Models.ChatTyping;
 import com.happysanta.spy.Models.DurovOnline;
@@ -418,6 +419,10 @@ public class Memory {
      * @param status
      */
     public static void notifyStatusListeners(Status status){
+        VKApiUserFull user = status.getOwner();
+        user.last_seen = status.getUnix();
+        user.online = status.isOnline();
+        user.platform = status.getPlatform();
         for (NewUpdateListener onlineListener : onlineListeners) {
             onlineListener.newItem(status);
         }
@@ -436,7 +441,7 @@ public class Memory {
      */
 
     public static void setStatus(VKApiUserFull user, Boolean online, boolean timeout, Integer platform) {
-        setStatus(user,online,Helper.getUnixNow() - (timeout ? 15 * 60 : 0), platform);
+        setStatus(user,online, Time.getUnixNow() - (timeout ? 15 * 60 : 0), platform);
 
     }
 
@@ -777,7 +782,7 @@ public class Memory {
         ContentValues values = new ContentValues();
         values.put("userid", userid);
         values.put("chatid", chatid);
-        values.put("time", Helper.getUnixNow() - 3 * 60);
+        values.put("time", Time.getUnixNow() - 3 * 60);
 
         save(DatabaseConnector.TYPING_DATABASE, values);
     }
@@ -857,7 +862,7 @@ public class Memory {
         return filteredUsersCount;
     }
     public static void setChatTyping(VKApiUserFull user, VKApiChat chat){
-        ChatTyping typing = new ChatTyping(user, Helper.getUnixNow()- 180, chat);
+        ChatTyping typing = new ChatTyping(user, Time.getUnixNow()- 180, chat);
         for (NewUpdateListener typingListener : typingListeners) {
             typingListener.newItem(typing);
         }
@@ -870,7 +875,7 @@ public class Memory {
     }
     public static void setTyping(VKApiUserFull user) {
 
-        Typing typing = new Typing(user, Helper.getUnixNow() - 180, 0);
+        Typing typing = new Typing(user, Time.getUnixNow() - 180, 0);
         for (NewUpdateListener typingListener : typingListeners) {
             typingListener.newItem(typing);
         }
@@ -912,7 +917,7 @@ public class Memory {
 
         ContentValues networkValues = new ContentValues();
         networkValues.put("connected", connected);
-        networkValues.put("time", Helper.getUnixNow());
+        networkValues.put("time", Time.getUnixNow());
 
         save(DatabaseConnector.NETWORK_DATABASE, networkValues);
     }

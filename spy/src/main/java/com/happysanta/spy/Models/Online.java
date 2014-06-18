@@ -1,6 +1,6 @@
 package com.happysanta.spy.Models;
 
-import com.happysanta.spy.Core.Helper;
+import com.happysanta.spy.Helper.Time;
 
 public class Online extends Update {
 
@@ -17,9 +17,9 @@ public class Online extends Update {
         this.since = since;
         this.till = till;
 
-        sinceConvertedTime =  Helper.getTime(since);
-        tillConvertedTime = Helper.getTime(till);
-        streakConverted = Helper.getStreak(till, since);
+        sinceConvertedTime =  Time.getTime(since);
+        tillConvertedTime = Time.getTime(till);
+        streakConverted = Time.getStreak(till, since);
 
     }
     public Online(int userid, int since, int till, int id, Integer platform){

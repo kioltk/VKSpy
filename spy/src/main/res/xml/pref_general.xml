@@ -14,7 +14,7 @@
             android:title="@string/connection_external"
             android:key="connection_external_interval"
             android:layout="@layout/preference"
-            android:defaultValue="false"
+            android:defaultValue="30"
             android:icon="@null"
             android:entries="@array/connection_external_interval"
             android:entryValues="@array/connection_external_interval_values"

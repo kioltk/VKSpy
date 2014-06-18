@@ -121,20 +121,20 @@
     </string>
     <string name="terms"><![CDATA[Пользователь может использовать данные, собираемые приложением, на своё усмотрение. Happy Santa LLC не несёт никакой ответственности за то, как пользователь использует собранные данные.]]></string>
 
-    <string name="important_notification">Important notification</string>
-    <string name="external">External</string>
-    <string name="adduser">Spy upon external user</string>
-    <string name="search">Search</string>
-    <string name="loading">Loading</string>
-    <string name="spyon">Spy on</string>
-    <string name="fill_addnew">Enter user id or link</string>
-    <string name="error_user_durov">Нене, Пашку добавлять нужно через Überfunktion.</string>
+    <string name="important_notification">Важливе сповіщення</string>
+    <string name="external">Закладки</string>
+    <string name="adduser">Стежити за користувачем</string>
+    <string name="search">Пошук</string>
+    <string name="loading">Завантаження</string>
+    <string name="spyon">Стежити</string>
+    <string name="fill_addnew">Введіть айді користувача чи лінк</string>
+    <string name="error_user_durov">Ніні,за Пашой ми більше не стежимо.Ось такі справи</string>
     <string name="error_user_loading">Помилка завантаження</string>
     <string name="error_user_deleted">Користувач видалений</string>
     <string name="error_user_exists">Користувач вже добавлений</string>
     <string name="error_user_idparsing">Невірно введений id</string>
-    <string name="connection">Connection</string>
-    <string name="connection_external">External</string>
+    <string name="connection">З\'єднання</string>
+    <string name="connection_external">@string/external</string>
     <string name="mobile">mobile</string>
     <string name="iphone">iPhone</string>
     <string name="ipad">iPad</string>

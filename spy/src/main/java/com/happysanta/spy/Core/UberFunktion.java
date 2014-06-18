@@ -15,6 +15,7 @@ import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.happysanta.spy.Helper.Time;
 import com.happysanta.spy.Models.DurovOnline;
 import com.happysanta.spy.R;
 import com.happysanta.spy.UserActivity;
@@ -70,8 +71,12 @@ public class UberFunktion {
         UberFunktion.context = context;
         initialize(null);
     }
+
     public static void initialize(ProgressDialog uberfunctionDialog) {
+        return;
+        /*
         Log.i("AGCY SPY FEATURE","New feature request");
+
         if(!putNewDialogWindow(uberfunctionDialog))
             return;
 
@@ -244,7 +249,7 @@ public class UberFunktion {
 
             }
         }.execute();
-
+        */
     }
     private static AlertDialog showError(Dialog dialog,String title, String message) {
         try {
@@ -360,7 +365,7 @@ public class UberFunktion {
                                 int lastIdTemp = online.to == 0 ? online.id - 1 : online.id;
                                 SharedPreferences.Editor durovPreferences = context.getSharedPreferences("durov", Context.MODE_MULTI_PROCESS).edit();
                                 durovPreferences.putInt("lastId", lastIdTemp);
-                                durovPreferences.putInt("lastUpdate",Helper.getUnixNow());
+                                durovPreferences.putInt("lastUpdate", Time.getUnixNow());
                                 durovPreferences.commit();
                                 if(online.to==0){
                                     UberFunktion.online = true;

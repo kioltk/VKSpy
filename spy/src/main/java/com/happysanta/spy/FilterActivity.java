@@ -173,7 +173,7 @@ public class FilterActivity extends ActionBarActivity {
                 }
 
                 //listView = (ListView) rootView.findViewById(R.id.list);
-                adapter = new UserListAdapter(new ItemHelper.ObservableFilterUsersArray(users), getActivity());
+                adapter = new UserListAdapter(new ItemHelper.ObservableFilterUsersArray(users, true), getActivity());
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

@@ -14,8 +14,8 @@ import android.widget.TextView;
 
 import com.happysanta.spy.Adapters.UpdatesAdapter;
 import com.happysanta.spy.Adapters.UpdatesWithOwnerAdapter;
-import com.happysanta.spy.Core.Helper;
 import com.happysanta.spy.Core.Memory;
+import com.happysanta.spy.Helper.Time;
 import com.happysanta.spy.Listeners.NewUpdateListener;
 import com.happysanta.spy.Models.Typing;
 import com.happysanta.spy.Models.Update;
@@ -97,7 +97,7 @@ public class TypingsFragment extends UpdatesFragment {
                     continue;
                 }
                 if (tag instanceof Integer) {
-                    ((TextView) timeView).setText(Helper.getSmartDate((Integer) tag));
+                    ((TextView) timeView).setText(Time.getSmartDate((Integer) tag));
 
                 }
 

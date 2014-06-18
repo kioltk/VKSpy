@@ -3,7 +3,6 @@
     <PreferenceCategory
         android:title="@string/notifications"
         android:layout="@layout/preference_header"
-        android:dependency="notifications_enabled"
         >
         <SwitchPreference
             android:title="@string/enabled"

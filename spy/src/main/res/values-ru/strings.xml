@@ -127,7 +127,7 @@
     <string name="loading">Загрузка</string>
     <string name="spyon">Следить</string>
     <string name="fill_addnew">Введите id или ссылку</string>
-    <string name="error_user_durov">Нене, Пашку добавлять нужно через Überfunktion.</string>
+    <string name="error_user_durov">Нене, за Пашей мы больше не следим. Такие дела</string>
     <string name="error_user_exists">Пользователь уже добавлен</string>
     <string name="error_user_idparsing">Неверно введённый id</string>
     <string name="error_user_loading">Ошибка загрузки</string>

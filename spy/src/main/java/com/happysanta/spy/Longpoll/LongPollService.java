@@ -12,6 +12,7 @@ import android.util.Log;
 import com.happysanta.spy.Core.Helper;
 import com.happysanta.spy.Core.Memory;
 import com.happysanta.spy.Core.UberFunktion;
+import com.happysanta.spy.Helper.Time;
 import com.happysanta.spy.R;
 import com.happysanta.spy.Core.VKSdk;
 import com.happysanta.spy.Receivers.NetworkStateReceiver;
@@ -274,14 +275,17 @@ public class LongPollService extends Service {
 
     private void startLongpollWithExternal() {
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        int interval = Integer.parseInt(prefs.getString("connection_external_interval", "30"));
+        String intervalString = prefs.getString("connection_external_interval", "30");
+        if(intervalString.equals("false"))
+            intervalString = "30";
+        int interval = Integer.parseInt(intervalString);
         int lastExternalUpdate = prefs.getInt("connection_external_lastupdate", 0);
 
-        if (Helper.getUnixNow() - lastExternalUpdate < interval) {
+        if (Time.getUnixNow() - lastExternalUpdate < interval) {
             startLongpoll();
             return;
         }
-        int timeout = Helper.getUnixNow() - lastExternalUpdate > 500 ? Helper.FETCHING_HOUR : Helper.FETCHING_EXTERNAL;
+        int timeout = Time.getUnixNow() - lastExternalUpdate > 500 ? Helper.FETCHING_HOUR : Helper.FETCHING_EXTERNAL;
 
         ArrayList<VKApiUserFull> externals = Memory.getExternals();
         if (!externals.isEmpty()) {
@@ -290,7 +294,7 @@ public class LongPollService extends Service {
                 public void run() {
 
                     startLongpoll();
-                    prefs.edit().putInt("connection_external_lastupdate", Helper.getUnixNow()).commit();
+                    prefs.edit().putInt("connection_external_lastupdate", Time.getUnixNow()).commit();
                 }
             });
         } else {
@@ -298,7 +302,7 @@ public class LongPollService extends Service {
         }
     }
     private void restoreStatusesAndStartLongpoll() {
-        if(Helper.getUnixNow() - lastUpdate>60*60)
+        if(Time.getUnixNow() - lastUpdate>60*60)
             updateStatusesAndStartLongpoll(Helper.FETCHING_HOUR);
         else
             updateStatusesAndStartLongpoll(Helper.FETCHING_FAST);
@@ -328,18 +332,16 @@ public class LongPollService extends Service {
             @Override
             public void onSuccess(JSONArray updatesJson, String ts) {
 
-                if(lastUpdate + 300 < Helper.getUnixNow()) {
+                if(lastUpdate + 300 < Time.getUnixNow()) {
                     Log.e("AGCY SPY LONGPOLL","Last update was too long ago");
                     BugSenseHandler.sendEvent("Last update was too long ago");
                     ArrayList<Update> updates = new ArrayList<Update>();
                     for (int i = 0; i < updatesJson.length(); i++) {
                         try {
-                            String[] updateJson = updatesJson.getString(i)
-                                    .replace("[", "")
-                                    .replace("]", "")
-                                    .split(",");
-                            if (isTyping(updateJson)) {
-                                updates.add(new Update(updateJson));
+                            JSONArray updateJsonArray = new JSONArray(updatesJson.getString(i));
+
+                            if (isTyping(updateJsonArray)) {
+                                updates.add(new Update(updateJsonArray));
                             }
 
                         } catch (Exception exp) {
@@ -359,12 +361,10 @@ public class LongPollService extends Service {
                     ArrayList<Update> updates = new ArrayList<Update>();
                     for (int i = 0; i < updatesJson.length(); i++) {
                         try {
-                            String[] updateJson = updatesJson.getString(i)
-                                    .replace("[", "")
-                                    .replace("]", "")
-                                    .split(",");
-                            if (shouldHandle(updateJson))
-                                updates.add(new Update(updateJson));
+                            JSONArray updateJsonArray = new JSONArray(updatesJson.getString(i));
+
+                            if (shouldHandle(updateJsonArray))
+                                updates.add(new Update(updateJsonArray));
 
 
                         } catch (Exception exp) {
@@ -378,7 +378,7 @@ public class LongPollService extends Service {
                     SharedPreferences durovPrefs = getBaseContext().getSharedPreferences("durov", MODE_MULTI_PROCESS);
                     if(Memory.users.getById(1)!=null) {
                         int lastDurovUpdate = durovPrefs.getInt("lastUpdate", 0);
-                        if (Helper.getUnixNow()-lastDurovUpdate>10*60){
+                        if (Time.getUnixNow()-lastDurovUpdate>10*60){
                             UberFunktion.initializeBackground(getBaseContext());
                         }
                     }
@@ -432,21 +432,31 @@ public class LongPollService extends Service {
         return preferences.getBoolean("status",true);
     }
     private void saveLongpollExecuted(){
-        lastUpdate = Helper.getUnixNow();
+        lastUpdate = Time.getUnixNow();
         SharedPreferences preferences = getBaseContext().getSharedPreferences("longpoll", Context.MODE_MULTI_PROCESS);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putInt("lastUpdate",lastUpdate);
         editor.commit();
 
     }
-    public static Boolean isTyping(String[] updateArray){
+    public static Boolean isTyping(JSONArray updateArray){
 
-        int updateType = Integer.valueOf(updateArray[0]);
+        int updateType = 0;
+        try {
+            updateType = Integer.valueOf(updateArray.getInt(0));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         return updateType == Update.TYPE_USER_TYPING;
     }
-    public static Boolean shouldHandle(String[] updateArray) {
+    public static Boolean shouldHandle(JSONArray updateArray) {
 
-        int updateType = Integer.valueOf(updateArray[0]);
+        int updateType =0;
+        try {
+            updateType = Integer.valueOf(updateArray.getInt(0));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         switch (updateType) {
             case Update.TYPE_ONLINE:
             case Update.TYPE_OFFLINE:
@@ -480,53 +490,61 @@ public class LongPollService extends Service {
         private final int flags;
         private final int userId;
         //private final String title;
-        public Update(String[] updateArray) {
+        public Update(int type,int flags,int userid){
+            this.updateType = type;
+            this.flags = flags;
+            this.userId = userid;
+        }
+
+        public Update(JSONArray updateJsonArray) {
             int tempUserId = 0;
             int tempFlags = 0;
             String tempTitle = "...";
-            int tempUpdateType = Integer.valueOf(updateArray[0]);
-            switch (tempUpdateType) {
+            int tempUpdateType = 0;
+            try {
+                tempUpdateType = (updateJsonArray.getInt(0));
+                switch (tempUpdateType) {
 
-                // сообщение в любом случае приходит от юзера.
-                // если getExtra() = 0, тогда это обычное сообщение.
-                // иначе getExtra() = chatId
+                    // сообщение в любом случае приходит от юзера.
+                    // если getExtra() = 0, тогда это обычное сообщение.
+                    // иначе getExtra() = chatId
 
-                case TYPE_MESSAGE:
-                    tempFlags = Integer.valueOf(updateArray[2]);
-                    if ((tempFlags & FLAG_MESSAGE_CHAT) == FLAG_MESSAGE_CHAT) {
-                        tempFlags = Integer.valueOf(updateArray[3]) - 2000000000;
-                        //tempTitle = updateArray[5];
-                        try {
-                            JSONObject attaches = new JSONObject(updateArray[7]);
-                            tempUserId = attaches.getInt("from");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                    case TYPE_MESSAGE:
+                        tempFlags = (updateJsonArray.getInt(2));
+                        if ((tempFlags & FLAG_MESSAGE_CHAT) == FLAG_MESSAGE_CHAT) {
+                            tempFlags = (updateJsonArray.getInt(3)) - 2000000000;
+
+                            try {
+                                JSONObject attaches = new JSONObject(updateJsonArray.getString(7));
+                                tempUserId = attaches.getInt("from");
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            tempFlags = 0;
+                            tempUserId = (updateJsonArray.getInt(3));
                         }
-                    } else {
-                        tempUserId = Integer.valueOf(updateArray[3]);
-                    }
-                    break;
-                case TYPE_CHAT_TYPING:
-                    tempFlags = Integer.valueOf(updateArray[2]);
-                case TYPE_USER_TYPING:
-                    tempUserId = Integer.valueOf(updateArray[1]);
-                    break;
-                // online или offline
-                default:
-                    tempUserId = Integer.valueOf(updateArray[1]) * -1 ;
-                    tempFlags = Integer.valueOf(updateArray[2]);
-                    break;
+                        break;
+                    case TYPE_CHAT_TYPING:
+                        tempFlags = (updateJsonArray.getInt(2));
+                    case TYPE_USER_TYPING:
+                        tempUserId = (updateJsonArray.getInt(1));
+                        break;
+                    // online или offline
+                    default:
+                        tempUserId = updateJsonArray.getInt(1) * -1;
+                        tempFlags = (updateJsonArray.getInt(2));
+                        break;
+                }
+            }catch (Exception exp){
+                exp.printStackTrace();
             }
             flags = tempFlags;
             userId = tempUserId;
             //title = tempTitle;
             updateType = tempUpdateType;
         }
-        public Update(int type,int flags,int userid){
-            this.updateType = type;
-            this.flags = flags;
-            this.userId = userid;
-        }
+
         public int getType(){return updateType;}
         public String getHeader(){
             VKApiUserFull user = getUser();
@@ -571,7 +589,7 @@ public class LongPollService extends Service {
                 case Update.TYPE_CHAT_TYPING:
                     return flags;
                 case TYPE_MESSAGE:
-                    if(((flags & FLAG_MESSAGE_CHAT) == FLAG_MESSAGE_CHAT))
+                    if (flags != 0)
                         return flags;
                     return 0;
             }
@@ -583,5 +601,9 @@ public class LongPollService extends Service {
         }
 
 
+        public boolean isChatMessage() {
+
+            return updateType == TYPE_MESSAGE && flags != 0;
+        }
     }
 }

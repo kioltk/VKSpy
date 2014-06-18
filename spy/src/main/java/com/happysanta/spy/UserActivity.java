@@ -26,6 +26,7 @@ import com.happysanta.spy.Adapters.UpdatesAdapter;
 import com.happysanta.spy.Core.Helper;
 import com.happysanta.spy.Core.Memory;
 import com.happysanta.spy.Fragments.ListFragment;
+import com.happysanta.spy.Helper.Time;
 import com.happysanta.spy.Models.Online;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.tabcarousel.BackScrollManager;
@@ -63,7 +64,7 @@ public class UserActivity extends ActionBarActivity {
         ImageView photo = (ImageView) findViewById(R.id.photo);
         status = (TextView) findViewById(R.id.status_text);
         if (user.online) {
-            if (user.online_mobile)
+            if (user.isOnlineMobile())
                 setOnline(ONLINE_MOBILE);
             else
                 setOnline(ONLINE_TRUE);
@@ -124,7 +125,7 @@ public class UserActivity extends ActionBarActivity {
                 break;
             default:
 
-                status.setText(Helper.getLastSeen(user));
+                status.setText(Time.getLastSeen(user));
                 break;
 
         }
@@ -162,6 +163,7 @@ public class UserActivity extends ActionBarActivity {
             ((ImageView)view.findViewById(R.id.icon)).setImageResource(R.drawable.ic_tab_onlines_selected);
         else
             ((ImageView)view.findViewById(R.id.icon)).setImageResource(R.drawable.ic_tab_onlines);
+        item.setTitle(R.string.enable_spy);
     }
 
     @Override

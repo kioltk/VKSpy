@@ -31,7 +31,7 @@ public class TypingItem extends UpdateItem {
         View rootView = inflater.inflate(R.layout.list_item_typing, null);
 
         TextView additional = (TextView) rootView.findViewById(R.id.additional);
-        additional.setVisibility(View.INVISIBLE);
+        additional.setVisibility(View.GONE);
 
         ((TextView)rootView.findViewById(R.id.time)).setText(""+ getContent().getSmartTime());
         return rootView;
@@ -74,7 +74,7 @@ public class TypingItem extends UpdateItem {
         }
 
         TextView additional = (TextView) rootView.findViewById(R.id.additional);
-        additional.setVisibility(View.INVISIBLE);
+        additional.setVisibility(View.GONE);
 
         ImageLoader.getInstance().displayImage(user.getBiggestPhoto(),photo);
         rootView.setTag("typing");

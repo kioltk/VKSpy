@@ -1,7 +1,7 @@
 package com.happysanta.spy.Models;
 
-import com.happysanta.spy.Core.Helper;
 import com.happysanta.spy.Core.Memory;
+import com.happysanta.spy.Helper.Time;
 import com.vk.sdk.api.model.VKApiUserFull;
 
 /**
@@ -33,13 +33,13 @@ public abstract class Update implements Comparable {
     }
 
     protected String convertTime() {
-        return Helper.getTime(getUnix());
+        return Time.getTime(getUnix());
     }
     protected String convertDate(){
-        return Helper.getDate(getUnix());
+        return Time.getDate(getUnix());
     }
     protected String convertSmartTime(){
-        return Helper.getSmartTime(getUnix());
+        return Time.getSmartTime(getUnix());
     }
 
     public String getDate(){
@@ -53,7 +53,7 @@ public abstract class Update implements Comparable {
     }
 
     public Boolean compareDays(Update anotherUpdate) {
-        return anotherUpdate != null && Helper.checkOneDay(anotherUpdate.getUnix(), this.getUnix());
+        return anotherUpdate != null && Time.checkOneDay(anotherUpdate.getUnix(), this.getUnix());
     }
 
     public Integer getUnix(){
