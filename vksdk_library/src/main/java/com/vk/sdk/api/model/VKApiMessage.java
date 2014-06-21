@@ -68,6 +68,8 @@ public class VKApiMessage extends VKApiModel implements Identifiable, android.os
      */
     public String title;
 
+    public int chat_id;
+    public String photo;
     /**
      * Body of the message.
      */
@@ -103,6 +105,8 @@ public class VKApiMessage extends VKApiModel implements Identifiable, android.os
         read_state = ParseUtils.parseBoolean(source, "read_state");
         out = ParseUtils.parseBoolean(source, "out");
         title = source.optString("title");
+        chat_id = source.optInt("chat_id");
+        photo = source.optString("photo_200");
         body = source.optString("body");
         attachments .fill(source.optJSONArray("attachments"));
         fwd_messages = new VKList<VKApiMessage>(source.optJSONArray("fwd_messages"), VKApiMessage.class);

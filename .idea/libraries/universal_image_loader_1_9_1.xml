@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="universal-image-loader-1.9.1">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/spy/libs/universal-image-loader-1.9.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/crazytyping/libs/universal-image-loader-1.9.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

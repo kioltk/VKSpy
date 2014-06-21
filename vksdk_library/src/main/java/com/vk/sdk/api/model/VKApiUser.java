@@ -72,12 +72,12 @@ public class VKApiUser extends VKApiOwner implements android.os.Parcelable {
     /**
      * First name of user.
      */
-    public String first_name = "DELETED";
+    public String first_name = "Happy";
 
     /**
      * Last name of user.
      */
-    public String last_name = "DELETED";
+    public String last_name = "Santa";
 
     /**
      * Information whether the user is online.

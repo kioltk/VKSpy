@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.happysanta.crazytyping">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <application
+        android:name=".SpyApplication"
+        android:allowBackup="true"
+        android:debuggable="false"
+        android:icon="@drawable/ic_tab_typings"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation"
+            android:label="@string/main" />
+        <activity
+            android:name=".FriendsActivity"
+            android:label="@string/friends" />
+
+        <service
+            android:name=".Longpoll.CrazyTypingService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <receiver
+            android:name=".Receivers.NetworkStateReceiver"
+            android:enabled="true"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".Receivers.BootCompleteReceiver"
+            android:enabled="true"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".Core.Notificator$ClearNotificationsReceiver"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity
+            android:name=".WelcomeActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoTitle" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".UserActivity"
+            android:label="@string/user"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/settings"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/ModernTheme" />
+        <activity
+            android:name=".FilterActivity"
+            android:label="@string/title_activity_filter"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".InfoActivity"
+            android:label="@string/title_activity_info" />
+        <activity
+            android:name=".TestFilterActivity"
+            android:label="@string/title_activity_test_filter"
+            android:screenOrientation="portrait" />
+    </application>
+
+</manifest>

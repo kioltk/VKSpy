@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:title="start"
+        android:id="@+id/toggler"
+        app:showAsAction="always"
+        />
+    <item
+        android:id="@+id/settings"
+        android:title="@string/settings"
+        />
+    <item
+        android:title="@string/app_about"
+        android:id="@+id/about"
+        />
+
+</menu>

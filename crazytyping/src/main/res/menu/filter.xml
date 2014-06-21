@@ -1,0 +1,28 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.happysanta.crazytyping.FilterActivity" >
+    <item
+        android:id="@+id/apply"
+        android:title="@string/apply"
+        android:enabled="true"
+        app:showAsAction="always"
+
+        />
+    <item
+        android:id="@+id/addButton"
+        android:title="@string/adduser"
+        android:icon="@drawable/ic_ab_add"
+        app:showAsAction="always"
+        />
+    <item
+        android:id="@+id/select"
+        android:title="@string/select_all"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+    <item android:id="@+id/deselect"
+        android:title="@string/deselect_all"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        />
+</menu>

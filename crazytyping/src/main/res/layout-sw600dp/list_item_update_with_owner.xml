@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+
+            android:visibility="invisible"
+            android:src="@drawable/ic_tab_typings_selected"
+            android:paddingRight="10dp"
+            android:id="@+id/typing_active"
+            android:textAllCaps="true"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/photo_holder" />
+        <ImageView
+            android:visibility="invisible"
+            android:src="@drawable/ic_tab_typings"
+            android:paddingRight="10dp"
+            android:textColor="@color/grey"
+            android:id="@+id/typing"
+            android:textAllCaps="true"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/photo_holder" />
+        <RelativeLayout
+            android:id="@+id/photo_holder"
+            android:layout_centerInParent="true"
+            android:layout_width="50dp"
+            android:layout_height="50dp">
+            <com.roundedimage.RoundedImageView
+                android:src="#0fff"
+                app:border_width="3dp"
+                app:border_color="@drawable/update_owner_border_selector"
+                app:is_oval="true"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+            <com.roundedimage.RoundedImageView
+                android:id="@+id/photo"
+                android:src="@drawable/user_placeholder"
+                app:corner_radius="30dip"
+                android:padding="3dp"
+                app:is_oval="true"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"  />
+        </RelativeLayout>
+        <LinearLayout
+            android:id="@+id/text_holder"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/photo_holder" >
+            <TextView
+                android:text="HAPPY SANTA!!1"
+                android:textSize="16sp"
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:textColor="@color/additional_text_color"
+                android:visibility="gone"
+                android:id="@+id/additional"
+                android:text="Vk Spy android"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>

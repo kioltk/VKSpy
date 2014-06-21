@@ -8,7 +8,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/spy" />
+            <option value="$PROJECT_DIR$/crazytyping" />
             <option value="$PROJECT_DIR$/vksdk_library" />
           </set>
         </option>

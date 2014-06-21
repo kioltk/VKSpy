@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="main">Главная</string>
+    <string name="login">Вход</string>
+    <string name="friends">Друзья</string>
+    <string name="settings">Настройки</string>
+    <string name="welcome">Привет</string>
+    <string name="user">Пользователь</string>
+    <string name="onlines">Онлайны</string>
+    <string name="typings">Тайпинги</string>
+    <string name="logout">Выход</string>
+    <string name="app_description"><![CDATA[<b>VK Spy</b> незаметно отслеживает активность Ваших друзей и других пользователей ВКонтакте.]]></string>
+    <string name="logout_message">После выхода мы не сможем дальше отслеживать активность пользователей</string>
+    <string name="logout_title">Действительно выйти?</string>
+    <string name="logout_accept">Выход!</string>
+    <string name="logout_cancel">Отмена</string>
+    <string name="nothinghere">Событий пока нет</string>
+    <string name="signin">Войти</string>
+    <string name="welcome_text">Добро пожаловать в дивный новый мир приватности и социальных сетей</string>
+    <string name="come_online_m">Зашёл в сеть</string>
+    <string name="come_online_f">Зашла в сеть</string>
+    <string name="gone_offline_m">Вышел из сети</string>
+    <string name="gone_offline_f">Вышла из сети</string>
+    <string name="was_writing_m">Писал 3 минуты назад</string>
+    <string name="was_writing_f">Писала 3 минуты назад</string>
+    <string name="last_seen">заходил</string>
+    <string name="last_seen_f">заходила</string>
+    <string name="at">в</string>
+    <string name="ago">назад</string>
+    <string name="now">сейчас</string>
+    <string name="today">сегодня</string>
+    <string name="yesterday">вчера</string>
+    <string name="moment">момент</string>
+    <string name="min">мин</string>
+    <string name="hr">ч</string>
+    <string name="hrs">ч</string>
+    <string name="undefined">undefined</string>
+    <string name="day">д</string>
+    <string name="sec">сек</string>
+    <string name="title_activity_filter">За кем следить</string>
+    <string name="apply">ОК</string>
+    <string name="no_tracks">Не за кем следить</string>
+    <string name="no_events">Событий пока нет</string>
+    <string name="filter_tip">Выберите за кем следить</string>
+    <string name="way_to_notify">Способ уведомления</string>
+    <string name="popup">Всплывающее уведомление</string>
+    <string name="notification">Уведомление в шторке</string>
+    <string name="enabled">Включено</string>
+    <string name="offline_notifications">Оффлайн уведомления</string>
+    <string name="online_notifications">Онлайн уведомления</string>
+    <string name="sound">Звук</string>
+    <string name="vibrate">Вибро</string>
+    <string name="notifications">Уведомления</string>
+    <string name="app_about">О приложении</string>
+    <string name="durov_function_title">Суперфункция</string>
+    <string name="durov_function_decription">Слежка за Павлом Дуровым!</string>
+    <string name="app_about_button">Ага</string>
+    <string name="app_about_description"><![CDATA[Приложение незаметно следит за пользователями ВК.\n<br/><br/><a href="http://vk.com/happysanta">Happy Santa LLC</a> © 2014<br/><br/>Сооружено <a href="http://vk.com/kio_tk">Денисом Давыдовым</a> при поддержке <a href="http://vk.com/ez">Жени</a> и <a href="http://vk.com/emc2">Вани</a>.]]></string>
+    <string name="important">Важные</string>
+    <string name="select_all">Выбрать всех</string>
+    <string name="deselect_all">Снять выделение</string>
+    <string name="moment_ago">только что</string>
+    <string name="enable_spy">Включить слежку</string>
+    <string name="onlines_notification" />
+    <string name="durov_start_message">Включить слежку за Павлом Дуровым?</string>
+    <string name="durov_start_title">Эксклюзивная фича</string>
+    <string name="durov_start_ok">Конечно!</string>
+    <string name="durov_start_update">Обновить</string>
+    <string name="durov_start_cancel">Кто это?</string>
+    <string name="durov_function_activating_title">Суперфича</string>
+    <string name="durov_function_activating_message">Загрузка</string>
+    <string name="durov_function_activated">Функция активирована</string>
+    <string name="durov_joke_title">Слежка за Павлом Дуровым</string>
+    <string name="durov_joke_message">Подобно Павлу, мы не идем на компромиссы. Да, руками разработчиков ВК ему удалось спрятать свой статус онлайн от чужих глаз. Но только не от нашего сумрачного гения. Happy Santa возвращает вам свободу, ведь vita sene libertate nlhil.</string>
+    <string name="durov_joke_button">@string/spyon</string>
+    <string name="durov_function_almost">Почти готово</string>
+    <string name="durov_function_activated_title">Слежка за Дуровым</string>
+    <string name="durov_function_updated">Обновлено</string>
+    <string name="durov_function_updating">Обновление</string>
+    <string name="error">Ошибка</string>
+    <string name="server_did_not_respond">Сервер не отвечает</string>
+    <string name="check_connection">Проверьте ваше интернет соединение</string>
+    <string name="unknown_error">Что-то пошло не так</string>
+    <string name="need_access">Для использования приложения нужен доступ</string>
+    <string name="help">Помощь</string>
+    <string name="no_typings">Тайпингов пока нет</string>
+    <string name="no_friends">У вас нет друзей =(</string>
+    <string name="close">Закрыть</string>
+    <string name="durov_wanna_see">Хочу посмотреть!</string>
+    <string name="send_logs">Отправить логи</string>
+    <string name="vk_down">@string/unknown_error</string>
+    <string name="additional">Дополнительно</string>
+    <string name="on">ВКЛ</string>
+    <string name="off">ВЫКЛ</string>
+    <string name="silent">Silent</string>
+    <string name="typings_notifications">Тайпинг уведомления</string>
+    <string name="chats">Чаты</string>
+    <string name="chat">Чат</string>
+    <string name="was_writing_chat_m">Писал в чате 3 минуты назад</string>
+    <string name="was_writing_chat_f">Писала в чате 3 минуты назад</string>
+    <string name="no_browser">Ого, у вас нету браузера.</string>
+    <string name="ok">OK</string>
+
+    <string name="login_title">Terms</string>
+    <string name="login_message">You agree with temrs, right?</string>
+    <string name="license">Лицензии открытого кода</string>
+    <string name="agreewithprivacy">Используя это приложение, вы соглашаетесь с</string>
+    <string name="termsandpolicy">Условие использования и Политика конфиденциальности</string>
+    <string name="termsandpolicy_abl">Условием использования и Политикой конфиденциальности</string>
+
+    <string name="privacypolicy_title">Политика конфиденциальности</string>
+    <string name="terms_title">Условия использования</string>
+    <string name="privacypolicy"><![CDATA[
+    1. В целях улучшения качества ПО, в процессе работы приложения мы анонимно собираем информацию посредством сервиса Bugsense. Политика сборка, хранения, передачи информации в данном случае является <a href=”http://www.splunk.com/view/SP-CAAAAAG”>политикой Splunk Inc.</a>. Информация, получаемая разработчиками с помощью сервиса Bugsense, не передаётся и не продаётся третьим лицам.
+    <br/><br/>2. Данные пользователей vk.com, используемые в приложении, публичны, и находятся по адресу api.vk.com. Права пользователей сервиса vk.com соблюдены по <a href="http://vk.com/privacy">правилам сервиса vk.com</a>.
+    <br/><br/>3. Любая личная информация пользователя, полученная через API VK (api.vk.com) используется исключительно локально на устройстве и не передаётся третим сервисам.
+    ]]></string>
+    <string name="terms"><![CDATA[Пользователь может использовать данные, собираемые приложением, на своё усмотрение. Happy Santa LLC не несёт никакой ответственности за то, как пользователь использует собранные данные.]]></string>
+
+
+    <string name="important_notification">Важное уведомление</string>
+    <string name="external">Закладки</string>
+    <string name="adduser">Следить за пользователем</string>
+    <string name="search">Поиск</string>
+    <string name="loading">Загрузка</string>
+    <string name="spyon">Следить</string>
+    <string name="fill_addnew">Введите id или ссылку</string>
+    <string name="error_user_durov">Нене, за Пашей мы больше не следим. Такие дела</string>
+    <string name="error_user_exists">Пользователь уже добавлен</string>
+    <string name="error_user_idparsing">Неверно введённый id</string>
+    <string name="error_user_loading">Ошибка загрузки</string>
+    <string name="error_user_deleted">Пользователь удален</string>
+    <string name="connection">Подключение</string>
+    <string name="connection_external">Закладки</string>
+    <string name="mobile">mobile</string>
+    <string name="iphone">iPhone</string>
+    <string name="ipad">iPad</string>
+    <string name="android">Android</string>
+    <string name="wphone">Windows Phone</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+
+    <plurals name="usersSelected">
+        <item quantity="zero">Никого не выбрано</item>
+        <item quantity="one">Выбран %d</item>
+        <item quantity="few">Выбрано %d</item>
+        <item quantity="many">Выбрано %d</item>
+        <item quantity="other">Выбрано %d</item>
+    </plurals>
+    <plurals name="onlines_notification" >
+        <item quantity="one">И ещё %d человек зашёли в сеть</item>
+        <item quantity="few">И ещё %d человека зашли в сеть</item>
+        <item quantity="many">И ещё %d человек зашли в сеть</item>
+        <item quantity="other">И ещё %d человека зашли в сеть</item>
+    </plurals>
+    <plurals name="offlines_notification">
+        <item quantity="one">И ещё %d человек вышли из сети</item>
+        <item quantity="few">И ещё %d человека вышли из сети</item>
+        <item quantity="many">И ещё %d человек вышли из сети</item>
+        <item quantity="other">И ещё %d человека  вышли из сети</item>
+    </plurals>
+    <plurals name="chat_notification">
+        <item quantity="one">И ещё %d человек писали в чате</item>
+        <item quantity="few">И ещё %d человека писали в чате</item>
+        <item quantity="many">И ещё %d человек писали в чате</item>
+        <item quantity="other">И ещё %d человека  писали в чате</item>
+    </plurals>
+
+</resources>

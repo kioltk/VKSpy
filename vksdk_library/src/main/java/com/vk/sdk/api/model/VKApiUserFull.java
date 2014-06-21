@@ -876,9 +876,12 @@ public class VKApiUserFull extends VKApiUser implements android.os.Parcelable {
      * атсибятина
      *
      */
-    public boolean tracked = false;
-    public boolean isTracked() {
-        return tracked;
+    @Deprecated
+    public boolean targeted = false;
+
+    @Deprecated
+    public boolean isTargeted() {
+        return targeted;
     }
     public Boolean isFriend = false;
     public String getBiggestPhoto(){

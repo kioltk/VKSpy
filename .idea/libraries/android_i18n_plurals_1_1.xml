@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="android-i18n-plurals-1.1">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/spy/libs/android-i18n-plurals-1.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/crazytyping/libs/android-i18n-plurals-1.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

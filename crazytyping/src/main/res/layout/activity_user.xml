@@ -1,0 +1,56 @@
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.happysanta.crazytyping.UserActivity"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <android.support.v4.view.ViewPager
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <com.tabcarousel.CarouselContainer
+        android:id="@+id/carousel_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true">
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/user"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+
+                android:layout_height="@dimen/carousel_container_height"
+                >
+                <com.roundedimage.RoundedImageView
+                    app:is_oval="true"
+                    android:id="@+id/photo"
+                    android:src="@drawable/user_placeholder"
+                    android:layout_marginBottom="15dp"
+                    android:layout_width="125dp"
+                    android:layout_height="125dp" />
+                <TextView
+                    android:id="@+id/status_text"
+                    android:textSize="16sp"
+                    android:textColor="#808080"
+                    android:gravity="center"
+                    android:text="@string/offline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+            <com.viewpagerindicator.TabPageIndicator
+                android:id="@+id/pager_indicator"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/carousel_indicator_height" />
+        </LinearLayout>
+        </com.tabcarousel.CarouselContainer>
+
+</RelativeLayout>

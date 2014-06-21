@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="nineoldandroids-2.4.0">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/spy/libs/nineoldandroids-2.4.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/crazytyping/libs/nineoldandroids-2.4.0.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

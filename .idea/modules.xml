@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/VKSpy.iml" filepath="$PROJECT_DIR$/VKSpy.iml" />
-      <module fileurl="file://$PROJECT_DIR$/spy/spy.iml" filepath="$PROJECT_DIR$/spy/spy.iml" />
+      <module fileurl="file://$PROJECT_DIR$/VKCrazyTyping.iml" filepath="$PROJECT_DIR$/VKCrazyTyping.iml" />
+      <module fileurl="file://$PROJECT_DIR$/crazytyping/crazytyping.iml" filepath="$PROJECT_DIR$/crazytyping/crazytyping.iml" />
       <module fileurl="file://$PROJECT_DIR$/vksdk_library/vksdk_library.iml" filepath="$PROJECT_DIR$/vksdk_library/vksdk_library.iml" />
     </modules>
   </component>
