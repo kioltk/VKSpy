@@ -102,6 +102,7 @@
     <string name="silent">Silent</string>
     <string name="typings_notifications">Тайпінг повідомлення</string>
     <string name="chats">Чати</string>
+    <string name="title_activity_info">InfoActivity</string>
 
     <string name="was_writing_chat_m">Писав в чаті 3 хвилини тому</string>
     <string name="was_writing_chat_f">Писала в чаті 3 хвилини тому</string>
@@ -145,6 +146,7 @@
     <string name="android">Android</string>
     <string name="wphone">Windows Phone</string>
 
+    <string name="windowse">Windows8</string>
     <plurals name="usersSelected">
         <item quantity="zero">Нікого не вибрано</item>
         <item quantity="one">Вибран %d</item>

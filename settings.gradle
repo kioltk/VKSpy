@@ -1,1 +1,1 @@
-include ':vksdk_library', 'spy'
+include ':vksdk_library', 'vkspy'

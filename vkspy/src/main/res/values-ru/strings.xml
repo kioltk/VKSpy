@@ -20,6 +20,7 @@
     <string name="signin">Войти</string>
     <string name="online">online</string>
     <string name="offline">offline</string>
+    <string name="title_activity_info">InfoActivity</string>
     <string name="open_profile">Открыть профиль</string>
     <string name="welcome_text">Добро пожаловать в дивный новый мир приватности и социальных сетей</string>
     <string name="come_online_m">Зашёл в сеть</string>
@@ -122,7 +123,6 @@
     ]]></string>
     <string name="terms"><![CDATA[Пользователь может использовать данные, собираемые приложением, на своё усмотрение. Happy Santa LLC не несёт никакой ответственности за то, как пользователь использует собранные данные.]]></string>
 
-
     <string name="important_notification">Важное уведомление</string>
     <string name="external">Закладки</string>
     <string name="adduser">Следить за пользователем</string>
@@ -142,6 +142,7 @@
     <string name="ipad">iPad</string>
     <string name="android">Android</string>
     <string name="wphone">Windows Phone</string>
+    <string name="windowse">Windows8</string>
 
     <plurals name="usersSelected">
         <item quantity="zero">Никого не выбрано</item>

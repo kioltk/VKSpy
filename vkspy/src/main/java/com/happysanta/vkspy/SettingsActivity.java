@@ -74,7 +74,7 @@ public class SettingsActivity extends PreferenceActivity {
                  //taps++;
              }else{
                  taps = 0;
-                startActivity(new Intent(getBaseContext(), TestFilterActivity.class));
+                startActivity(new Intent(getBaseContext(), FilterActivity.class));
              }
             }
         });

@@ -6,7 +6,7 @@
 
     <LinearLayout
         android:orientation="vertical"
-        tools:context="com.happysanta.vkspy.TestFilterActivity"
+        tools:context="com.happysanta.vkspy.FilterActivity"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 

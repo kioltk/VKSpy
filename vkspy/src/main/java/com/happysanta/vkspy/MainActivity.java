@@ -336,7 +336,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void filterOnlines(View view) {
-        startActivity(new Intent(this, TestFilterActivity.class));
+        startActivity(new Intent(this, FilterActivity.class));
     }
     public void filterTypings(View view){
         Toast.makeText(getBaseContext(),".!.",Toast.LENGTH_SHORT).show();

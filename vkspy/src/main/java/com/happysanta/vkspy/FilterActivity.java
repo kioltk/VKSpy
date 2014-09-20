@@ -46,7 +46,7 @@ import com.vk.sdk.api.model.VKApiUserFull;
 import com.vk.sdk.api.model.VKList;
 
 
-public class TestFilterActivity extends ActionBarActivity {
+public class FilterActivity extends ActionBarActivity {
 
 
     protected MenuItem applyButton;
@@ -332,13 +332,13 @@ public class TestFilterActivity extends ActionBarActivity {
     }
 
     public static class FilterFriendsFragment extends UsersListFragment {
-        TestFilterActivity activity;
+        FilterActivity activity;
         private ListView listView;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            activity = (TestFilterActivity) getActivity();
+            activity = (FilterActivity) getActivity();
         }
         protected ListView getListView(){
             if(rootView!=null){
