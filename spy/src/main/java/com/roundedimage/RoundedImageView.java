@@ -13,7 +13,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.happysanta.spy.R;
+import com.happysanta.vkspy.R;
 
 
 @SuppressWarnings("UnusedDeclaration")

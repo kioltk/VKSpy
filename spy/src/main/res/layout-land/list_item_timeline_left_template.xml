@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <com.happysanta.spy.Views.TimelineView
+        <com.happysanta.vkspy.Views.TimelineView
             android:id="@+id/timelineView"
             android:layout_centerInParent="true"
             android:layout_width="50dp"

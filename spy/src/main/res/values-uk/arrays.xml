@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <string-array name="notification_type">
+        <item>@string/notification</item>
+        <item>@string/popup</item>
+    </string-array>
+    <string-array name="notification_type_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
     <string-array name="connection_external_interval">
         <item>10 cекунд</item>
         <item>30 cекунд</item>

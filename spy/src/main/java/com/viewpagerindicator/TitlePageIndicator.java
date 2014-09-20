@@ -36,7 +36,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 
-import com.happysanta.spy.R;
+import com.happysanta.vkspy.R;
 
 import java.util.ArrayList;
 

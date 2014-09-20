@@ -9,7 +9,7 @@
         android:isScrollContainer="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:context="com.happysanta.spy.InfoActivity$PlaceholderFragment">
+        tools:context="com.happysanta.vkspy.InfoActivity$PlaceholderFragment">
 
         <LinearLayout
             xmlns:android="http://schemas.android.com/apk/res/android"

@@ -16,7 +16,7 @@
     <string name="logout_title">Дійсно вийти?</string>
     <string name="logout_accept">Вихід!</string>
     <string name="logout_cancel">Скасувати</string>
-    <string name="nothinghere">Подій поки немає</string>
+    <!--string name="nothinghere">Подій поки немає</string-->
     <string name="signin">Ввійти</string>
     <string name="welcome_text">Ласкаво просимо в прекрасний новий світ приватності і соціальних мереж</string>
     <string name="come_online_m">Зайшов в мережу</string>
@@ -45,6 +45,10 @@
     <string name="no_events">Подій поки немає</string>
     <string name="filter_tip">Оберіть за ким стежити</string>
     <string name="way_to_notify">Спосіб повідомлення</string>
+    <string name="open_profile">Профиль</string>
+    <string name="online">online</string>
+    <string name="offline">offline</string>
+    <string name="chat">Чат</string>
     <string name="popup">Спливаюче сповіщення</string>
     <string name="notification">Повідомлення у шторці</string>
     <string name="enabled">Увімкнено</string>
@@ -63,7 +67,7 @@
     <string name="deselect_all">Зняти виділення</string>
     <string name="moment_ago">щойно</string>
     <string name="enable_spy">Увімкнути стеження</string>
-    <string name="onlines_notification" />
+    <!--string name="onlines_notification" /-->
     <string name="durov_start_message">Включити стеження за Павлом Дуровим?</string>
     <string name="durov_start_title">Ексклюзивна фіча</string>
     <string name="durov_start_ok">Стежити!</string>
@@ -72,7 +76,7 @@
     <string name="durov_function_activating_title">Суперфіча</string>
     <string name="durov_function_activating_message">Завантаження</string>
     <string name="durov_function_activated">Функція активована</string>
-    <string name="durov_joke">Місце для Ваніного жарту</string>
+    <!--string name="durov_joke">Місце для Ваніного жарту</string-->
     <string name="durov_joke_title">@string/durov_function_title</string>
     <string name="durov_joke_message">Подібно до Павла, ми не йдемо на компроміси. Так, руками розробників ВК йому вдалося сховати свій статус онлайн від чужих очей. Але тільки не від нашого сутінкового генія. Happy Santa повертає вам свободу, адже vita sene libertate nlhil.</string>
     <string name="durov_joke_button">@string/durov_start_ok</string>

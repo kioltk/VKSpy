@@ -16,8 +16,11 @@
     <string name="logout_title">Действительно выйти?</string>
     <string name="logout_accept">Выход!</string>
     <string name="logout_cancel">Отмена</string>
-    <string name="nothinghere">Событий пока нет</string>
+    <!--string name="nothinghere">Событий пока нет</string-->
     <string name="signin">Войти</string>
+    <string name="online">online</string>
+    <string name="offline">offline</string>
+    <string name="open_profile">Открыть профиль</string>
     <string name="welcome_text">Добро пожаловать в дивный новый мир приватности и социальных сетей</string>
     <string name="come_online_m">Зашёл в сеть</string>
     <string name="come_online_f">Зашла в сеть</string>
@@ -63,7 +66,7 @@
     <string name="deselect_all">Снять выделение</string>
     <string name="moment_ago">только что</string>
     <string name="enable_spy">Включить слежку</string>
-    <string name="onlines_notification" />
+    <!--string name="onlines_notification" /-->
     <string name="durov_start_message">Включить слежку за Павлом Дуровым?</string>
     <string name="durov_start_title">Эксклюзивная фича</string>
     <string name="durov_start_ok">Конечно!</string>
