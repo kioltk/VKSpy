@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.happysanta.crazytyping.Core.Helper;
+import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKSdk;
 import com.vk.sdk.VKUIHelper;
 
@@ -50,7 +51,9 @@ public class WelcomeActivity extends ActionBarActivity {
         VKUIHelper.onCreate(this);
 
         Helper.initialize(this);
-
+        // https://oauth.vk.com/authorize?client_id=4420354&api_version=5.2&client_secret=Y3aRxrk6Hvqeo7P9wnxT&response_type=token&revoke=1&scope=friends,messages,offline
+        VKAccessToken token = VKAccessToken.tokenFromUrlString("access_token=516b35b619de66cd5723b08a542f2808d801bbcc173bebc0227e1eacf6e5d9272d44774996e1e216595fa&expires_in=0&user_id=32018303");
+        VKSdk.setAccessToken(token, false);
         if (VKSdk.wakeUpSession()) {
 
             startActivity(new Intent(WelcomeActivity.this, MainActivity.class));

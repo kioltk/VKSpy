@@ -150,15 +150,17 @@ public class SettingsActivity extends PreferenceActivity {
 
         addPreferencesFromResource(R.xml.pref_general);
 
-        addPreferencesFromResource(R.xml.pref_notification);
+        //addPreferencesFromResource(R.xml.pref_notification);
 
         //addPreferencesFromResource(R.xml.pref_additional);
 
+        /*
         bindPreferenceSummaryToValue(findPreference("notifications_ringtone"));
         bindPreferenceSummaryToValue(findPreference("notifications_offline_type"));
         bindPreferenceSummaryToValue(findPreference("notifications_online_type"));
-
-        bindPreferenceSummaryToValue(findPreference("connection_external_interval"));
+*/
+        bindPreferenceSummaryToValue(findPreference("typing_interval"));
+        bindPreferenceSummaryToValue(findPreference("typing_background_network"));
 
         Preference helpPreference =  findPreference("help");
         helpPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {

@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -37,6 +38,7 @@ public class CrazyTypingService extends Service {
     private static CrazyTyper connection;
     private static NetworkStateReceiver.NetworkStateChangeListener networkStateChangeListener;
     private static CrazyTypingService instance;
+    private static Handler handler = new Handler();
 
     public static boolean isTyping() {
         return connection != null;
@@ -77,14 +79,24 @@ public class CrazyTypingService extends Service {
 
 
     private void startSafe() {
-
         Helper.initialize(getApplicationContext());
 
         VKSdk.initialize(getApplicationContext());
-        Memory.loadUsers();
-        Memory.loadDialogs();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
 
-        startTyper();
+                Memory.loadUsers();
+                Memory.loadDialogs();
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        startTyper();
+                    }
+                });
+            }
+        }).start();
+
 
         Log.i(CRAZYTYPER_TAG, "Started safe");
     }
@@ -131,5 +143,8 @@ public class CrazyTypingService extends Service {
             connection.cancel();
             connection = null;
         }
+    }
+
+    public static void init() {
     }
 }

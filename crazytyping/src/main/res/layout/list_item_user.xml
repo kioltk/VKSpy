@@ -3,52 +3,51 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:paddingLeft="12dp"
-    android:paddingRight="12dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
     android:layout_height="match_parent"
-    android:background="@drawable/user_item_selector">
+    android:background="@drawable/item_user_background_selector">
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="70dp">
-    <LinearLayout
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <com.roundedimage.RoundedImageView
-            android:id="@+id/photo"
-            android:src="@drawable/user_placeholder"
-            app:is_oval="true"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:layout_width="60dp"
-            android:layout_height="60dp"  />
-        <TextView
-            android:text="HAPPY SANTA!!1"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="32dp"
-            android:textColor="@color/user_item_text_color_selector"
-            android:textSize="18sp"
-            android:id="@+id/name"
+        android:layout_height="56dp">
+        <LinearLayout
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-    <View
-        android:id="@+id/divider"
-        android:background="@drawable/user_list_divider"
-        android:layout_alignParentBottom="true"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"/>
-    <ImageView
-        android:visibility="gone"
-        android:id="@+id/status_image"
-        android:layout_marginRight="12dp"
-        android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
-        android:src="@drawable/circle"
-        android:minHeight="7dp"
-        android:minWidth="7dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+            android:layout_height="match_parent">
+            <com.roundedimage.RoundedImageView
+                android:id="@+id/photo"
+                android:src="@drawable/user_placeholder"
+                app:is_oval="true"
+                android:layout_width="48dp"
+                android:layout_height="48dp"  />
+            <TextView
+                android:text="HAPPY SANTA!!1"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="40dp"
+                android:textColor="@color/user_item_text_color_selector"
+                android:textSize="16sp"
+                android:id="@+id/name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <View
+            android:visibility="gone"
+            android:layout_marginLeft="56dp"
+            android:id="@+id/divider"
+            android:background="@drawable/user_list_divider"
+            android:layout_alignParentBottom="true"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"/>
+        <com.LDroid.LCheckBox
+            android:id="@+id/checked"
+            android:layout_alignParentRight="true"
+            android:layout_centerInParent="true"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:paddingLeft="20dp"
+            android:paddingBottom="40dp"
+            app:lineWidth="2dp"
+            app:lineColor="@color/blue"/>
     </RelativeLayout>
 </RelativeLayout>

@@ -3,6 +3,7 @@ package com.happysanta.crazytyping.Adapters.CustomItems;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Checkable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -33,7 +34,7 @@ public class DialogItem extends Item implements Reconvertable, LoadableImage {
     @Override
     public View getView(Context context) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View rootView = inflater.inflate(R.layout.list_item_update_with_owner, null);
+        View rootView = inflater.inflate(R.layout.list_item_user, null);
 
 
         return reconvert(context,rootView);
@@ -44,22 +45,17 @@ public class DialogItem extends Item implements Reconvertable, LoadableImage {
     @Override
     public View reconvert(Context context, View rootView) {
         TextView name = (TextView) rootView.findViewById(R.id.name);
-        View typing = rootView.findViewById(R.id.typing);
-        View typingActive = rootView.findViewById(R.id.typing_active);
-        typing.clearAnimation();
-        typingActive.clearAnimation();
-        if(getContent().targeted)
-            typing.setVisibility(View.VISIBLE);
-        else
-            typing.setVisibility(View.INVISIBLE);
+        Checkable checked = (Checkable) rootView.findViewById(R.id.checked);
+        checked.setChecked(getContent().targeted);
         name.setText(getContent().getTitle());
 
 
-        TextView additional = (TextView) rootView.findViewById(R.id.additional);
-        additional.setVisibility(View.GONE);
-        if(imageLoaded)
-            loadImage(rootView);
-        else
+        //xTextView additional = (TextView) rootView.findViewById(R.id.additional);
+        //additional.setVisibility(View.GONE);
+        if(imageLoaded) {
+         //   loadImage(rootView);
+        }
+        // else
             placeHolder(rootView);
 
 

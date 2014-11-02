@@ -18,6 +18,7 @@ public class NetworkStateReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("AGCY SPY","Network connectivity change");
+
         if(intent.getExtras()!=null) {
             NetworkInfo ni = (NetworkInfo) intent.getExtras().get(ConnectivityManager.EXTRA_NETWORK_INFO);
             if (ni != null && ni.getState() == NetworkInfo.State.CONNECTED) {
@@ -25,7 +26,8 @@ public class NetworkStateReceiver extends BroadcastReceiver {
 
                 for (NetworkStateChangeListener listener : listeners.values()) {
                     listener.onConnected();
-                    Memory.saveNetwork(true);
+
+                    //Memory.saveNetwork(true);
                 }
                 //listeners.clear();
             }
@@ -33,7 +35,8 @@ public class NetworkStateReceiver extends BroadcastReceiver {
 
                 for (NetworkStateChangeListener listener : listeners.values()) {
                     listener.onLost();
-                    Memory.saveNetwork(false);
+                    //Memory.saveNetwork(false);
+
                 }
                 Log.d("AGCY SPY", "Connection lost");
 

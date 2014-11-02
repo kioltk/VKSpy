@@ -7,6 +7,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Checkable;
 
 import com.happysanta.crazytyping.Adapters.DialogsAdapter;
 import com.happysanta.crazytyping.Core.Memory;
@@ -69,53 +70,9 @@ public class DialogsFragment extends ListFragment {
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         boolean targeted = targetDialog(id);
 
-        final View typingView = view.findViewById(R.id.typing);
-        AlphaAnimation alphaAnimation;
-        if(targeted){
-            Memory.addTypingListener(view);
-            alphaAnimation = new AlphaAnimation(0,1);
-            alphaAnimation.setInterpolator(new DecelerateInterpolator());
-            alphaAnimation.setDuration(100);
-            alphaAnimation.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-                    typingView.setVisibility(View.INVISIBLE);
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    typingView.setVisibility(View.VISIBLE);
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-
-                }
-            });
-        }else{
-
-            Memory.removeTypingListener(view);
-            alphaAnimation = new AlphaAnimation(1,0);
-            alphaAnimation.setInterpolator(new DecelerateInterpolator());
-            alphaAnimation.setDuration(100);
-            alphaAnimation.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-                    typingView.setVisibility(View.VISIBLE);
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    typingView.setVisibility(View.INVISIBLE);
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-
-                }
-            });
-        }
-        typingView.startAnimation(alphaAnimation);
+        final Checkable typingView = (Checkable) view.findViewById(R.id.checked);
+        if(targeted != typingView.isChecked())
+            typingView.toggle();
     }
 
     private Boolean targetDialog(long id) {

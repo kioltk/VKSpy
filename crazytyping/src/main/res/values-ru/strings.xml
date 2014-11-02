@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="app_name">Сумасшедший Писач</string>
     <string name="main">Главная</string>
     <string name="login">Вход</string>
     <string name="friends">Друзья</string>
@@ -15,7 +16,7 @@
     <string name="logout_title">Действительно выйти?</string>
     <string name="logout_accept">Выход!</string>
     <string name="logout_cancel">Отмена</string>
-    <string name="nothinghere">Событий пока нет</string>
+    <!--<string name="nothinghere">Событий пока нет</string>-->
     <string name="signin">Войти</string>
     <string name="welcome_text">Добро пожаловать в дивный новый мир приватности и социальных сетей</string>
     <string name="come_online_m">Зашёл в сеть</string>
@@ -62,7 +63,7 @@
     <string name="deselect_all">Снять выделение</string>
     <string name="moment_ago">только что</string>
     <string name="enable_spy">Включить слежку</string>
-    <string name="onlines_notification" />
+    <!--<string name="onlines_notification" />-->
     <string name="durov_start_message">Включить слежку за Павлом Дуровым?</string>
     <string name="durov_start_title">Эксклюзивная фича</string>
     <string name="durov_start_ok">Конечно!</string>
@@ -96,7 +97,7 @@
     <string name="silent">Silent</string>
     <string name="typings_notifications">Тайпинг уведомления</string>
     <string name="chats">Чаты</string>
-    <string name="chat">Чат</string>
+    <!--<string name="chat">Чат</string>-->
     <string name="was_writing_chat_m">Писал в чате 3 минуты назад</string>
     <string name="was_writing_chat_f">Писала в чате 3 минуты назад</string>
     <string name="no_browser">Ого, у вас нету браузера.</string>
@@ -137,9 +138,21 @@
     <string name="iphone">iPhone</string>
     <string name="ipad">iPad</string>
     <string name="android">Android</string>
+    <string name="windowse">Windows8</string>
     <string name="wphone">Windows Phone</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
+    <string name="typing_interval">Typing interval</string>
+    <string name="pref_general">General</string>
+    <string name="typing_background">Background typing</string>
+    <string name="typing_background_desc">Автовключение</string>
+    <string name="typing_background_network">Network type</string>
+
+    <string name="pull_to_refresh_pull_label">Pull to refresh…</string>
+    <string name="pull_to_refresh_release_label">Release to refresh…</string>
+    <string name="pull_to_refresh_refreshing_label">Loading…</string>
+    <string name="pull_to_refresh_refreshing_failed_label">Refresh failed</string>
+    <string name="offline">offline</string>
 
     <plurals name="usersSelected">
         <item quantity="zero">Никого не выбрано</item>

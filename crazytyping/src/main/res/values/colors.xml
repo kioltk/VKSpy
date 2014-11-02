@@ -7,9 +7,10 @@
     <color name="transparent_black">#99000000</color>
 
     <!-- carousel temp -->
+    <color name="blue_extra_light">#e7e9fd</color>
     <color name="blue_light">#add5f2</color>
-    <color name="blue">#2994e2</color>
-    <color name="blue_dark">#2B587A</color>
+    <color name="blue">#ff5677fc</color>
+    <color name="blue_dark">#4e6cef</color>
     <color name="red">#ffe24d3e</color>
     <color name="red_dark">#ffd86d6b</color>
     <color name="green">#ff09aa38</color>
@@ -21,7 +22,7 @@
     <color name="grey_light_extra">#f0f0f0</color>
     <color name="grey_user_item_background">#f2f2f2</color>
 
-    <color name="grey_user_background">#e3eff9</color>
+    <color name="user_item_background_selected">@color/blue_extra_light</color>
 
     <color name="blue_timeline">@color/blue_light</color>
     <color name="blue_circle">#3196df</color>

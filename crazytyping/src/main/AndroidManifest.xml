@@ -12,14 +12,16 @@
     <application
         android:name=".SpyApplication"
         android:allowBackup="true"
-        android:debuggable="false"
-        android:icon="@drawable/ic_tab_typings"
-        android:label="@string/app_name"
+        android:icon="@drawable/ic_crazy"
+        android:hardwareAccelerated="true"
+        android:label="VK Crazy Typing"
         android:theme="@style/AppTheme" >
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation"
-            android:label="@string/main" />
+            android:label="@string/main"
+            android:theme="@style/AppTheme.NoTitle"
+            />
         <activity
             android:name=".FriendsActivity"
             android:label="@string/friends" />
@@ -37,14 +39,7 @@
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
-        <receiver
-            android:name=".Receivers.BootCompleteReceiver"
-            android:enabled="true"
-            android:exported="true" >
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
+
         <receiver
             android:name=".Core.Notificator$ClearNotificationsReceiver"
             android:enabled="true"
@@ -76,11 +71,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".InfoActivity"
-            android:label="@string/title_activity_info" />
-        <activity
-            android:name=".TestFilterActivity"
-            android:label="@string/title_activity_test_filter"
-            android:screenOrientation="portrait" />
+            android:label="Info" />
     </application>
 
 </manifest>

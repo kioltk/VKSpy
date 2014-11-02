@@ -7,18 +7,34 @@
         android:icon="@null"
         />
     <PreferenceCategory
-        android:title="@string/connection"
+        android:title="@string/pref_general"
         android:layout="@layout/preference_header"
         >
-        <ListPreference
-            android:title="@string/connection_external"
-            android:key="connection_external_interval"
-            android:layout="@layout/preference"
-            android:defaultValue="30"
+        <SwitchPreference
+            android:title="@string/typing_background"
+            android:summary="@string/typing_background_desc"
+            android:key="typing_background"
+            android:defaultValue="false"
             android:icon="@null"
-            android:entries="@array/connection_external_interval"
+            android:layout="@layout/preference"
+            />
+        <ListPreference
+            android:title="@string/typing_background_network"
+            android:key="typing_background_network"
+            android:dependency="typing_background"
+            android:defaultValue="1"
+            android:icon="@null"
+            android:entries="@array/typing_background_network"
+            android:entryValues="@array/typing_background_network_values"
+            />
+        <ListPreference
+            android:title="@string/typing_interval"
+            android:key="typing_interval"
+            android:layout="@layout/preference"
+            android:defaultValue="10"
+            android:icon="@null"
+            android:entries="@array/typing_interval"
             android:entryValues="@array/connection_external_interval_values"
-            android:summary="@string/connection_external"
             />
 
     </PreferenceCategory>

@@ -32,11 +32,11 @@
         android:layout_width="0dp"
         android:layout_height="match_parent">
 
+        <!--android:text="@string/chat"-->
         <TextView
             android:textColor="@color/additional_text_color"
             android:id="@+id/additional"
             android:visibility="invisible"
-            android:text="@string/chat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>

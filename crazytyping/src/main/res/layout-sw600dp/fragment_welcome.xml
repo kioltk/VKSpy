@@ -5,6 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingTop="@dimen/status_bar_height"
+    android:paddingBottom="@dimen/navigation_bar_height"
     tools:context="com.happysanta.crazytyping.WelcomeActivity$PlaceholderFragment">
 
     <ImageView

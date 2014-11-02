@@ -10,9 +10,9 @@
         app:showAsAction="always"
 
         />
-    <item
+    <!--item
         android:id="@+id/profile"
         android:title="@string/open_profile"
         app:showAsAction="never"
-        />
+        /-->
 </menu>

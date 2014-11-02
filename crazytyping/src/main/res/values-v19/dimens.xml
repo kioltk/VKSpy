@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="status_bar_height">25dp</dimen>
+    <dimen name="action_bar_default_height">48dp</dimen>
+    <dimen name="navigation_bar_height">48dp</dimen>
+    <dimen name="action_bar_padding" >8dp</dimen>
+    <dimen name="float_button_bottom_padding">56dp</dimen>
+    <dimen name="float_button_right_padding">16dp</dimen>
+
+</resources>

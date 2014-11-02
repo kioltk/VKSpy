@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingRight="@dimen/global_padding"
     >
 
     <LinearLayout
@@ -10,19 +11,25 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!--com.viewpagerindicator.TabPageIndicator
-            android:id="@+id/mainIndicator"
+        <com.LDroid.LActionBar
+            android:id="@+id/action_bar"
+            android:background="@color/blue"
+            android:paddingTop="@dimen/status_bar_height"
             android:layout_width="match_parent"
-            android:layout_height="48dp"/-->
+            android:layout_height="wrap_content" />
 
         <FrameLayout
             android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
-        <android.support.v4.view.ViewPager
-            android:id="@+id/pager"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
     </LinearLayout>
-
+    <ImageButton
+        android:id="@+id/typingButton"
+        android:layout_margin="16dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:src="@drawable/ic_tab_typings"
+        android:background="@drawable/write_button"
+        android:layout_width="56dp"
+        android:layout_height="56dp"/>
     </RelativeLayout>

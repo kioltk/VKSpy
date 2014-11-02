@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="toggler_height">30dp</dimen>
+    <dimen name="action_bar_padding_left" >8dp</dimen>
+
+    <dimen name="float_button_bottom_padding">8dp</dimen>
+    <dimen name="float_button_right_padding" >8dp</dimen>
+    <dimen name="global_padding">40dp</dimen>
+    <dimen name="action_bar_extended">150dp</dimen>
 </resources>

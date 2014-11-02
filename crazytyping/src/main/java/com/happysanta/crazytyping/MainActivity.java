@@ -1,5 +1,7 @@
 package com.happysanta.crazytyping;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -21,10 +23,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Transformation;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.LDroid.LActionBar;
 import com.happysanta.crazytyping.Core.Helper;
 import com.happysanta.crazytyping.Core.Memory;
 import com.happysanta.crazytyping.Fragments.DialogsFragment;
@@ -45,6 +54,7 @@ import org.json.JSONException;
 
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -54,19 +64,20 @@ public class MainActivity extends ActionBarActivity {
     private DialogsFragment dialogsFragment;
     private Button togglerButton;
     private static boolean loading = false;
+    private ImageButton typingButton;
+    private int actionBarHeight;
+    private float buttonPos;
 
 
     @Override
     protected void onPause() {
         super.onPause();
-        isOpened = false;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         VKUIHelper.onResume(this);
-        isOpened = true;
 
     }
 
@@ -100,14 +111,153 @@ public class MainActivity extends ActionBarActivity {
             invalidateOptionsMenu();
 
         activity = this;
+        typingButton = (ImageButton) findViewById(R.id.typingButton);
+        typingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(transition)
+                    return;
+                openActionBar();
+                moveButton();
+            }
+        });
 
     }
+    boolean activated = false;
+    boolean transition = false;
+    private void openActionBar() {
+        ArrayList<View> views = new ArrayList<View>();
+        for(int i = 0; i < 5; i ++){
+
+            views.add(new TextView(this) {{
+                setText("Hello!");
+                setTextColor(0xffffffff);
+                setGravity(Gravity.CENTER);
+                setTextSize(18);
+            }});
+        }
+
+        final LActionBar actionbar = (LActionBar) findViewById(R.id.action_bar);
+        if(isOpened) {
+            actionbar.closeActionBar();
+            isOpened = false;
+        }
+        else {
+            actionbar.openActionBar(views);
+            isOpened = true;
+        }
+        /*
+        actionBarHeight = actionbar.getHeight();
+
+        ResizeAnimation resizeAnimation = new ResizeAnimation(actionbar,actionbar.getWidth(),actionBarHeight,actionbar.getWidth(),actionBarHeight*(activated?0.5f: 2f));
+
+        resizeAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+                transition = true;
+                activated = !activated;
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                transition = false;
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        resizeAnimation.setInterpolator(new DecelerateInterpolator());
+        //resizeAnimation.start();
+        actionbar.startAnimation(resizeAnimation);
+        */
+    }
+    void moveButton() {
+        if (!activated) {
+            buttonPos = typingButton.getY();
+        }
+        int to = activated ? (int) buttonPos : (actionBarHeight * 2 - typingButton.getHeight()/2);
+        int from = activated ? actionBarHeight - typingButton.getHeight()/2 : (int) buttonPos;
+        MoveAnimation moveAnimation = new MoveAnimation(typingButton, 0, from, 0, to);
+        moveAnimation.setInterpolator(new DecelerateInterpolator());
+        //typingButton.startAnimation(moveAnimation);
+
+    }
+    public static class ResizeAnimation extends Animation {
+        private View mView;
+        private float mToHeight;
+        private float mFromHeight;
+
+        private float mToWidth;
+        private float mFromWidth;
+        private boolean firstUpdated;
+
+        public ResizeAnimation(View v, float fromWidth, float fromHeight, float toWidth, float toHeight) {
+            mToHeight = toHeight;
+            mToWidth = toWidth;
+            mFromHeight = fromHeight;
+            mFromWidth = fromWidth;
+            mView = v;
+            setDuration(500);
+        }
+        public void firstUpdate(){
+        }
+
+        @Override
+        protected void applyTransformation(float interpolatedTime, Transformation t) {
+            if(!firstUpdated)
+                firstUpdate();
+            float height =
+                    (mToHeight - mFromHeight) * interpolatedTime + mFromHeight;
+            float width = (mToWidth - mFromWidth) * interpolatedTime + mFromWidth;
+            ViewGroup.LayoutParams p = mView.getLayoutParams();
+            p.height = (int) height;
+            p.width = (int) width;
+            mView.requestLayout();
+        }
+
+    }
+
+    public class MoveAnimation extends Animation{
+
+        private final View mView;
+        private final int mToX;
+        private final int mToY;
+        private final int mFromX;
+        private final int mFromY;
+
+        public MoveAnimation(View view, int fromX, int fromY, int toX, int toY){
+            mToX = toX;
+            mToY = toY;
+            mFromX = fromX;
+            mFromY = fromY;
+            mView = view;
+            setDuration(500);
+
+        }
+
+        @Override
+        protected void applyTransformation(float interpolatedTime, Transformation t) {
+
+
+            float x =
+                    (mToX - mFromX) * interpolatedTime + mFromX;
+            float y = (mToY - mFromY) * interpolatedTime + mFromY;
+
+            //mView.setX( x);
+            mView.setY(y);
+        }
+    }
+
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         if(savedInstanceState==null) {
             //updateDialogs();
+            CrazyTypingService.init();
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -224,6 +374,11 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
+    public void stop(){
+        if(togglerButton!=null)
+        togglerButton.setText(R.string.start);
+            CrazyTypingService.stop();
+    }
     private Boolean toggle(){
         if(Memory.getTargetedDialogs().isEmpty()) {
             Toast.makeText(this,"select some dialogs first", Toast.LENGTH_LONG).show();
@@ -238,6 +393,7 @@ public class MainActivity extends ActionBarActivity {
         if(loading || activity == null)
             return;
         loading = true;
+        activity.stop();
         activity.ready(false);
         CrazyTypingService.stop();
         VKParameters userParameters = new VKParameters();
@@ -470,7 +626,6 @@ public class MainActivity extends ActionBarActivity {
                                                     Helper.trackedUpdated();
                                                 }
                                                 Helper.downloadingEnded();
-                                                startCrazyTyper();
                                             }
                                         });
                                     }

@@ -8,6 +8,7 @@ android {
         targetSdkVersion 19
         versionCode 1
         versionName '0.9'
+        resConfig 'en'
     }
     buildTypes {
         debug {
@@ -16,7 +17,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
         release {
-            debuggable true
+            debuggable false
             runProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }

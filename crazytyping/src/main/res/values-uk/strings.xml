@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="app_name">Божевільний Письменник</string>
     <string name="main">Головна</string>
     <string name="login">Вхід</string>
     <string name="friends">Друзі</string>
@@ -15,7 +16,7 @@
     <string name="logout_title">Дійсно вийти?</string>
     <string name="logout_accept">Вихід!</string>
     <string name="logout_cancel">Скасувати</string>
-    <string name="nothinghere">Подій поки немає</string>
+    <!--<string name="nothinghere">Подій поки немає</string>-->
     <string name="signin">Ввійти</string>
     <string name="welcome_text">Ласкаво просимо в прекрасний новий світ приватності і соціальних мереж</string>
     <string name="come_online_m">Зайшов в мережу</string>
@@ -62,7 +63,7 @@
     <string name="deselect_all">Зняти виділення</string>
     <string name="moment_ago">щойно</string>
     <string name="enable_spy">Увімкнути стеження</string>
-    <string name="onlines_notification" />
+    <!--<string name="onlines_notification" />-->
     <string name="durov_start_message">Включити стеження за Павлом Дуровим?</string>
     <string name="durov_start_title">Ексклюзивна фіча</string>
     <string name="durov_start_ok">Стежити!</string>
@@ -71,7 +72,7 @@
     <string name="durov_function_activating_title">Суперфіча</string>
     <string name="durov_function_activating_message">Завантаження</string>
     <string name="durov_function_activated">Функція активована</string>
-    <string name="durov_joke">Місце для Ваніного жарту</string>
+    <!--<string name="durov_joke">Місце для Ваніного жарту</string>-->
     <string name="durov_joke_title">@string/durov_function_title</string>
     <string name="durov_joke_message">Подібно до Павла, ми не йдемо на компроміси. Так, руками розробників ВК йому вдалося сховати свій статус онлайн від чужих очей. Але тільки не від нашого сутінкового генія. Happy Santa повертає вам свободу, адже vita sene libertate nlhil.</string>
     <string name="durov_joke_button">@string/durov_start_ok</string>
@@ -139,9 +140,20 @@
     <string name="ipad">iPad</string>
     <string name="android">Android</string>
     <string name="wphone">Windows Phone</string>
+    <string name="windowse">Windows8</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
+    <string name="typing_interval">Typing interval</string>
+    <string name="pref_general">General</string>
+    <string name="typing_background">Background typing</string>
+    <string name="typing_background_desc">Автовключение</string>
+    <string name="typing_background_network">Network type</string>
 
+    <string name="pull_to_refresh_pull_label">Pull to refresh…</string>
+    <string name="pull_to_refresh_release_label">Release to refresh…</string>
+    <string name="pull_to_refresh_refreshing_label">Loading…</string>
+    <string name="pull_to_refresh_refreshing_failed_label">Refresh failed</string>
+    <string name="offline">offline</string>
     <plurals name="usersSelected">
         <item quantity="zero">Нікого не вибрано</item>
         <item quantity="one">Вибран %d</item>

@@ -1,0 +1,10 @@
+<resources>
+    <declare-styleable name="LActionBar">
+        <attr name="barTitle" format="string" />
+        <attr name="backgroundColor" format="color" />
+        <attr name="barIcon" format="color|reference" />
+    </declare-styleable>
+
+    <declare-styleable name="LActionBarExtended">
+    </declare-styleable>
+</resources>

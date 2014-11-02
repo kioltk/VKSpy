@@ -62,9 +62,6 @@ public class InfoActivity extends Activity {
             // that hierarchy.
             onBackPressed();
         }
-        if (id == R.id.action_settings) {
-            return true;
-        }
         return super.onOptionsItemSelected(item);
     }
 

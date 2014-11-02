@@ -63,16 +63,8 @@ public class UserItem extends Item implements LoadableImage,Reconvertable {
     @Override
     public View reconvert(Context context, View rootView) {
         TextView name = (TextView) rootView.findViewById(R.id.name);
-        ImageView status = (ImageView) rootView.findViewById(R.id.status_image);
 
         name.setText(user.first_name+" "+user.last_name);
-        if(user.online) {
-            status.setVisibility(View.VISIBLE);
-            if (user.isOnlineMobile())
-                status.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_online_mobile));
-        }else{
-            status.setVisibility(View.GONE);
-        }
         if(imageLoaded)
             loadImage(rootView);
         else

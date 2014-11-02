@@ -1,0 +1,6 @@
+<resources>
+    <declare-styleable name="LCheckBox">
+        <attr name="lineWidth" format="dimension" />
+        <attr name="lineColor" format="color" />
+    </declare-styleable>
+</resources>

@@ -3,17 +3,17 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true" >
         <shape>
-            <solid android:color="@color/grey_user_item_background"/>
+            <solid android:color="@color/user_item_background_selected"/>
         </shape>
     </item>
     <item android:state_hovered="true" >
         <shape>
-            <solid android:color="@color/grey_user_item_background"/>
+            <solid android:color="@color/user_item_background_selected"/>
         </shape>
     </item>
     <item android:state_focused="true" >
         <shape>
-            <solid android:color="@color/grey_user_item_background"/>
+            <solid android:color="@color/user_item_background_selected"/>
         </shape>
     </item>
     <item >
