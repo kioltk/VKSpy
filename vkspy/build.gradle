@@ -1,24 +1,28 @@
 apply plugin: 'android'
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion '19.1.0'
+    compileSdkVersion 24
+    buildToolsVersion "24.0.2"
+
+    useLibrary 'org.apache.http.legacy'
+
     defaultConfig {
+        applicationId "com.happysanta.vkspy"
         minSdkVersion 14
-        targetSdkVersion 19
+        targetSdkVersion 22
         versionCode 31
         versionName '1.2.3'
     }
     buildTypes {
         debug {
-            debuggable true
-            runProguard false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+//            debuggable true
+//            runProguard false
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
         release {
-            debuggable false
-            runProguard true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+//            debuggable false
+//            runProguard true
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
     productFlavors {
